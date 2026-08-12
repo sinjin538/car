@@ -7,170 +7,68 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; color: #333; }
         
-        .dispatch-container {
-            display: flex;
-            max-width: 1500px;
-            margin: 20px auto;
-            gap: 20px;
-            padding: 0 20px;
-        }
-
-        .main-section {
-            flex: 3;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .sidebar-section {
-            flex: 1.2;
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            height: fit-content;
-        }
-
-        .card {
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
+        .dispatch-container { display: flex; max-width: 1500px; margin: 20px auto; gap: 20px; padding: 0 20px; }
+        .main-section { flex: 3; display: flex; flex-direction: column; gap: 20px; }
+        .sidebar-section { flex: 1.2; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); height: fit-content; }
+        .card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 
         /* 달력 스타일 */
-        .calendar-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-            font-size: 1.2rem;
-            font-weight: bold;
-        }
-
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 5px;
-        }
-
-        .calendar-day-header {
-            font-weight: bold;
-            text-align: center;
-            padding: 8px;
-            background: #eef2f7;
-            border-radius: 4px;
-        }
-
+        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 1.2rem; font-weight: bold; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+        .calendar-day-header { font-weight: bold; text-align: center; padding: 8px; background: #eef2f7; border-radius: 4px; }
         .calendar-day-header.sun { color: #d9534f; }
         .calendar-day-header.sat { color: #0275d8; }
 
-        .calendar-cell {
-            min-height: 100px;
-            background: #fafbfc;
-            border: 1px solid #e1e4e8;
-            border-radius: 4px;
-            padding: 6px;
-            font-size: 0.85rem;
-            position: relative;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            flex-direction: column;
-        }
-
+        .calendar-cell { min-height: 110px; background: #fafbfc; border: 1px solid #e1e4e8; border-radius: 4px; padding: 6px; font-size: 0.85rem; position: relative; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; }
         .calendar-cell:hover { background: #f1f3f5; }
         .calendar-cell.selected { border: 2px solid #007bff; background: #e8f0fe; }
-
         .calendar-cell.sun .date-num { color: #d9534f; font-weight: bold; }
         .calendar-cell.sat .date-num { color: #0275d8; font-weight: bold; }
         .calendar-cell.holiday .date-num { color: #d9534f !important; font-weight: bold; }
-        
         .holiday-name { font-size: 0.7rem; color: #d9534f; font-weight: bold; display: block; margin-top: 2px;}
 
-        /* 달력 안쪽 당직/휴무 태그 스타일 */
-        .status-tag {
-            font-size: 0.75rem;
-            margin-top: 4px;
-            word-break: keep-all;
-            line-height: 1.3;
-        }
+        /* 태그 (당직/휴무 및 배차결과) */
+        .status-tag { font-size: 0.75rem; margin-top: 4px; word-break: keep-all; line-height: 1.3; }
         .duty-tag { color: #d35400; font-weight: bold; }
         .off-tag { color: #7f8c8d; font-weight: bold; }
+        .dispatch-tag { background-color: #e3f2fd; color: #0d47a1; border: 1px solid #bbdefb; padding: 3px 5px; border-radius: 4px; margin-top: 4px; font-size: 0.75rem; font-weight: bold; }
 
         /* 운전자 상태 그리드 */
-        .status-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .status-item {
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            padding: 10px;
-            border-radius: 6px;
-            text-align: center;
-        }
-
-        .radio-group {
-            margin-top: 8px;
-            display: flex;
-            justify-content: center;
-            gap: 6px;
-            font-size: 0.8rem;
-        }
-
+        .status-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-top: 10px; }
+        .status-item { background: #f8f9fa; border: 1px solid #dee2e6; padding: 10px; border-radius: 6px; text-align: center; }
+        .radio-group { margin-top: 8px; display: flex; justify-content: center; gap: 6px; font-size: 0.8rem; }
         .radio-group label { cursor: pointer; }
 
-        /* 우측 예약 입력 폼 */
-        .sidebar-section h3 {
-            margin-bottom: 15px;
-            font-size: 1.1rem;
-            border-bottom: 2px solid #007bff;
-            padding-bottom: 8px;
-        }
-
-        .vehicle-item {
-            border: 1px solid #e1e4e8;
-            border-radius: 6px;
-            margin-bottom: 10px;
-            background: #fafbfc;
-            overflow: hidden;
-        }
-
-        .vehicle-header {
-            display: flex;
-            align-items: center;
-            padding: 12px;
-            cursor: pointer;
-            gap: 10px;
-            font-weight: 500;
-        }
-
+        /* 우측 폼 */
+        .sidebar-section h3 { margin-bottom: 15px; font-size: 1.1rem; border-bottom: 2px solid #007bff; padding-bottom: 8px; }
+        .vehicle-item { border: 1px solid #e1e4e8; border-radius: 6px; margin-bottom: 10px; background: #fafbfc; overflow: hidden; }
+        .vehicle-header { display: flex; align-items: center; padding: 12px; cursor: pointer; gap: 10px; font-weight: 500; }
         .vehicle-header:hover { background: #f1f3f5; }
         .vehicle-body { display: none; padding: 15px; border-top: 1px solid #e1e4e8; background: #fff; }
-        
         .form-group { margin-bottom: 10px; }
         .form-group label { display: block; font-size: 0.8rem; margin-bottom: 4px; color: #555; font-weight: 600; }
         .form-group input { width: 100%; padding: 6px 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.85rem; }
+        
+        .btn-reserve { width: 100%; background: #007bff; color: white; border: none; padding: 8px; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-reserve:hover { background: #0056b3; }
+        
+        /* 배차 결과 리스트 */
+        .result-list { list-style: none; padding: 0; margin-top: 10px; }
+        .result-list li { background: #f8f9fa; border: 1px solid #dee2e6; padding: 10px; margin-bottom: 6px; border-radius: 4px; font-size: 0.9rem; }
+        .result-list li b { color: #007bff; }
     </style>
 </head>
 <body>
 
     <div class="dispatch-container">
-        <!-- 왼쪽: 전체 달력 및 하단 상태 관리 -->
+        <!-- 왼쪽: 캘린더 및 상태 -->
         <div class="main-section">
             <div class="card">
                 <div class="calendar-header">
                     <span>📅 2026년 8월</span>
-                    <div>
-                        <button>&lt;</button>
-                        <button>&gt;</button>
-                    </div>
+                    <div><button>&lt;</button> <button>&gt;</button></div>
                 </div>
-                <div class="calendar-grid">
+                <div class="calendar-grid" id="calendar-grid">
                     <div class="calendar-day-header sun">일</div>
                     <div class="calendar-day-header">월</div>
                     <div class="calendar-day-header">화</div>
@@ -178,160 +76,126 @@
                     <div class="calendar-day-header">목</div>
                     <div class="calendar-day-header">금</div>
                     <div class="calendar-day-header sat">토</div>
-
-                    <!-- 빈칸 (1일이 토요일) -->
-                    <div class="calendar-cell" style="background:#f4f6f9; cursor:default;"></div>
-                    <div class="calendar-cell" style="background:#f4f6f9; cursor:default;"></div>
-                    <div class="calendar-cell" style="background:#f4f6f9; cursor:default;"></div>
-                    <div class="calendar-cell" style="background:#f4f6f9; cursor:default;"></div>
-                    <div class="calendar-cell" style="background:#f4f6f9; cursor:default;"></div>
-                    <div class="calendar-cell" style="background:#f4f6f9; cursor:default;"></div>
-
-                    <!-- 날짜 셀에 data-date 속성 부여 -->
-                    <div class="calendar-cell sat" data-date="2026-08-01" onclick="selectDate('2026-08-01', this)"><span class="date-num">1</span></div>
-                    <div class="calendar-cell sun" data-date="2026-08-02" onclick="selectDate('2026-08-02', this)"><span class="date-num">2</span></div>
-                    <div class="calendar-cell" data-date="2026-08-03" onclick="selectDate('2026-08-03', this)"><span class="date-num">3</span></div>
-                    <div class="calendar-cell" data-date="2026-08-04" onclick="selectDate('2026-08-04', this)"><span class="date-num">4</span></div>
-                    <div class="calendar-cell" data-date="2026-08-05" onclick="selectDate('2026-08-05', this)"><span class="date-num">5</span></div>
-                    <div class="calendar-cell" data-date="2026-08-06" onclick="selectDate('2026-08-06', this)"><span class="date-num">6</span></div>
-                    <div class="calendar-cell" data-date="2026-08-07" onclick="selectDate('2026-08-07', this)"><span class="date-num">7</span></div>
-                    
-                    <div class="calendar-cell sat" data-date="2026-08-08" onclick="selectDate('2026-08-08', this)"><span class="date-num">8</span></div>
-                    <div class="calendar-cell sun" data-date="2026-08-09" onclick="selectDate('2026-08-09', this)"><span class="date-num">9</span></div>
-                    <div class="calendar-cell" data-date="2026-08-10" onclick="selectDate('2026-08-10', this)"><span class="date-num">10</span></div>
-                    <div class="calendar-cell" data-date="2026-08-11" onclick="selectDate('2026-08-11', this)"><span class="date-num">11</span></div>
-                    <div class="calendar-cell" data-date="2026-08-12" onclick="selectDate('2026-08-12', this)"><span class="date-num">12</span></div>
-                    <div class="calendar-cell" data-date="2026-08-13" onclick="selectDate('2026-08-13', this)"><span class="date-num">13</span></div>
-                    <div class="calendar-cell sat" data-date="2026-08-14" onclick="selectDate('2026-08-14', this)"><span class="date-num">14</span></div>
-
-                    <div class="calendar-cell sat holiday" data-date="2026-08-15" onclick="selectDate('2026-08-15', this)"><span class="date-num">15</span><span class="holiday-name">광복절</span></div>
-                    <div class="calendar-cell sun" data-date="2026-08-16" onclick="selectDate('2026-08-16', this)"><span class="date-num">16</span></div>
-                    <div class="calendar-cell holiday" data-date="2026-08-17" onclick="selectDate('2026-08-17', this)"><span class="date-num">17</span><span class="holiday-name">대체공휴일</span></div>
-                    
-                    <div class="calendar-cell" data-date="2026-08-18" onclick="selectDate('2026-08-18', this)"><span class="date-num">18</span></div>
-                    <div class="calendar-cell" data-date="2026-08-19" onclick="selectDate('2026-08-19', this)"><span class="date-num">19</span></div>
-                    <div class="calendar-cell" data-date="2026-08-20" onclick="selectDate('2026-08-20', this)"><span class="date-num">20</span></div>
-                    <div class="calendar-cell sat" data-date="2026-08-21" onclick="selectDate('2026-08-21', this)"><span class="date-num">21</span></div>
-
-                    <div class="calendar-cell sat" data-date="2026-08-22" onclick="selectDate('2026-08-22', this)"><span class="date-num">22</span></div>
-                    <div class="calendar-cell sun" data-date="2026-08-23" onclick="selectDate('2026-08-23', this)"><span class="date-num">23</span></div>
-                    <div class="calendar-cell" data-date="2026-08-24" onclick="selectDate('2026-08-24', this)"><span class="date-num">24</span></div>
-                    <div class="calendar-cell" data-date="2026-08-25" onclick="selectDate('2026-08-25', this)"><span class="date-num">25</span></div>
-                    <div class="calendar-cell" data-date="2026-08-26" onclick="selectDate('2026-08-26', this)"><span class="date-num">26</span></div>
-                    <div class="calendar-cell" data-date="2026-08-27" onclick="selectDate('2026-08-27', this)"><span class="date-num">27</span></div>
-                    <div class="calendar-cell sat" data-date="2026-08-28" onclick="selectDate('2026-08-28', this)"><span class="date-num">28</span></div>
-
-                    <div class="calendar-cell sat" data-date="2026-08-29" onclick="selectDate('2026-08-29', this)"><span class="date-num">29</span></div>
-                    <div class="calendar-cell sun" data-date="2026-08-30" onclick="selectDate('2026-08-30', this)"><span class="date-num">30</span></div>
-                    <div class="calendar-cell" data-date="2026-08-31" onclick="selectDate('2026-08-31', this)"><span class="date-num">31</span></div>
+                    <!-- 자바스크립트로 캘린더 날짜가 렌더링 됩니다 -->
                 </div>
             </div>
 
             <!-- 하단 정보창 -->
             <div class="card">
                 <h3 id="result-title">최종 배차 결과</h3>
-                <p id="result-content" style="margin: 10px 0; color: #666;">선택된 날짜의 예약 내역이 표시됩니다.</p>
+                <ul id="result-content" class="result-list">
+                    <li style="color:#666;">선택된 날짜의 예약 내역이 없습니다.</li>
+                </ul>
                 
-                <h3 style="margin-top: 20px;">일일 운전자 상태 (선택된 날짜 연동)</h3>
-                <!-- JS가 이 영역에 9명의 운전원을 동적으로 생성합니다 -->
+                <h3 style="margin-top: 20px;">일일 운전자 상태 (선택 날짜 연동)</h3>
                 <div class="status-grid" id="status-container"></div>
             </div>
         </div>
 
-        <!-- 오른쪽: 배차 예약 정보 입력 -->
+        <!-- 오른쪽: 배차 입력 -->
         <div class="sidebar-section">
             <h3>배차 예약 정보 입력</h3>
             
-            <div class="vehicle-item">
-                <div class="vehicle-header">
-                    <input type="checkbox" id="v1" onclick="toggleVehicleForm('form1', this)">
-                    <label for="v1" style="cursor: pointer; flex: 1;">1호차 (버스)</label>
-                </div>
-                <div class="vehicle-body" id="form1">
-                    <div class="form-group"><label>예약자명</label><input type="text"></div>
-                    <div class="form-group"><label>운행 목적지</label><input type="text"></div>
-                </div>
-            </div>
-            <div class="vehicle-item">
-                <div class="vehicle-header">
-                    <input type="checkbox" id="v2" onclick="toggleVehicleForm('form2', this)">
-                    <label for="v2" style="cursor: pointer; flex: 1;">2호차 (버스)</label>
-                </div>
-                <div class="vehicle-body" id="form2">
-                    <div class="form-group"><label>예약자명</label><input type="text"></div>
-                    <div class="form-group"><label>운행 목적지</label><input type="text"></div>
-                </div>
-            </div>
-            <div class="vehicle-item">
-                <div class="vehicle-header">
-                    <input type="checkbox" id="v3" onclick="toggleVehicleForm('form3', this)">
-                    <label for="v3" style="cursor: pointer; flex: 1;">3호차 (버스)</label>
-                </div>
-                <div class="vehicle-body" id="form3">
-                    <div class="form-group"><label>예약자명</label><input type="text"></div>
-                    <div class="form-group"><label>운행 목적지</label><input type="text"></div>
-                </div>
-            </div>
+            <!-- 버스 (2명 배차) -->
+            <script>
+                const busList = ['1호차', '2호차', '3호차'];
+                const solatiList = ['11호차', '12호차', '13호차', '14호차'];
+                
+                // HTML 동적 생성
+                busList.forEach(v => {
+                    document.write(`
+                    <div class="vehicle-item">
+                        <div class="vehicle-header">
+                            <input type="checkbox" id="v_${v}" onclick="toggleVehicleForm('form_${v}', this)">
+                            <label for="v_${v}" style="cursor: pointer; flex: 1;">${v} (버스)</label>
+                        </div>
+                        <div class="vehicle-body" id="form_${v}">
+                            <div class="form-group"><label>예약자명</label><input type="text" id="name_${v}"></div>
+                            <div class="form-group"><label>운행 목적지</label><input type="text" id="dest_${v}"></div>
+                            <button class="btn-reserve" onclick="makeReservation('${v}', true)">예약 등록 (운전원 2명 배차)</button>
+                        </div>
+                    </div>`);
+                });
 
-            <!-- 쏠라티 라인업 -->
-            <div class="vehicle-item">
-                <div class="vehicle-header">
-                    <input type="checkbox" id="v11" onclick="toggleVehicleForm('form11', this)">
-                    <label for="v11" style="cursor: pointer; flex: 1;">11호차 (쏠라티)</label>
-                </div>
-                <div class="vehicle-body" id="form11">
-                    <div class="form-group"><label>예약자명</label><input type="text"></div>
-                    <div class="form-group"><label>운행 목적지</label><input type="text"></div>
-                </div>
-            </div>
-            <div class="vehicle-item">
-                <div class="vehicle-header">
-                    <input type="checkbox" id="v12" onclick="toggleVehicleForm('form12', this)">
-                    <label for="v12" style="cursor: pointer; flex: 1;">12호차 (쏠라티)</label>
-                </div>
-                <div class="vehicle-body" id="form12">
-                    <div class="form-group"><label>예약자명</label><input type="text"></div>
-                    <div class="form-group"><label>운행 목적지</label><input type="text"></div>
-                </div>
-            </div>
-            <div class="vehicle-item">
-                <div class="vehicle-header">
-                    <input type="checkbox" id="v13" onclick="toggleVehicleForm('form13', this)">
-                    <label for="v13" style="cursor: pointer; flex: 1;">13호차 (쏠라티)</label>
-                </div>
-                <div class="vehicle-body" id="form13">
-                    <div class="form-group"><label>예약자명</label><input type="text"></div>
-                    <div class="form-group"><label>운행 목적지</label><input type="text"></div>
-                </div>
-            </div>
-            <div class="vehicle-item">
-                <div class="vehicle-header">
-                    <input type="checkbox" id="v14" onclick="toggleVehicleForm('form14', this)">
-                    <label for="v14" style="cursor: pointer; flex: 1;">14호차 (쏠라티)</label>
-                </div>
-                <div class="vehicle-body" id="form14">
-                    <div class="form-group"><label>예약자명</label><input type="text"></div>
-                    <div class="form-group"><label>운행 목적지</label><input type="text"></div>
-                </div>
-            </div>
+                // 쏠라티 (1명 배차)
+                solatiList.forEach(v => {
+                    document.write(`
+                    <div class="vehicle-item">
+                        <div class="vehicle-header">
+                            <input type="checkbox" id="v_${v}" onclick="toggleVehicleForm('form_${v}', this)">
+                            <label for="v_${v}" style="cursor: pointer; flex: 1;">${v} (쏠라티)</label>
+                        </div>
+                        <div class="vehicle-body" id="form_${v}">
+                            <div class="form-group"><label>예약자명</label><input type="text" id="name_${v}"></div>
+                            <div class="form-group"><label>운행 목적지</label><input type="text" id="dest_${v}"></div>
+                            <button class="btn-reserve" onclick="makeReservation('${v}', false)">예약 등록 (운전원 1명 배차)</button>
+                        </div>
+                    </div>`);
+                });
+            </script>
         </div>
     </div>
 
     <script>
-        // 우측 폼 열기/닫기
         function toggleVehicleForm(formId, checkbox) {
-            const formBody = document.getElementById(formId);
-            formBody.style.display = checkbox.checked ? "block" : "none";
+            document.getElementById(formId).style.display = checkbox.checked ? "block" : "none";
         }
 
         // ==========================================
-        // 1. 운전원 리스트 및 상태 관리 변수
+        // 1. 상태 및 배차 데이터 저장 변수
         // ==========================================
         const drivers = ['박기준', '변석현', '이명순', '김탁', '한상훈', '문인식', '황덕일', '강철규', '이상헌'];
-        let currentDate = '';
-        const dailyDriverStatus = {}; // 날짜별 운전자 상태 저장 객체
+        let globalDriverIndex = 0; // 전체 배차 순번을 기억하는 포인터
+        
+        let currentDate = ''; // 현재 선택된 날짜
+        const dailyDriverStatus = {}; // 날짜별 운전자 [출근/당직/휴무] 상태 저장
+        const dispatchData = {}; // 날짜별 배차 완료 데이터 저장 { "2026-08-12": [ {vehicle: '1호차', assigned: ['박기준','변석현']} ] }
 
-        // 특정 날짜의 특정 운전자 상태 가져오기 (기본값 '출근')
+        // ==========================================
+        // 2. 달력 렌더링 및 클릭 이벤트
+        // ==========================================
+        function initCalendar() {
+            const grid = document.getElementById('calendar-grid');
+            // 8월 1일이 토요일이므로 앞 6칸 빈칸
+            for(let i=0; i<6; i++) {
+                grid.innerHTML += `<div class="calendar-cell" style="background:#f4f6f9; cursor:default;"></div>`;
+            }
+            
+            for(let d=1; d<=31; d++) {
+                const dateStr = `2026-08-${String(d).padStart(2, '0')}`;
+                let extraClass = '';
+                let extraHTML = '';
+                
+                const dayOfWeek = (5 + d) % 7; // 1일이 토요일(6)
+                if (dayOfWeek === 0) extraClass += 'sun ';
+                if (dayOfWeek === 6) extraClass += 'sat ';
+                
+                if (d === 15) { extraClass += 'holiday '; extraHTML = `<span class="holiday-name">광복절</span>`; }
+                if (d === 17) { extraClass += 'holiday '; extraHTML = `<span class="holiday-name">대체공휴일</span>`; }
+
+                grid.innerHTML += `
+                    <div class="calendar-cell ${extraClass}" data-date="${dateStr}" onclick="selectDate('${dateStr}', this)">
+                        <span class="date-num">${d}</span>${extraHTML}
+                        <div class="tag-container" id="tags_${dateStr}"></div>
+                    </div>`;
+            }
+        }
+
+        function selectDate(dateStr, cellElement) {
+            currentDate = dateStr;
+            const prev = document.querySelector('.calendar-cell.selected');
+            if (prev) prev.classList.remove('selected');
+            cellElement.classList.add('selected');
+
+            document.getElementById('result-title').innerText = `최종 배차 결과 (${dateStr})`;
+            
+            renderStatusPanel(dateStr); // 해당 날짜의 운전자 상태 출력
+            renderDispatchResult(dateStr); // 해당 날짜의 배차 결과 출력
+        }
+
+        // ==========================================
+        // 3. 운전원 상태 관리 (출근/휴무/당직)
+        // ==========================================
         function getDriverStatus(date, driver) {
             if (!dailyDriverStatus[date]) {
                 dailyDriverStatus[date] = {};
@@ -340,95 +204,133 @@
             return dailyDriverStatus[date][driver];
         }
 
-        // 특정 운전자의 상태 변경 (라디오버튼 클릭 시)
         function changeStatus(driver, status) {
             dailyDriverStatus[currentDate][driver] = status;
-            updateCalendarCellUI(currentDate); // 달력 UI 업데이트
+            updateCalendarCellUI(currentDate); 
         }
 
-        // ==========================================
-        // 2. 하단 일일 운전자 상태 UI 렌더링 함수
-        // ==========================================
         function renderStatusPanel(date) {
             const container = document.getElementById('status-container');
             container.innerHTML = '';
             
             drivers.forEach(driver => {
                 const currentStatus = getDriverStatus(date, driver);
-                
-                const item = document.createElement('div');
-                item.className = 'status-item';
-                item.innerHTML = `
-                    <strong>${driver}</strong>
-                    <div class="radio-group">
-                        <label><input type="radio" name="st_${driver}" value="출근" ${currentStatus === '출근' ? 'checked' : ''} onchange="changeStatus('${driver}', '출근')">출근</label>
-                        <label><input type="radio" name="st_${driver}" value="당직" ${currentStatus === '당직' ? 'checked' : ''} onchange="changeStatus('${driver}', '당직')">당직</label>
-                        <label><input type="radio" name="st_${driver}" value="휴무" ${currentStatus === '휴무' ? 'checked' : ''} onchange="changeStatus('${driver}', '휴무')">휴무</label>
-                    </div>
-                `;
-                container.appendChild(item);
+                container.innerHTML += `
+                    <div class="status-item">
+                        <strong>${driver}</strong>
+                        <div class="radio-group">
+                            <label><input type="radio" name="st_${driver}" value="출근" ${currentStatus === '출근' ? 'checked' : ''} onchange="changeStatus('${driver}', '출근')">출근</label>
+                            <label><input type="radio" name="st_${driver}" value="당직" ${currentStatus === '당직' ? 'checked' : ''} onchange="changeStatus('${driver}', '당직')">당직</label>
+                            <label><input type="radio" name="st_${driver}" value="휴무" ${currentStatus === '휴무' ? 'checked' : ''} onchange="changeStatus('${driver}', '휴무')">휴무</label>
+                        </div>
+                    </div>`;
             });
         }
 
         // ==========================================
-        // 3. 달력 칸에 휴무/당직 텍스트 표시
+        // 4. ★ 핵심: 순번제 배차 로직 ★
+        // ==========================================
+        function makeReservation(vehicleName, isBus) {
+            if (!currentDate) return alert("배차할 날짜를 달력에서 먼저 선택하세요!");
+            
+            const reqCount = isBus ? 2 : 1; // 버스 2명, 쏠라티 1명
+            const assignedDrivers = [];
+            let loopGuard = 0; // 무한 루프 방지용
+
+            // 요구 인원수(reqCount)를 채울 때까지 순번 탐색
+            while(assignedDrivers.length < reqCount && loopGuard < 20) {
+                const candidate = drivers[globalDriverIndex];
+                const status = getDriverStatus(currentDate, candidate); // 해당 날짜의 상태 확인
+
+                // 해당 날짜에 '휴무'가 아니면 배차 명단에 추가
+                if (status !== '휴무') {
+                    assignedDrivers.push(candidate);
+                }
+
+                // 조건에 상관없이 글로벌 인덱스는 다음 사람으로 넘어감 (원형 큐)
+                globalDriverIndex = (globalDriverIndex + 1) % drivers.length;
+                loopGuard++;
+            }
+
+            if (assignedDrivers.length < reqCount) {
+                return alert("출근 가능한 운전원이 부족하여 배차할 수 없습니다.");
+            }
+
+            // 배차 데이터 저장
+            if (!dispatchData[currentDate]) { dispatchData[currentDate] = []; }
+            
+            // 예약자명, 목적지 정보 가져오기
+            const rsvName = document.getElementById(`name_${vehicleName}`).value || '미상';
+            const rsvDest = document.getElementById(`dest_${vehicleName}`).value || '지정안됨';
+
+            dispatchData[currentDate].push({
+                vehicle: vehicleName,
+                name: rsvName,
+                dest: rsvDest,
+                assigned: assignedDrivers
+            });
+
+            // 예약 폼 닫기 및 체크해제
+            document.getElementById(`v_${vehicleName}`).checked = false;
+            document.getElementById(`form_${vehicleName}`).style.display = "none";
+            
+            // 입력창 초기화
+            document.getElementById(`name_${vehicleName}`).value = '';
+            document.getElementById(`dest_${vehicleName}`).value = '';
+
+            // UI 업데이트
+            updateCalendarCellUI(currentDate);
+            renderDispatchResult(currentDate);
+        }
+
+        // ==========================================
+        // 5. 달력 셀 & 하단 결과창 UI 업데이트
         // ==========================================
         function updateCalendarCellUI(date) {
-            const cell = document.querySelector(`.calendar-cell[data-date="${date}"]`);
-            if (!cell) return;
+            const container = document.getElementById(`tags_${date}`);
+            if (!container) return;
+            container.innerHTML = ''; // 기존 태그 지우기
 
-            // 기존 태그 지우기
-            const existingTags = cell.querySelectorAll('.status-tag');
-            existingTags.forEach(tag => tag.remove());
+            // 1. 배차된 차량 표시
+            const dayDispatches = dispatchData[date] || [];
+            dayDispatches.forEach(d => {
+                container.innerHTML += `<div class="dispatch-tag">${d.vehicle}: ${d.assigned.join(', ')}</div>`;
+            });
 
+            // 2. 휴무/당직 표시
             const data = dailyDriverStatus[date] || {};
             const offDrivers = drivers.filter(d => data[d] === '휴무');
             const dutyDrivers = drivers.filter(d => data[d] === '당직');
 
-            // 휴무자 렌더링
-            if (offDrivers.length > 0) {
-                const offDiv = document.createElement('div');
-                offDiv.className = 'status-tag off-tag';
-                offDiv.innerText = `휴무: ${offDrivers.join(', ')}`;
-                cell.appendChild(offDiv);
-            }
-
-            // 당직자 렌더링
-            if (dutyDrivers.length > 0) {
-                const dutyDiv = document.createElement('div');
-                dutyDiv.className = 'status-tag duty-tag';
-                dutyDiv.innerText = `당직: ${dutyDrivers.join(', ')}`;
-                cell.appendChild(dutyDiv);
-            }
+            if (offDrivers.length > 0) container.innerHTML += `<div class="status-tag off-tag">휴무: ${offDrivers.join(', ')}</div>`;
+            if (dutyDrivers.length > 0) container.innerHTML += `<div class="status-tag duty-tag">당직: ${dutyDrivers.join(', ')}</div>`;
         }
 
-        // ==========================================
-        // 4. 달력 날짜 클릭 시 실행되는 함수
-        // ==========================================
-        function selectDate(dateStr, cellElement) {
-            currentDate = dateStr;
+        function renderDispatchResult(date) {
+            const contentUl = document.getElementById('result-content');
+            const dayDispatches = dispatchData[date] || [];
 
-            // 셀렉트 시각적 효과
-            const previouslySelected = document.querySelector('.calendar-cell.selected');
-            if (previouslySelected) {
-                previouslySelected.classList.remove('selected');
+            if (dayDispatches.length === 0) {
+                contentUl.innerHTML = `<li style="color:#666;">${date} 등록된 예약 내역이 없습니다.</li>`;
+                return;
             }
-            cellElement.classList.add('selected');
 
-            // 최종 배차 결과 텍스트 변경
-            document.getElementById('result-title').innerText = `최종 배차 결과 (${dateStr})`;
-            document.getElementById('result-content').innerText = `${dateStr} 등록된 예약 내역이 없습니다.`;
-
-            // 선택된 날짜에 맞게 하단 운전자 상태 패널 다시 그리기
-            renderStatusPanel(dateStr);
+            contentUl.innerHTML = '';
+            dayDispatches.forEach(d => {
+                contentUl.innerHTML += `
+                    <li>
+                        <b>[${d.vehicle}]</b> 예약자: ${d.name} | 목적지: ${d.dest} <br>
+                        👉 <b>배차 운전원: ${d.assigned.join(', ')}</b>
+                    </li>`;
+            });
         }
 
-        // 초기 화면 설정 (페이지 접속 시 2026-08-12가 클릭된 상태로 셋팅)
+        // 실행 설정
         window.onload = () => {
+            initCalendar();
+            // 기본으로 12일 클릭된 상태로 시작
             const initialCell = document.querySelector(`.calendar-cell[data-date="2026-08-12"]`);
-            if (initialCell) {
-                selectDate('2026-08-12', initialCell);
-            }
+            if (initialCell) selectDate('2026-08-12', initialCell);
         };
     </script>
 </body>
