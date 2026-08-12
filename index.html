@@ -2,7 +2,14 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>배차관리 시스템</title>
+    <!-- 모바일 환경 최적화 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>모바일 배차관리 시스템 (DB연동)</title>
+    
+    <!-- 💡 Firebase SDK (기존 코드와 충돌 없는 Compat 버전 사용) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; color: #333; }
@@ -14,10 +21,10 @@
 
         /* 달력 스타일 */
         .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 1.2rem; font-weight: bold; }
-        .calendar-header button { padding: 4px 10px; font-size: 1rem; cursor: pointer; border: 1px solid #ccc; background: #fff; border-radius: 4px; }
+        .calendar-header button { padding: 6px 14px; font-size: 1rem; cursor: pointer; border: 1px solid #ccc; background: #fff; border-radius: 4px; }
         .calendar-header button:hover { background: #eef2f7; }
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
-        .calendar-day-header { font-weight: bold; text-align: center; padding: 8px; background: #eef2f7; border-radius: 4px; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+        .calendar-day-header { font-weight: bold; text-align: center; padding: 8px; background: #eef2f7; border-radius: 4px; font-size: 0.9rem; }
         .calendar-day-header.sun { color: #d9534f; }
         .calendar-day-header.sat { color: #0275d8; }
 
@@ -27,42 +34,64 @@
         .calendar-cell.sun .date-num { color: #d9534f; font-weight: bold; }
         .calendar-cell.sat .date-num { color: #0275d8; font-weight: bold; }
         .calendar-cell.holiday .date-num { color: #d9534f !important; font-weight: bold; }
-        .holiday-name { font-size: 0.7rem; color: #d9534f; font-weight: bold; display: block; margin-top: 2px;}
 
         /* 태그 */
         .status-tag { font-size: 0.75rem; margin-top: 4px; word-break: keep-all; line-height: 1.3; }
         .duty-tag { color: #d35400; font-weight: bold; }
         .off-tag { color: #7f8c8d; font-weight: bold; }
-        .dispatch-tag { background-color: #e3f2fd; color: #0d47a1; border: 1px solid #bbdefb; padding: 3px 5px; border-radius: 4px; margin-top: 4px; font-size: 0.75rem; font-weight: bold; }
+        .dispatch-tag { background-color: #e3f2fd; color: #0d47a1; border: 1px solid #bbdefb; padding: 4px; border-radius: 4px; margin-top: 4px; font-size: 0.75rem; font-weight: bold; word-break: keep-all;}
 
         /* 운전자 상태 그리드 */
-        .status-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-top: 10px; }
+        .status-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin-top: 10px; }
         .status-item { background: #f8f9fa; border: 1px solid #dee2e6; padding: 10px; border-radius: 6px; text-align: center; }
-        .radio-group { margin-top: 8px; display: flex; justify-content: center; gap: 6px; font-size: 0.8rem; }
-        .radio-group label { cursor: pointer; }
+        .radio-group { margin-top: 8px; display: flex; justify-content: center; flex-wrap: wrap; gap: 6px; font-size: 0.8rem; }
+        .radio-group label { cursor: pointer; display: flex; align-items: center; gap: 2px; }
 
         /* 우측 폼 */
         .sidebar-section h3 { margin-bottom: 15px; font-size: 1.1rem; border-bottom: 2px solid #007bff; padding-bottom: 8px; }
         .vehicle-item { border: 1px solid #e1e4e8; border-radius: 6px; margin-bottom: 10px; background: #fafbfc; overflow: hidden; }
-        .vehicle-header { display: flex; align-items: center; padding: 12px; cursor: pointer; gap: 10px; font-weight: 500; }
+        .vehicle-header { display: flex; align-items: center; padding: 14px 12px; cursor: pointer; gap: 10px; font-weight: 500; font-size: 1rem; }
         .vehicle-header:hover { background: #f1f3f5; }
         .vehicle-body { display: none; padding: 15px; border-top: 1px solid #e1e4e8; background: #fff; }
-        .form-group { margin-bottom: 10px; }
-        .form-group label { display: block; font-size: 0.8rem; margin-bottom: 4px; color: #555; font-weight: 600; }
-        .form-group input { width: 100%; padding: 6px 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.85rem; }
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; font-size: 0.85rem; margin-bottom: 6px; color: #555; font-weight: 600; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.95rem; }
         
-        .btn-group { display: flex; gap: 10px; margin-top: 10px; }
-        .btn-reserve { flex: 1; background: #007bff; color: white; border: none; padding: 8px; border-radius: 4px; font-weight: bold; cursor: pointer; }
+        .chk-group label { display: flex; align-items: center; gap: 8px; color: #d9534f; cursor: pointer; }
+        .chk-group input { width: 18px; height: 18px; }
+
+        .btn-group { display: flex; gap: 10px; margin-top: 15px; }
+        .btn-reserve { flex: 1; background: #007bff; color: white; border: none; padding: 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.95rem; }
         .btn-reserve:hover { background: #0056b3; }
-        .btn-cancel { flex: 1; background: #dc3545; color: white; border: none; padding: 8px; border-radius: 4px; font-weight: bold; cursor: pointer; }
+        .btn-cancel { flex: 1; background: #dc3545; color: white; border: none; padding: 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.95rem; }
         .btn-cancel:hover { background: #c82333; }
         
         .result-list { list-style: none; padding: 0; margin-top: 10px; }
-        .result-list li { background: #f8f9fa; border: 1px solid #dee2e6; padding: 10px; margin-bottom: 6px; border-radius: 4px; font-size: 0.9rem; }
+        .result-list li { background: #f8f9fa; border: 1px solid #dee2e6; padding: 12px; margin-bottom: 8px; border-radius: 4px; font-size: 0.95rem; line-height: 1.5; }
         .result-list li b { color: #007bff; }
+        .badge { background: #6c757d; color: white; padding: 3px 6px; border-radius: 4px; font-size: 0.75rem; margin-right: 5px; }
+
+        /* 로딩 화면 오버레이 */
+        #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); z-index: 9999; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; font-weight: bold; color: #007bff; }
+
+        @media (max-width: 768px) {
+            .dispatch-container { flex-direction: column; padding: 10px; margin: 10px auto; gap: 10px; }
+            .sidebar-section { width: 100%; padding: 15px; }
+            .card { padding: 15px; }
+            .calendar-cell { min-height: 90px; padding: 3px; font-size: 0.75rem; }
+            .dispatch-tag { font-size: 0.65rem; padding: 3px; }
+            .status-tag { font-size: 0.7rem; }
+            .calendar-day-header { font-size: 0.75rem; padding: 4px; }
+            .calendar-header { font-size: 1.1rem; }
+            .status-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
+            .vehicle-header { font-size: 0.9rem; padding: 12px 10px; }
+        }
     </style>
 </head>
 <body>
+
+    <!-- DB 로딩 화면 -->
+    <div id="loading-overlay">서버 데이터 불러오는 중...</div>
 
     <div class="dispatch-container">
         <!-- 왼쪽 영역 -->
@@ -75,9 +104,7 @@
                         <button onclick="changeMonth(1)">&gt;</button>
                     </div>
                 </div>
-                <div class="calendar-grid" id="calendar-grid">
-                    <!-- JS로 달력이 자동 렌더링 됩니다 -->
-                </div>
+                <div class="calendar-grid" id="calendar-grid"></div>
             </div>
 
             <div class="card">
@@ -86,77 +113,304 @@
                     <li style="color:#666;">선택된 날짜의 예약 내역이 없습니다.</li>
                 </ul>
                 
-                <h3 style="margin-top: 20px;">일일 운전자 상태 (선택 날짜 연동)</h3>
+                <h3 style="margin-top: 20px;">일일 운전자 상태</h3>
                 <div class="status-grid" id="status-container"></div>
             </div>
         </div>
 
-        <!-- 오른쪽 예약 영역 -->
+        <!-- 오른쪽 예약 폼 생성부 -->
         <div class="sidebar-section">
             <h3>배차 예약 정보 입력</h3>
             <script>
                 const busList = ['1호차', '2호차', '3호차'];
                 const solatiList = ['11호차', '12호차', '13호차', '14호차'];
                 
-                busList.forEach(v => {
-                    document.write(`
+                const formTemplate = (v, isBus) => `
                     <div class="vehicle-item">
                         <div class="vehicle-header">
-                            <input type="checkbox" id="v_${v}" onclick="toggleVehicleForm('form_${v}', this)">
-                            <label for="v_${v}" style="cursor: pointer; flex: 1;">${v} (버스)</label>
+                            <input type="checkbox" id="v_${v}" onclick="toggleVehicleForm('${v}', this, ${isBus})">
+                            <label for="v_${v}" style="cursor: pointer; flex: 1;">${v} (${isBus ? '버스' : '쏠라티'})</label>
                         </div>
                         <div class="vehicle-body" id="form_${v}">
-                            <div class="form-group"><label>예약자명</label><input type="text" id="name_${v}"></div>
+                            <div class="form-group"><label>출발지</label><input type="text" id="start_${v}"></div>
                             <div class="form-group"><label>운행 목적지</label><input type="text" id="dest_${v}"></div>
+                            <div class="form-group">
+                                <label>운행 형태</label>
+                                <select id="type_${v}">
+                                    <option value="공공예약" selected>공공예약</option>
+                                    <option value="1박">1박</option>
+                                    <option value="2박">2박</option>
+                                    <option value="성묘지원">성묘지원</option>
+                                    <option value="나들이동행">나들이동행</option>
+                                    <option value="시티투어">시티투어</option>
+                                </select>
+                            </div>
+                            <div class="form-group"><label>운행 거리 (km)</label><input type="number" id="km_${v}" value="0"></div>
+                            ${isBus ? `<div class="form-group chk-group"><label><input type="checkbox" id="single_${v}"> 1인 배차 적용 (버스 전용)</label></div>` : ''}
                             <div class="btn-group">
-                                <button class="btn-reserve" onclick="makeReservation('${v}', true)">예약 등록</button>
-                                <button class="btn-cancel" onclick="cancelReservation('${v}')">예약 취소</button>
+                                <button class="btn-reserve" onclick="makeReservation('${v}', ${isBus})">예약 등록</button>
+                                <button class="btn-cancel" onclick="cancelReservation('${v}')">배차 취소</button>
                             </div>
                         </div>
-                    </div>`);
-                });
-
-                solatiList.forEach(v => {
-                    document.write(`
-                    <div class="vehicle-item">
-                        <div class="vehicle-header">
-                            <input type="checkbox" id="v_${v}" onclick="toggleVehicleForm('form_${v}', this)">
-                            <label for="v_${v}" style="cursor: pointer; flex: 1;">${v} (쏠라티)</label>
-                        </div>
-                        <div class="vehicle-body" id="form_${v}">
-                            <div class="form-group"><label>예약자명</label><input type="text" id="name_${v}"></div>
-                            <div class="form-group"><label>운행 목적지</label><input type="text" id="dest_${v}"></div>
-                            <div class="btn-group">
-                                <button class="btn-reserve" onclick="makeReservation('${v}', false)">예약 등록</button>
-                                <button class="btn-cancel" onclick="cancelReservation('${v}')">예약 취소</button>
-                            </div>
-                        </div>
-                    </div>`);
-                });
+                    </div>
+                `;
+                busList.forEach(v => document.write(formTemplate(v, true)));
+                solatiList.forEach(v => document.write(formTemplate(v, false)));
             </script>
         </div>
     </div>
 
     <script>
-        function toggleVehicleForm(formId, checkbox) {
-            document.getElementById(formId).style.display = checkbox.checked ? "block" : "none";
-        }
+        // ==========================================
+        // 1. 💡 캡처 화면의 Firebase 설정값 적용 💡
+        // ==========================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyCipeqfmU03bZQozFt8MdToxxuDyFIUd-g",
+            authDomain: "park-fc66f.firebaseapp.com",
+            projectId: "park-fc66f",
+            storageBucket: "park-fc66f.firebasestorage.app",
+            messagingSenderId: "93011031366",
+            appId: "1:93011031366:web:72438cb8d71dd5a7902147",
+            measurementId: "G-TE2R83Q94K"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
 
         // ==========================================
-        // 1. 전역 변수 설정
+        // 2. 전역 상태 변수
         // ==========================================
         const drivers = ['박기준', '변석현', '이명순', '김탁', '한상훈', '문인식', '황덕일', '강철규', '이상헌'];
-        let globalDriverIndex = 0; 
-        
         let currentYear = 2026;
-        let currentMonth = 7; // 0=1월, 7=8월
+        let currentMonth = 7; 
         let currentDate = '2026-08-12'; 
         
         const dailyDriverStatus = {}; 
-        const dispatchData = {}; 
+        let allReservations = []; 
 
         // ==========================================
-        // 2. 동적 달력 생성 (월 이동 포함)
+        // 3. 서버 데이터 불러오기 (초기 구동)
+        // ==========================================
+        async function loadFromFirebase() {
+            try {
+                // 1) 배차 내역 가져오기
+                const resSnapshot = await db.collection('reservations').get();
+                allReservations = [];
+                resSnapshot.forEach(doc => allReservations.push(doc.data()));
+
+                // 2) 휴무/당직 상태 가져오기
+                const statusSnapshot = await db.collection('daily_status').get();
+                statusSnapshot.forEach(doc => { dailyDriverStatus[doc.id] = doc.data(); });
+
+                // 3) 화면 렌더링
+                recalculateAll(false); // DB 다시 쓰기 방지
+                
+                // 로딩 창 숨기기
+                document.getElementById('loading-overlay').style.display = 'none';
+            } catch (error) {
+                console.error("Firebase 로드 에러:", error);
+                alert("데이터를 불러오지 못했습니다. Firestore 보안 규칙을 '테스트 모드(if true;)'로 변경했는지 확인하세요.");
+                document.getElementById('loading-overlay').style.display = 'none';
+            }
+        }
+
+        // ==========================================
+        // 4. 배차 엔진 & 상태 관리 (DB 업데이트 포함)
+        // ==========================================
+        function toggleVehicleForm(vehicleName, checkbox, isBus) {
+            document.getElementById(`form_${vehicleName}`).style.display = checkbox.checked ? "block" : "none";
+            if (checkbox.checked) {
+                const existing = allReservations.find(r => r.vehicle === vehicleName && r.dates.includes(currentDate));
+                if (existing) {
+                    document.getElementById(`start_${vehicleName}`).value = existing.start;
+                    document.getElementById(`dest_${vehicleName}`).value = existing.dest;
+                    document.getElementById(`type_${vehicleName}`).value = existing.type;
+                    document.getElementById(`km_${vehicleName}`).value = existing.km;
+                    if(isBus) document.getElementById(`single_${vehicleName}`).checked = (existing.reqCount === 1);
+                } else {
+                    document.getElementById(`start_${vehicleName}`).value = '';
+                    document.getElementById(`dest_${vehicleName}`).value = '';
+                    document.getElementById(`type_${vehicleName}`).value = '공공예약';
+                    document.getElementById(`km_${vehicleName}`).value = '0';
+                    if(isBus) document.getElementById(`single_${vehicleName}`).checked = false;
+                }
+            }
+        }
+
+        function getDriverStatus(date, driver) {
+            if (!dailyDriverStatus[date]) {
+                dailyDriverStatus[date] = {};
+                drivers.forEach(d => dailyDriverStatus[date][d] = '출근');
+            }
+            return dailyDriverStatus[date][driver];
+        }
+
+        function handleStatusChange(driver, newStatus, oldStatus) {
+            if (newStatus === '휴무') {
+                if (!confirm(`${driver} 운전원 휴무 사용하시겠습니까?`)) {
+                    renderStatusPanel(currentDate);
+                    return;
+                }
+            }
+            if (!dailyDriverStatus[currentDate]) dailyDriverStatus[currentDate] = {};
+            dailyDriverStatus[currentDate][driver] = newStatus;
+
+            // 💡 DB에 일일 상태 저장
+            db.collection('daily_status').doc(currentDate).set(dailyDriverStatus[currentDate]);
+
+            recalculateAll(true); 
+            renderStatusPanel(currentDate);
+        }
+
+        function recalculateAll(shouldSaveToDB = true) {
+            allReservations.forEach(r => r.assigned = []);
+            allReservations.sort((a, b) => {
+                if (a.startDate !== b.startDate) return new Date(a.startDate) - new Date(b.startDate);
+                
+                const typeWeight = (t) => {
+                    if (t.includes('공공')) return 1;
+                    if (t.includes('1박')) return 2;
+                    if (t.includes('2박')) return 3;
+                    if (t.includes('성묘')) return 4;
+                    if (t.includes('나들이')) return 5;
+                    if (t.includes('시티')) return 6;
+                    return 99;
+                };
+                const wA = typeWeight(a.type), wB = typeWeight(b.type);
+                if (wA !== wB) return wA - wB; 
+
+                const vehWeight = (v) => {
+                    if (v === '3호차') return 1;
+                    if (v === '1호차') return 2;
+                    if (v === '2호차') return 3;
+                    if (v === '11호차') return 4;
+                    if (v === '12호차') return 5;
+                    if (v === '13호차') return 6;
+                    if (v === '14호차') return 7;
+                    return 99;
+                };
+                const vA = vehWeight(a.vehicle), vB = vehWeight(b.vehicle);
+                if (vA !== vB) return vA - vB; 
+
+                return a.km - b.km;
+            });
+
+            let pointer = 0;
+            allReservations.forEach(res => {
+                let loopGuard = 0;
+                while (res.assigned.length < res.reqCount && loopGuard < 50) {
+                    const candidate = drivers[pointer];
+                    let isWorkingAllDays = true;
+                    
+                    for (let d of res.dates) {
+                        const status = getDriverStatus(d, candidate);
+                        if (status === '휴무') { isWorkingAllDays = false; break; }
+                    }
+
+                    let isOverlapping = false;
+                    for (let other of allReservations) {
+                        if (other.id !== res.id && other.assigned.includes(candidate)) {
+                            const overlap = res.dates.some(d => other.dates.includes(d));
+                            if (overlap) { isOverlapping = true; break; }
+                        }
+                    }
+
+                    if (isWorkingAllDays && !isOverlapping) res.assigned.push(candidate);
+                    
+                    pointer = (pointer + 1) % drivers.length;
+                    loopGuard++;
+                }
+
+                // 💡 DB에 수정된 할당 내역 업데이트 (앞당겨진 정보 저장)
+                if (shouldSaveToDB) {
+                    db.collection('reservations').doc(res.id).set(res);
+                }
+            });
+
+            renderCalendar();
+            renderDispatchResult(currentDate);
+        }
+
+        // ==========================================
+        // 5. 예약 등록 / 취소 로직 (DB연동)
+        // ==========================================
+        function getDatesForTrip(startDate, type) {
+            let days = 1;
+            if (type.includes('1박')) days = 2;
+            if (type.includes('2박')) days = 3;
+            
+            const dates = [];
+            let cur = new Date(startDate);
+            for(let i = 0; i < days; i++) {
+                const y = cur.getFullYear();
+                const m = String(cur.getMonth() + 1).padStart(2, '0');
+                const d = String(cur.getDate()).padStart(2, '0');
+                dates.push(`${y}-${m}-${d}`);
+                cur.setDate(cur.getDate() + 1);
+            }
+            return dates;
+        }
+
+        function makeReservation(vehicleName, isBus) {
+            const type = document.getElementById(`type_${vehicleName}`).value;
+            const dates = getDatesForTrip(currentDate, type);
+
+            let reqCount = 1; 
+            if (isBus) {
+                const isSingle = document.getElementById(`single_${vehicleName}`).checked;
+                reqCount = isSingle ? 1 : 2; 
+            }
+
+            // 기존 예약 찾아서 배열에서 제거
+            const existingIndex = allReservations.findIndex(r => r.vehicle === vehicleName && r.dates.includes(currentDate));
+            let docId = Date.now().toString(); // 새 ID 발급 (DB용 문자열)
+            
+            if (existingIndex !== -1) {
+                docId = allReservations[existingIndex].id; // 덮어쓰기면 기존 ID 유지
+                allReservations.splice(existingIndex, 1);
+            }
+
+            const newReservation = {
+                id: docId,
+                startDate: currentDate,
+                dates: dates, 
+                vehicle: vehicleName,
+                start: document.getElementById(`start_${vehicleName}`).value || '미상',
+                dest: document.getElementById(`dest_${vehicleName}`).value || '지정안됨',
+                type: type,
+                km: parseInt(document.getElementById(`km_${vehicleName}`).value) || 0,
+                reqCount: reqCount,
+                assigned: []
+            };
+
+            allReservations.push(newReservation);
+
+            document.getElementById(`v_${vehicleName}`).checked = false;
+            document.getElementById(`form_${vehicleName}`).style.display = "none";
+
+            recalculateAll(true); // 여기서 계산 후 전체 예약 리스트 DB에 자동 저장됨
+        }
+
+        function cancelReservation(vehicleName) {
+            const index = allReservations.findIndex(r => r.vehicle === vehicleName && r.dates.includes(currentDate));
+            if (index !== -1) {
+                const deletedId = allReservations[index].id;
+                allReservations.splice(index, 1);
+                
+                // 💡 DB에서 해당 문서 삭제
+                db.collection('reservations').doc(deletedId).delete();
+
+                recalculateAll(true); 
+                alert(`[${vehicleName}] 배차가 취소되었습니다.`);
+            } else {
+                alert("이 날짜에 등록된 배차 내역이 없습니다.");
+            }
+            document.getElementById(`v_${vehicleName}`).checked = false;
+            document.getElementById(`form_${vehicleName}`).style.display = "none";
+        }
+
+        // ==========================================
+        // 6. UI 렌더링
         // ==========================================
         function changeMonth(offset) {
             currentMonth += offset;
@@ -178,12 +432,10 @@
             const firstDay = new Date(currentYear, currentMonth, 1).getDay();
             const lastDate = new Date(currentYear, currentMonth + 1, 0).getDate();
 
-            // 앞쪽 빈칸 채우기
             for (let i = 0; i < firstDay; i++) {
                 grid.innerHTML += `<div class="calendar-cell" style="background:#f4f6f9; cursor:default;"></div>`;
             }
 
-            // 날짜 채우기
             for (let d = 1; d <= lastDate; d++) {
                 const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
                 const dayOfWeek = (firstDay + d - 1) % 7;
@@ -193,12 +445,6 @@
                 if (dayOfWeek === 0) extraClass += 'sun ';
                 if (dayOfWeek === 6) extraClass += 'sat ';
 
-                // 임시 휴일 처리 (26년 8월)
-                if (currentYear === 2026 && currentMonth === 7) {
-                    if (d === 15) { extraClass += 'holiday '; extraHTML = `<span class="holiday-name">광복절</span>`; }
-                    if (d === 17) { extraClass += 'holiday '; extraHTML = `<span class="holiday-name">대체공휴일</span>`; }
-                }
-
                 if (dateStr === currentDate) extraClass += 'selected ';
 
                 grid.innerHTML += `
@@ -207,179 +453,32 @@
                         <div class="tag-container" id="tags_${dateStr}"></div>
                     </div>`;
             }
-            
-            // 렌더링 후 배차 태그들 모두 다시 붙이기
             for (let d = 1; d <= lastDate; d++) {
                 const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
                 updateCalendarCellUI(dateStr);
             }
         }
 
-        function selectDate(dateStr) {
-            currentDate = dateStr;
-            renderCalendar(); // 달력 재렌더링 (selected 클래스 이동)
-            document.getElementById('result-title').innerText = `최종 배차 결과 (${dateStr})`;
-            renderStatusPanel(dateStr); 
-            renderDispatchResult(dateStr); 
-        }
-
-        // ==========================================
-        // 3. 상태 변경 및 ★순번 자동 땡김(Cascading)★
-        // ==========================================
-        function getDriverStatus(date, driver) {
-            if (!dailyDriverStatus[date]) {
-                dailyDriverStatus[date] = {};
-                drivers.forEach(d => dailyDriverStatus[date][d] = '출근');
-            }
-            return dailyDriverStatus[date][driver];
-        }
-
-        function changeStatus(driver, status) {
-            dailyDriverStatus[currentDate][driver] = status;
-            
-            // 휴무/당직으로 빠지는 인원이 생기면, 즉시 남은 사람들을 땡겨서 재배치!
-            if (status === '휴무' || status === '당직') {
-                cascadeShiftDispatches(currentDate);
-            }
-            
-            updateCalendarCellUI(currentDate); 
-            renderDispatchResult(currentDate);
-        }
-
-        // 핵심: 배차 인원이 빠지면 순번을 앞으로 당겨서 채우는 로직
-        function cascadeShiftDispatches(date) {
-            const dayDispatches = dispatchData[date] || [];
-            if (dayDispatches.length === 0) return;
-
-            let flatAssignedList = [];
-            
-            // 1. 현재 배차된 모든 사람을 순서대로 한 줄로 세움
-            dayDispatches.forEach(d => {
-                d.assigned.forEach(drv => flatAssignedList.push(drv));
-            });
-
-            // 2. 그 중 방금 '휴무'나 '당직'으로 바뀐 사람은 줄에서 탈락시킴 (순번이 당겨짐)
-            flatAssignedList = flatAssignedList.filter(drv => getDriverStatus(date, drv) === '출근');
-
-            // 3. 전체 필요한 인원 수 계산
-            const totalRequired = dayDispatches.reduce((sum, d) => sum + d.reqCount, 0);
-
-            // 4. 모자란 인원수만큼 글로벌 큐에서 새 사람을 데려와 맨 뒤에 세움
-            let loopGuard = 0;
-            while (flatAssignedList.length < totalRequired && loopGuard < 50) {
-                const candidate = drivers[globalDriverIndex];
-                if (getDriverStatus(date, candidate) === '출근' && !flatAssignedList.includes(candidate)) {
-                    flatAssignedList.push(candidate);
-                }
-                globalDriverIndex = (globalDriverIndex + 1) % drivers.length;
-                loopGuard++;
-            }
-
-            // 5. 앞당겨진 사람들을 각 차량의 필요 인원수에 맞게 다시 태움
-            let pointer = 0;
-            dayDispatches.forEach(d => {
-                d.assigned = flatAssignedList.slice(pointer, pointer + d.reqCount);
-                pointer += d.reqCount;
-            });
-        }
-
-        function renderStatusPanel(date) {
-            const container = document.getElementById('status-container');
-            container.innerHTML = '';
-            
-            drivers.forEach(driver => {
-                const currentStatus = getDriverStatus(date, driver);
-                container.innerHTML += `
-                    <div class="status-item">
-                        <strong>${driver}</strong>
-                        <div class="radio-group">
-                            <label><input type="radio" name="st_${driver}" value="출근" ${currentStatus === '출근' ? 'checked' : ''} onchange="changeStatus('${driver}', '출근')">출근</label>
-                            <label><input type="radio" name="st_${driver}" value="당직" ${currentStatus === '당직' ? 'checked' : ''} onchange="changeStatus('${driver}', '당직')">당직</label>
-                            <label><input type="radio" name="st_${driver}" value="휴무" ${currentStatus === '휴무' ? 'checked' : ''} onchange="changeStatus('${driver}', '휴무')">휴무</label>
-                        </div>
-                    </div>`;
-            });
-        }
-
-        // ==========================================
-        // 4. 예약 등록 / 단순 취소 (원복 X)
-        // ==========================================
-        function makeReservation(vehicleName, isBus) {
-            if (!dispatchData[currentDate]) dispatchData[currentDate] = [];
-            
-            if (dispatchData[currentDate].some(d => d.vehicle === vehicleName)) {
-                return alert("이미 배차된 차량입니다.");
-            }
-
-            const reqCount = isBus ? 2 : 1; 
-            const assignedDrivers = [];
-            let loopGuard = 0; 
-
-            while(assignedDrivers.length < reqCount && loopGuard < 20) {
-                const candidate = drivers[globalDriverIndex];
-                const status = getDriverStatus(currentDate, candidate); 
-
-                // 현재 다른 차량에 이미 탑승한 상태인지 확인
-                const isAlreadyAssigned = dispatchData[currentDate].some(d => d.assigned.includes(candidate));
-
-                if (status === '출근' && !isAlreadyAssigned) {
-                    assignedDrivers.push(candidate);
-                }
-                globalDriverIndex = (globalDriverIndex + 1) % drivers.length;
-                loopGuard++;
-            }
-
-            dispatchData[currentDate].push({
-                vehicle: vehicleName,
-                name: document.getElementById(`name_${vehicleName}`).value || '미상',
-                dest: document.getElementById(`dest_${vehicleName}`).value || '지정안됨',
-                reqCount: reqCount, // 재배치를 위해 필요 인원 기억
-                assigned: assignedDrivers
-            });
-
-            document.getElementById(`v_${vehicleName}`).checked = false;
-            document.getElementById(`form_${vehicleName}`).style.display = "none";
-            
-            updateCalendarCellUI(currentDate);
-            renderDispatchResult(currentDate);
-        }
-
-        // 단순 취소: 배차 리스트에서만 삭제하고 글로벌 순번은 건드리지 않음
-        function cancelReservation(vehicleName) {
-            const dayDispatches = dispatchData[currentDate] || [];
-            const index = dayDispatches.findIndex(d => d.vehicle === vehicleName);
-            
-            if (index !== -1) {
-                dayDispatches.splice(index, 1);
-                updateCalendarCellUI(currentDate);
-                renderDispatchResult(currentDate);
-                alert(`[${vehicleName}] 배차가 정상 취소되었습니다. (순번 롤백 안됨)`);
-            } else {
-                alert("등록된 배차 내역이 없습니다.");
-            }
-
-            document.getElementById(`name_${vehicleName}`).value = '';
-            document.getElementById(`dest_${vehicleName}`).value = '';
-            document.getElementById(`v_${vehicleName}`).checked = false;
-            document.getElementById(`form_${vehicleName}`).style.display = "none";
-        }
-
-        // ==========================================
-        // 5. UI 렌더링 업데이트
-        // ==========================================
         function updateCalendarCellUI(date) {
             const container = document.getElementById(`tags_${date}`);
             if (!container) return;
             container.innerHTML = ''; 
 
-            const dayDispatches = dispatchData[date] || [];
-            dayDispatches.forEach(d => {
-                container.innerHTML += `<div class="dispatch-tag">${d.vehicle}: ${d.assigned.join(', ')}</div>`;
+            const activeReservations = allReservations.filter(r => r.dates.includes(date));
+            activeReservations.forEach(d => {
+                let shortType = d.type.replace('예약', '').replace('지원', '').replace('투어', '').replace('동행', '');
+                let customStyle = '';
+                if (d.type.includes('1박')) {
+                    customStyle = 'background-color: #ffe066; color: #333; border: 1px solid #fcc419;';
+                } else if (d.type.includes('2박')) {
+                    customStyle = 'background-color: #fd7e14; color: #fff; border: 1px solid #e8590c;';
+                }
+                container.innerHTML += `<div class="dispatch-tag" style="${customStyle}">[${shortType}] ${d.vehicle}: ${d.assigned.join(', ')}</div>`;
             });
 
-            const data = dailyDriverStatus[date] || {};
-            const offDrivers = drivers.filter(d => data[d] === '휴무');
-            const dutyDrivers = drivers.filter(d => data[d] === '당직');
+            const statusData = dailyDriverStatus[date] || {};
+            const offDrivers = drivers.filter(d => statusData[d] === '휴무');
+            const dutyDrivers = drivers.filter(d => statusData[d] === '당직');
 
             if (offDrivers.length > 0) container.innerHTML += `<div class="status-tag off-tag">휴무: ${offDrivers.join(', ')}</div>`;
             if (dutyDrivers.length > 0) container.innerHTML += `<div class="status-tag duty-tag">당직: ${dutyDrivers.join(', ')}</div>`;
@@ -387,27 +486,57 @@
 
         function renderDispatchResult(date) {
             const contentUl = document.getElementById('result-content');
-            const dayDispatches = dispatchData[date] || [];
+            const activeReservations = allReservations.filter(r => r.dates.includes(date));
 
-            if (dayDispatches.length === 0) {
+            if (activeReservations.length === 0) {
                 contentUl.innerHTML = `<li style="color:#666;">${date} 등록된 예약 내역이 없습니다.</li>`;
                 return;
             }
 
             contentUl.innerHTML = '';
-            dayDispatches.forEach(d => {
+            activeReservations.forEach(d => {
                 contentUl.innerHTML += `
                     <li>
-                        <b>[${d.vehicle}]</b> 예약자: ${d.name} | 목적지: ${d.dest} <br>
-                        👉 <b>배차 운전원: ${d.assigned.join(', ')}</b>
+                        <b>[${d.vehicle}]</b> <span class="badge" style="background:#007bff;">${d.type}</span> <span class="badge" style="background:#17a2b8;">${d.km}km</span><br>
+                        출발지: ${d.start} | 목적지: ${d.dest} <br>
+                        👉 <b style="color:#28a745;">배차 운전원: ${d.assigned.length > 0 ? d.assigned.join(', ') : '인원 부족'}</b>
                     </li>`;
             });
         }
 
-        // 초기 시작
+        function renderStatusPanel(date) {
+            const container = document.getElementById('status-container');
+            container.innerHTML = '';
+            drivers.forEach(driver => {
+                const currentStatus = getDriverStatus(date, driver);
+                container.innerHTML += `
+                    <div class="status-item">
+                        <strong>${driver}</strong>
+                        <div class="radio-group">
+                            <label><input type="radio" name="st_${driver}" value="출근" ${currentStatus === '출근' ? 'checked' : ''} onchange="handleStatusChange('${driver}', '출근', '${currentStatus}')">출근</label>
+                            <label><input type="radio" name="st_${driver}" value="당직" ${currentStatus === '당직' ? 'checked' : ''} onchange="handleStatusChange('${driver}', '당직', '${currentStatus}')">당직</label>
+                            <label><input type="radio" name="st_${driver}" value="휴무" ${currentStatus === '휴무' ? 'checked' : ''} onchange="handleStatusChange('${driver}', '휴무', '${currentStatus}')">휴무</label>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        function selectDate(dateStr) {
+            currentDate = dateStr;
+            renderCalendar(); 
+            document.getElementById('result-title').innerText = `최종 배차 결과 (${dateStr})`;
+            renderStatusPanel(dateStr); 
+            renderDispatchResult(dateStr); 
+        }
+
+        // ==========================================
+        // 7. 페이지 로드 시 초기화
+        // ==========================================
         window.onload = () => {
             renderCalendar();
-            selectDate('2026-08-12');
+            selectDate('2026-08-12'); 
+            // 💡 최초 구동 시 Firebase에서 데이터 가져오기 실행
+            loadFromFirebase();
         };
     </script>
 </body>
