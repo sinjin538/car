@@ -14,6 +14,8 @@
 
         /* 달력 스타일 */
         .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 1.2rem; font-weight: bold; }
+        .calendar-header button { padding: 4px 10px; font-size: 1rem; cursor: pointer; border: 1px solid #ccc; background: #fff; border-radius: 4px; }
+        .calendar-header button:hover { background: #eef2f7; }
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
         .calendar-day-header { font-weight: bold; text-align: center; padding: 8px; background: #eef2f7; border-radius: 4px; }
         .calendar-day-header.sun { color: #d9534f; }
@@ -49,14 +51,12 @@
         .form-group label { display: block; font-size: 0.8rem; margin-bottom: 4px; color: #555; font-weight: 600; }
         .form-group input { width: 100%; padding: 6px 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.85rem; }
         
-        /* 버튼 스타일 (예약/취소) */
         .btn-group { display: flex; gap: 10px; margin-top: 10px; }
         .btn-reserve { flex: 1; background: #007bff; color: white; border: none; padding: 8px; border-radius: 4px; font-weight: bold; cursor: pointer; }
         .btn-reserve:hover { background: #0056b3; }
         .btn-cancel { flex: 1; background: #dc3545; color: white; border: none; padding: 8px; border-radius: 4px; font-weight: bold; cursor: pointer; }
         .btn-cancel:hover { background: #c82333; }
         
-        /* 배차 결과 리스트 */
         .result-list { list-style: none; padding: 0; margin-top: 10px; }
         .result-list li { background: #f8f9fa; border: 1px solid #dee2e6; padding: 10px; margin-bottom: 6px; border-radius: 4px; font-size: 0.9rem; }
         .result-list li b { color: #007bff; }
@@ -69,21 +69,17 @@
         <div class="main-section">
             <div class="card">
                 <div class="calendar-header">
-                    <span>📅 2026년 8월</span>
-                    <div><button>&lt;</button> <button>&gt;</button></div>
+                    <span id="month-display">📅 2026년 8월</span>
+                    <div>
+                        <button onclick="changeMonth(-1)">&lt;</button>
+                        <button onclick="changeMonth(1)">&gt;</button>
+                    </div>
                 </div>
                 <div class="calendar-grid" id="calendar-grid">
-                    <div class="calendar-day-header sun">일</div>
-                    <div class="calendar-day-header">월</div>
-                    <div class="calendar-day-header">화</div>
-                    <div class="calendar-day-header">수</div>
-                    <div class="calendar-day-header">목</div>
-                    <div class="calendar-day-header">금</div>
-                    <div class="calendar-day-header sat">토</div>
+                    <!-- JS로 달력이 자동 렌더링 됩니다 -->
                 </div>
             </div>
 
-            <!-- 최종 결과 및 상태창 -->
             <div class="card">
                 <h3 id="result-title">최종 배차 결과</h3>
                 <ul id="result-content" class="result-list">
@@ -98,12 +94,10 @@
         <!-- 오른쪽 예약 영역 -->
         <div class="sidebar-section">
             <h3>배차 예약 정보 입력</h3>
-            
             <script>
                 const busList = ['1호차', '2호차', '3호차'];
                 const solatiList = ['11호차', '12호차', '13호차', '14호차'];
                 
-                // 버스 (2명 배차) + 예약/취소 버튼 생성
                 busList.forEach(v => {
                     document.write(`
                     <div class="vehicle-item">
@@ -122,7 +116,6 @@
                     </div>`);
                 });
 
-                // 쏠라티 (1명 배차) + 예약/취소 버튼 생성
                 solatiList.forEach(v => {
                     document.write(`
                     <div class="vehicle-item">
@@ -150,56 +143,88 @@
         }
 
         // ==========================================
-        // 1. 상태 및 배차 데이터 저장 변수
+        // 1. 전역 변수 설정
         // ==========================================
         const drivers = ['박기준', '변석현', '이명순', '김탁', '한상훈', '문인식', '황덕일', '강철규', '이상헌'];
-        let globalDriverIndex = 0; // 운전원 순번 포인터
+        let globalDriverIndex = 0; 
         
-        let currentDate = ''; 
+        let currentYear = 2026;
+        let currentMonth = 7; // 0=1월, 7=8월
+        let currentDate = '2026-08-12'; 
+        
         const dailyDriverStatus = {}; 
         const dispatchData = {}; 
 
         // ==========================================
-        // 2. 달력 렌더링
+        // 2. 동적 달력 생성 (월 이동 포함)
         // ==========================================
-        function initCalendar() {
+        function changeMonth(offset) {
+            currentMonth += offset;
+            if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+            else if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+            renderCalendar();
+        }
+
+        function renderCalendar() {
+            document.getElementById('month-display').innerText = `📅 ${currentYear}년 ${currentMonth + 1}월`;
             const grid = document.getElementById('calendar-grid');
-            for(let i=0; i<6; i++) grid.innerHTML += `<div class="calendar-cell" style="background:#f4f6f9; cursor:default;"></div>`;
-            
-            for(let d=1; d<=31; d++) {
-                const dateStr = `2026-08-${String(d).padStart(2, '0')}`;
+            grid.innerHTML = `
+                <div class="calendar-day-header sun">일</div><div class="calendar-day-header">월</div>
+                <div class="calendar-day-header">화</div><div class="calendar-day-header">수</div>
+                <div class="calendar-day-header">목</div><div class="calendar-day-header">금</div>
+                <div class="calendar-day-header sat">토</div>
+            `;
+
+            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+            const lastDate = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+            // 앞쪽 빈칸 채우기
+            for (let i = 0; i < firstDay; i++) {
+                grid.innerHTML += `<div class="calendar-cell" style="background:#f4f6f9; cursor:default;"></div>`;
+            }
+
+            // 날짜 채우기
+            for (let d = 1; d <= lastDate; d++) {
+                const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                const dayOfWeek = (firstDay + d - 1) % 7;
+                
                 let extraClass = '';
                 let extraHTML = '';
-                
-                const dayOfWeek = (5 + d) % 7;
                 if (dayOfWeek === 0) extraClass += 'sun ';
                 if (dayOfWeek === 6) extraClass += 'sat ';
-                
-                if (d === 15) { extraClass += 'holiday '; extraHTML = `<span class="holiday-name">광복절</span>`; }
-                if (d === 17) { extraClass += 'holiday '; extraHTML = `<span class="holiday-name">대체공휴일</span>`; }
+
+                // 임시 휴일 처리 (26년 8월)
+                if (currentYear === 2026 && currentMonth === 7) {
+                    if (d === 15) { extraClass += 'holiday '; extraHTML = `<span class="holiday-name">광복절</span>`; }
+                    if (d === 17) { extraClass += 'holiday '; extraHTML = `<span class="holiday-name">대체공휴일</span>`; }
+                }
+
+                if (dateStr === currentDate) extraClass += 'selected ';
 
                 grid.innerHTML += `
-                    <div class="calendar-cell ${extraClass}" data-date="${dateStr}" onclick="selectDate('${dateStr}', this)">
+                    <div class="calendar-cell ${extraClass}" data-date="${dateStr}" onclick="selectDate('${dateStr}')">
                         <span class="date-num">${d}</span>${extraHTML}
                         <div class="tag-container" id="tags_${dateStr}"></div>
                     </div>`;
             }
+            
+            // 렌더링 후 배차 태그들 모두 다시 붙이기
+            for (let d = 1; d <= lastDate; d++) {
+                const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                updateCalendarCellUI(dateStr);
+            }
         }
 
-        function selectDate(dateStr, cellElement) {
+        function selectDate(dateStr) {
             currentDate = dateStr;
-            const prev = document.querySelector('.calendar-cell.selected');
-            if (prev) prev.classList.remove('selected');
-            cellElement.classList.add('selected');
-
+            renderCalendar(); // 달력 재렌더링 (selected 클래스 이동)
             document.getElementById('result-title').innerText = `최종 배차 결과 (${dateStr})`;
-            
             renderStatusPanel(dateStr); 
             renderDispatchResult(dateStr); 
         }
 
         // ==========================================
-        // 3. 운전원 상태 관리 (휴무/당직 변경 시 실행)
+        // 3. 상태 변경 및 ★순번 자동 땡김(Cascading)★
         // ==========================================
         function getDriverStatus(date, driver) {
             if (!dailyDriverStatus[date]) {
@@ -211,7 +236,51 @@
 
         function changeStatus(driver, status) {
             dailyDriverStatus[currentDate][driver] = status;
+            
+            // 휴무/당직으로 빠지는 인원이 생기면, 즉시 남은 사람들을 땡겨서 재배치!
+            if (status === '휴무' || status === '당직') {
+                cascadeShiftDispatches(currentDate);
+            }
+            
             updateCalendarCellUI(currentDate); 
+            renderDispatchResult(currentDate);
+        }
+
+        // 핵심: 배차 인원이 빠지면 순번을 앞으로 당겨서 채우는 로직
+        function cascadeShiftDispatches(date) {
+            const dayDispatches = dispatchData[date] || [];
+            if (dayDispatches.length === 0) return;
+
+            let flatAssignedList = [];
+            
+            // 1. 현재 배차된 모든 사람을 순서대로 한 줄로 세움
+            dayDispatches.forEach(d => {
+                d.assigned.forEach(drv => flatAssignedList.push(drv));
+            });
+
+            // 2. 그 중 방금 '휴무'나 '당직'으로 바뀐 사람은 줄에서 탈락시킴 (순번이 당겨짐)
+            flatAssignedList = flatAssignedList.filter(drv => getDriverStatus(date, drv) === '출근');
+
+            // 3. 전체 필요한 인원 수 계산
+            const totalRequired = dayDispatches.reduce((sum, d) => sum + d.reqCount, 0);
+
+            // 4. 모자란 인원수만큼 글로벌 큐에서 새 사람을 데려와 맨 뒤에 세움
+            let loopGuard = 0;
+            while (flatAssignedList.length < totalRequired && loopGuard < 50) {
+                const candidate = drivers[globalDriverIndex];
+                if (getDriverStatus(date, candidate) === '출근' && !flatAssignedList.includes(candidate)) {
+                    flatAssignedList.push(candidate);
+                }
+                globalDriverIndex = (globalDriverIndex + 1) % drivers.length;
+                loopGuard++;
+            }
+
+            // 5. 앞당겨진 사람들을 각 차량의 필요 인원수에 맞게 다시 태움
+            let pointer = 0;
+            dayDispatches.forEach(d => {
+                d.assigned = flatAssignedList.slice(pointer, pointer + d.reqCount);
+                pointer += d.reqCount;
+            });
         }
 
         function renderStatusPanel(date) {
@@ -233,51 +302,41 @@
         }
 
         // ==========================================
-        // 4. 예약 등록 (순번제 배차)
+        // 4. 예약 등록 / 단순 취소 (원복 X)
         // ==========================================
         function makeReservation(vehicleName, isBus) {
-            if (!currentDate) return alert("배차할 날짜를 달력에서 먼저 선택하세요!");
-            
             if (!dispatchData[currentDate]) dispatchData[currentDate] = [];
             
-            // 이미 배차된 차량인지 체크
             if (dispatchData[currentDate].some(d => d.vehicle === vehicleName)) {
-                return alert("이미 배차된 차량입니다. 다시 배차하시려면 '예약 취소'를 먼저 눌러주세요.");
+                return alert("이미 배차된 차량입니다.");
             }
 
             const reqCount = isBus ? 2 : 1; 
             const assignedDrivers = [];
             let loopGuard = 0; 
-            const startIndex = globalDriverIndex; // ★ 원복을 위해 배차 시작 전 순번을 기억합니다 ★
 
             while(assignedDrivers.length < reqCount && loopGuard < 20) {
                 const candidate = drivers[globalDriverIndex];
                 const status = getDriverStatus(currentDate, candidate); 
 
-                // 해당 날짜에 '휴무'가 아니면 배차 명단에 추가
-                if (status !== '휴무') {
+                // 현재 다른 차량에 이미 탑승한 상태인지 확인
+                const isAlreadyAssigned = dispatchData[currentDate].some(d => d.assigned.includes(candidate));
+
+                if (status === '출근' && !isAlreadyAssigned) {
                     assignedDrivers.push(candidate);
                 }
-
                 globalDriverIndex = (globalDriverIndex + 1) % drivers.length;
                 loopGuard++;
             }
 
-            if (assignedDrivers.length < reqCount) {
-                globalDriverIndex = startIndex; // 사람 부족 시 순번 원복
-                return alert("출근 가능한 운전원이 부족합니다.");
-            }
-
-            // 배차 데이터 저장
             dispatchData[currentDate].push({
                 vehicle: vehicleName,
                 name: document.getElementById(`name_${vehicleName}`).value || '미상',
                 dest: document.getElementById(`dest_${vehicleName}`).value || '지정안됨',
-                assigned: assignedDrivers,
-                prevIndex: startIndex // ★ 취소 시 이 순번으로 완벽 롤백
+                reqCount: reqCount, // 재배치를 위해 필요 인원 기억
+                assigned: assignedDrivers
             });
 
-            // 폼 닫기
             document.getElementById(`v_${vehicleName}`).checked = false;
             document.getElementById(`form_${vehicleName}`).style.display = "none";
             
@@ -285,30 +344,20 @@
             renderDispatchResult(currentDate);
         }
 
-        // ==========================================
-        // 5. ★ 예약 취소 및 순번 원복 기능 ★
-        // ==========================================
+        // 단순 취소: 배차 리스트에서만 삭제하고 글로벌 순번은 건드리지 않음
         function cancelReservation(vehicleName) {
-            if (!currentDate) return alert("날짜를 선택하세요.");
-            
             const dayDispatches = dispatchData[currentDate] || [];
             const index = dayDispatches.findIndex(d => d.vehicle === vehicleName);
             
             if (index !== -1) {
-                // 삭제되는 배차가 기록해두었던 시작 순번으로 전체 순번을 되돌립니다. (완벽 원복)
-                globalDriverIndex = dayDispatches[index].prevIndex; 
-                
-                // 데이터 배열에서 해당 차량 삭제
                 dayDispatches.splice(index, 1);
-                
                 updateCalendarCellUI(currentDate);
                 renderDispatchResult(currentDate);
-                alert(`[${vehicleName}] 배차가 취소되었고, 운전원 순번이 원복되었습니다.`);
+                alert(`[${vehicleName}] 배차가 정상 취소되었습니다. (순번 롤백 안됨)`);
             } else {
-                alert("해당 날짜에 이 차량으로 등록된 배차가 없습니다.");
+                alert("등록된 배차 내역이 없습니다.");
             }
 
-            // 폼 초기화 및 닫기
             document.getElementById(`name_${vehicleName}`).value = '';
             document.getElementById(`dest_${vehicleName}`).value = '';
             document.getElementById(`v_${vehicleName}`).checked = false;
@@ -316,7 +365,7 @@
         }
 
         // ==========================================
-        // 6. UI 업데이트
+        // 5. UI 렌더링 업데이트
         // ==========================================
         function updateCalendarCellUI(date) {
             const container = document.getElementById(`tags_${date}`);
@@ -355,10 +404,10 @@
             });
         }
 
+        // 초기 시작
         window.onload = () => {
-            initCalendar();
-            const initialCell = document.querySelector(`.calendar-cell[data-date="2026-08-12"]`);
-            if (initialCell) selectDate('2026-08-12', initialCell);
+            renderCalendar();
+            selectDate('2026-08-12');
         };
     </script>
 </body>
