@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>배차관리 시스템</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; color: #333; }
+        
+        /* 전체 컨테이너 */
+        .dispatch-container {
+            display: flex;
+            max-width: 1400px;
+            margin: 20px auto;
+            gap: 20px;
+            padding: 0 20px;
+        }
+
+        /* 왼쪽 메인 영역 (달력 및 결과) */
+        .main-section {
+            flex: 3;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* 오른쪽 사이드바 (배차 예약 정보 입력) */
+        .sidebar-section {
+            flex: 1;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            height: fit-content;
+        }
+
+        /* 카드 공통 스타일 */
+        .card {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        /* 상단 헤더 및 달력 그리드 (예시) */
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            text-align: center;
+        }
+
+        .calendar-day-header {
+            font-weight: bold;
+            padding: 8px;
+            background: #eef2f7;
+            border-radius: 4px;
+        }
+
+        .calendar-cell {
+            min-height: 80px;
+            background: #fafbfc;
+            border: 1px solid #e1e4e8;
+            border-radius: 4px;
+            padding: 5px;
+            text-align: left;
+            font-size: 0.85rem;
+        }
+
+        /* 운전자 상태 및 당직/휴무 체크 창 */
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .status-item {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        /* 우측 예약 입력 폼 스타일 */
+        .sidebar-section h3 {
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 8px;
+        }
+
+        .vehicle-checkbox-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .vehicle-checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            background: #fafbfc;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dispatch-container">
+        <!-- 왼쪽: 달력 및 하단 상태 관리 -->
+        <div class="main-section">
+            <!-- 달력 카드 -->
+            <div class="card">
+                <div class="calendar-header">
+                    <span>📅 2026년 8월</span>
+                    <div>
+                        <button>&lt;</button>
+                        <button>&gt;</button>
+                    </div>
+                </div>
+                <div class="calendar-grid">
+                    <div class="calendar-day-header" style="color:red;">일</div>
+                    <div class="calendar-day-header">월</div>
+                    <div class="calendar-day-header">화</div>
+                    <div class="calendar-day-header">수</div>
+                    <div class="calendar-day-header">목</div>
+                    <div class="calendar-day-header">금</div>
+                    <div class="calendar-day-header" style="color:blue;">토</div>
+                    <!-- 날짜 셀 예시 -->
+                    <div class="calendar-cell">1</div>
+                    <div class="calendar-cell">2</div>
+                    <div class="calendar-cell">3</div>
+                    <div class="calendar-cell">4</div>
+                    <div class="calendar-cell">5</div>
+                    <div class="calendar-cell">6</div>
+                    <div class="calendar-cell">7</div>
+                </div>
+            </div>
+
+            <!-- 최종 배차 결과 및 일일 운전자 상태 -->
+            <div class="card">
+                <h3>최종 배차 결과</h3>
+                <p style="margin: 10px 0; color: #666;">2026-08-12 등록된 예약 내역이 없습니다.</p>
+                
+                <h3 style="margin-top: 20px;">일일 운전자 상태</h3>
+                <div class="status-grid">
+                    <div class="status-item">
+                        <strong>박기준</strong><br><small>5순위</small>
+                    </div>
+                    <div class="status-item">
+                        <strong>변석현</strong><br><small>6순위</small>
+                    </div>
+                    <div class="status-item">
+                        <strong>이명순</strong><br><small>7순위</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 오른쪽: 배차 예약 정보 입력 창 -->
+        <div class="sidebar-section">
+            <h3>배차 예약 정보 입력</h3>
+            <div class="vehicle-checkbox-list">
+                <label class="vehicle-checkbox-item">
+                    <input type="checkbox"> 1호차 (4921)
+                </label>
+                <label class="vehicle-checkbox-item">
+                    <input type="checkbox"> 2호차 (4922)
+                </label>
+                <label class="vehicle-checkbox-item">
+                    <input type="checkbox"> 3호차 (1557)
+                </label>
+                <label class="vehicle-checkbox-item">
+                    <input type="checkbox"> 11호차 (7711)
+                </label>
+                <label class="vehicle-checkbox-item">
+                    <input type="checkbox"> 12호차 (7712)
+                </label>
+                <label class="vehicle-checkbox-item">
+                    <input type="checkbox"> 13호차 (7713)
+                </label>
+                <label class="vehicle-checkbox-item">
+                    <input type="checkbox"> 14호차 (7714)
+                </label>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
