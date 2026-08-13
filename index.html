@@ -56,6 +56,9 @@
         .badge.city { background-color: #85c1e9; color: #003366; } 
         .badge.default { background-color: #6c757d; color: #fff; }
 
+        /* 🔥 수동 배차 전용 빨간색 배지 CSS */
+        .badge.manual-badge { background-color: #dc3545 !important; color: #fff !important; }
+
         .early-underline { text-decoration: underline; text-decoration-color: #dc3545; text-underline-offset: 3px; text-decoration-thickness: 2px; }
 
         .cal-status { font-size: 0.75rem; margin-top: 2px; }
@@ -197,22 +200,31 @@
                             
                             ${isBus ? `<div class="form-group chk-group" id="single_box_${v}"><label><input type="checkbox" id="single_${v}"> 1인 배차 적용 (버스 전용)</label></div>` : ''}
                             
+                            <!-- 🔥 UI 업데이트: 운전원 옆에 각각 선운행 분리 & 수동배차 상단 강조 -->
                             <div style="border-top: 1px dashed #ccc; margin-top: 15px; padding-top: 10px;">
-                                <div class="form-group chk-group" style="margin-bottom: 10px;">
-                                    <label><input type="checkbox" id="early_${v}"> 선운행 적용 (이름 밑줄 빨갛게 표시)</label>
-                                </div>
-                                <div class="form-group chk-group" style="color:#007bff; margin-bottom: 10px;">
+                                <div class="form-group chk-group" style="color:#007bff; margin-bottom: 12px; background: #e8f0fe; padding: 6px; border-radius: 4px;">
                                     <label><input type="checkbox" id="manual_${v}" onchange="toggleManual('${v}', ${isBus})"> 수동 배차 적용 (체크해야 운전원 수정 가능)</label>
                                 </div>
                                 
-                                <div class="form-group">
-                                    <label>배정 운전원 1</label>
-                                    <select id="driver1_${v}" disabled><option value="">자동 배정</option>${_driverOptions}</select>
+                                <div style="display:flex; gap:10px; align-items:flex-end; margin-bottom:12px;">
+                                    <div class="form-group" style="flex:1; margin-bottom:0;">
+                                        <label>배정 운전원 1</label>
+                                        <select id="driver1_${v}" disabled><option value="">자동 배정</option>${_driverOptions}</select>
+                                    </div>
+                                    <div class="form-group chk-group" style="margin-bottom:8px;">
+                                        <label><input type="checkbox" id="early1_${v}"> 선운행</label>
+                                    </div>
                                 </div>
+
                                 ${isBus ? `
-                                <div class="form-group">
-                                    <label>배정 운전원 2</label>
-                                    <select id="driver2_${v}" disabled><option value="">자동 배정</option>${_driverOptions}</select>
+                                <div style="display:flex; gap:10px; align-items:flex-end; margin-bottom:12px;">
+                                    <div class="form-group" style="flex:1; margin-bottom:0;">
+                                        <label>배정 운전원 2</label>
+                                        <select id="driver2_${v}" disabled><option value="">자동 배정</option>${_driverOptions}</select>
+                                    </div>
+                                    <div class="form-group chk-group" style="margin-bottom:8px;">
+                                        <label><input type="checkbox" id="early2_${v}"> 선운행</label>
+                                    </div>
                                 </div>` : ''}
                                 
                                 <div class="form-group" style="margin-top:10px; border-top: 1px dashed #eee; padding-top:10px;">
@@ -366,9 +378,14 @@
                     document.getElementById(`km_${vehicleName}`).value = existing.km;
                     if(isBus) document.getElementById(`single_${vehicleName}`).checked = (existing.reqCount === 1);
                     
-                    document.getElementById(`early_${vehicleName}`).checked = existing.isEarly || false;
                     document.getElementById(`manual_${vehicleName}`).checked = existing.isManual || false;
                     document.getElementById(`next_pointer_${vehicleName}`).value = existing.nextPointerDriver || '';
+
+                    // 개별 선운행 체크
+                    document.getElementById(`early1_${vehicleName}`).checked = existing.isEarly1 || false;
+                    if(isBus && document.getElementById(`early2_${vehicleName}`)) {
+                        document.getElementById(`early2_${vehicleName}`).checked = existing.isEarly2 || false;
+                    }
 
                     d1.value = existing.assigned[0] || '';
                     if (isBus && d2) d2.value = existing.assigned[1] || '';
@@ -392,10 +409,14 @@
                     document.getElementById(`km_${vehicleName}`).value = '0';
                     if(isBus) document.getElementById(`single_${vehicleName}`).checked = false;
                     
-                    document.getElementById(`early_${vehicleName}`).checked = false;
                     document.getElementById(`manual_${vehicleName}`).checked = false;
                     document.getElementById(`next_pointer_${vehicleName}`).value = '';
                     
+                    document.getElementById(`early1_${vehicleName}`).checked = false;
+                    if(isBus && document.getElementById(`early2_${vehicleName}`)) {
+                        document.getElementById(`early2_${vehicleName}`).checked = false;
+                    }
+
                     d1.value = ''; d1.disabled = true;
                     if(isBus && d2) { d2.value = ''; d2.disabled = true; }
                     
@@ -432,19 +453,15 @@
             db.collection('daily_status').doc(currentDate).set(dailyDriverStatus[currentDate]).catch(e=>{});
         }
 
-        // 🔥 엔진: 쏠라티 공공, 성묘 동급 최우선 / 버스 무조건 최우선
         function recalculateAll(shouldSaveToDB = true) {
             allReservations.forEach(r => r.assigned = []);
             allReservations.sort((a, b) => {
-                // 1. 날짜 순
                 if (a.startDate !== b.startDate) return new Date(a.startDate) - new Date(b.startDate);
                 
-                // 2. 버스(1~3호) 무조건 쏠라티보다 우선
                 const isBusA = ['1호차', '2호차', '3호차'].includes(a.vehicle);
                 const isBusB = ['1호차', '2호차', '3호차'].includes(b.vehicle);
                 if (isBusA !== isBusB) return isBusA ? -1 : 1; 
 
-                // 🔥 3. 쏠라티 전용 룰 적용 (공공, 성묘, 서울 1순위 동급)
                 const getTypeWeight = (t, isBus) => {
                     if (isBus) {
                         if (t.includes('공공') || t.includes('서울')) return 1; 
@@ -454,7 +471,7 @@
                         if (t.includes('나들이')) return 5;
                         if (t.includes('시티')) return 6; 
                         return 99;
-                    } else { // 쏠라티
+                    } else { 
                         if (t.includes('공공') || t.includes('서울') || t.includes('성묘')) return 1; 
                         if (t.includes('1박')) return 2; 
                         if (t.includes('2박')) return 3;
@@ -467,10 +484,8 @@
                 const wB = getTypeWeight(b.type, isBusB);
                 if (wA !== wB) return wA - wB; 
 
-                // 4. 형태가 같으면 무조건 거리(KM)가 적은 차 우선
                 if (a.km !== b.km) return a.km - b.km;
 
-                // 5. KM도 같으면 차량 번호 
                 const vehWeight = (v) => {
                     if (v === '3호차') return 1; if (v === '1호차') return 2; if (v === '2호차') return 3;
                     if (v === '11호차') return 4; if (v === '12호차') return 5; if (v === '13호차') return 6; if (v === '14호차') return 7; return 99;
@@ -537,7 +552,11 @@
             const dates = getDatesForTrip(currentDate, type);
             
             let isManual = document.getElementById(`manual_${vehicleName}`).checked;
-            let isEarly = document.getElementById(`early_${vehicleName}`).checked;
+            
+            // 💡 분리된 선운행 개별 체크박스 수집
+            let isEarly1 = document.getElementById(`early1_${vehicleName}`).checked;
+            let isEarly2 = isBus && document.getElementById(`early2_${vehicleName}`) ? document.getElementById(`early2_${vehicleName}`).checked : false;
+
             let manualDrivers = [];
             let reqCount = 1;
 
@@ -571,7 +590,8 @@
                 reqCount: reqCount, assigned: [],
                 isCanceled: false,
                 isManual: isManual,
-                isEarly: isEarly,
+                isEarly1: isEarly1,
+                isEarly2: isEarly2,
                 manualDrivers: manualDrivers,
                 nextPointerDriver: nextPointerDriver
             });
@@ -660,18 +680,22 @@
                 else if (shortType === '2박') { boxClass = 'night2'; badgeClass = 'night2'; }
                 else if (shortType === '시티' || shortType === '서울') { boxClass = 'city'; badgeClass = 'city'; }
 
+                // 💡 수동 배차일 경우 배지 배경 빨간색으로 변경
+                if (d.isManual) badgeClass = 'manual-badge';
+
                 let canceledBoxStyle = d.isCanceled ? 'background-color: transparent; border: 1px dashed #adb5bd; color: #adb5bd; text-decoration: line-through;' : '';
                 let canceledBadgeStyle = d.isCanceled ? 'background-color: transparent; color: #adb5bd; border: 1px solid #adb5bd;' : '';
                 
-                let assignedNames = d.assigned.join(', ');
-                if (d.isEarly && !d.isCanceled) {
-                    assignedNames = `<span class="early-underline">${assignedNames}</span>`;
-                }
+                // 💡 개별 선운행 밑줄 표시 로직
+                let assignedNamesHTML = d.assigned.map((name, idx) => {
+                    let isUnderline = (idx === 0 && d.isEarly1) || (idx === 1 && d.isEarly2);
+                    return (isUnderline && !d.isCanceled) ? `<span class="early-underline">${name}</span>` : name;
+                }).join(', ');
 
                 container.innerHTML += `
                     <div class="event-box ${boxClass}" style="${canceledBoxStyle}">
                         <span class="badge ${badgeClass}" style="${canceledBadgeStyle}">${shortType}</span> 
-                        ${d.vehicle}: ${assignedNames}
+                        ${d.vehicle}: ${assignedNamesHTML}
                     </div>`;
             });
 
@@ -703,13 +727,19 @@
                 else if (shortType === '2박') badgeClass = 'night2';
                 else if (shortType === '시티' || shortType === '서울') badgeClass = 'city';
 
+                // 💡 수동 배차일 경우 배지 배경 빨간색으로 변경
+                if (d.isManual) badgeClass = 'manual-badge';
+
                 let canceledLiStyle = d.isCanceled ? 'color: #adb5bd; text-decoration: line-through;' : '';
                 let canceledBadgeStyle = d.isCanceled ? 'background-color: transparent; color: #adb5bd; border: 1px solid #adb5bd;' : '';
                 
-                let assignedNames = d.assigned.length > 0 ? d.assigned.join(', ') : '인원 부족';
-                if (d.isEarly && !d.isCanceled) {
-                    assignedNames = `<span class="early-underline">${assignedNames}</span>`;
-                }
+                // 💡 개별 선운행 밑줄 표시 로직
+                let assignedNamesHTML = d.assigned.map((name, idx) => {
+                    let isUnderline = (idx === 0 && d.isEarly1) || (idx === 1 && d.isEarly2);
+                    return (isUnderline && !d.isCanceled) ? `<span class="early-underline">${name}</span>` : name;
+                }).join(', ');
+                
+                if (d.assigned.length === 0) assignedNamesHTML = '인원 부족';
 
                 contentUl.innerHTML += `
                     <li style="${canceledLiStyle}">
@@ -718,7 +748,7 @@
                         <span class="badge default" style="margin-right:0; ${canceledBadgeStyle}">${d.km}km</span>
                         ${d.isCanceled ? '<span style="color:#d9534f; font-weight:bold; margin-left:5px; text-decoration:none;">[취소됨]</span>' : ''}<br>
                         출발지: ${d.start} | 목적지: ${d.dest} <br>
-                        👉 <b style="${d.isCanceled ? 'color:#adb5bd;' : 'color:#28a745;'}">배차 운전원: ${assignedNames}</b>
+                        👉 <b style="${d.isCanceled ? 'color:#adb5bd;' : 'color:#28a745;'}">배차 운전원: ${assignedNamesHTML}</b>
                     </li>`;
             });
         }
