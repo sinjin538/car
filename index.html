@@ -20,22 +20,26 @@
 
         .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 1.25rem; font-weight: 700; }
         .calendar-header button { padding: 4px 12px; font-size: 1.1rem; cursor: pointer; border: 1px solid #ccc; background: #fff; border-radius: 4px; font-family: inherit;}
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+        
+        /* 🔥 요일별 가로 넓이 무조건 동일하게 고정 (minmax 0, 1fr) */
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+        
         .calendar-day-header { font-weight: 700; text-align: center; padding: 8px; background: #eef2f7; border-radius: 4px; font-size: 0.95rem; }
         .calendar-day-header.sun { color: #d9534f; }
         .calendar-day-header.sat { color: #0275d8; }
 
-        .calendar-cell { min-height: 130px; background: #fff; border: 1px solid #e1e4e8; border-radius: 4px; padding: 4px; font-size: 0.85rem; cursor: pointer; display: flex; flex-direction: column; }
+        /* 🔥 달력 셀 높이 원복 (밑으로 늘어나게) + 가로 오버플로우 숨김 */
+        .calendar-cell { min-height: 130px; background: #fff; border: 1px solid #e1e4e8; border-radius: 4px; padding: 4px; font-size: 0.85rem; cursor: pointer; display: flex; flex-direction: column; overflow: hidden; }
         .calendar-cell:hover { background: #fafbfc; }
         .calendar-cell.selected { border: 2px solid #007bff; background: #f0f7ff; }
         .calendar-cell.sun .date-num { color: #d9534f; font-weight: 700; }
         .calendar-cell.sat .date-num { color: #0275d8; font-weight: 700; }
         .calendar-cell.holiday .date-num { color: #d9534f !important; font-weight: 700; }
 
-        /* 🔥 공휴일 날짜 옆으로 배치 (크기 축소) */
         .holiday-name { font-size: 0.65rem; color: #d9534f; font-weight: 700; letter-spacing: -0.5px; text-align: right; word-break: keep-all; margin-left: 4px; }
 
-        .tag-container { display: flex; flex-direction: column; gap: 3px; margin-top: 4px; overflow-x: auto; scrollbar-width: none; flex: 1; }
+        /* 🔥 태그들이 칸 밖으로 삐져나가지 않고 안에서만 스크롤되도록 설정 */
+        .tag-container { display: flex; flex-direction: column; gap: 3px; margin-top: 4px; overflow-x: auto; scrollbar-width: none; flex: 1; width: 100%; }
         .tag-container::-webkit-scrollbar { display: none; }
         
         .event-box { 
@@ -88,6 +92,8 @@
         .form-group select:disabled { background-color: #e9ecef; cursor: not-allowed; }
         .chk-group label { color: #d9534f; cursor: pointer; font-weight: 700; display:flex; align-items:center; gap:6px;}
         
+        .manual-box { display: none; background: #f1f3f5; padding: 12px; border-radius: 6px; border: 1px dashed #adb5bd; margin-bottom: 12px; }
+
         .btn-group { display: flex; gap: 6px; margin-top: 15px; }
         .btn-reserve { flex: 1.2; background: #007bff; color: white; border: none; padding: 10px 4px; border-radius: 4px; font-weight: 700; cursor: pointer; font-family: inherit; font-size: 0.85rem;}
         .btn-cancel { flex: 1; background: #dc3545; color: white; border: none; padding: 10px 4px; border-radius: 4px; font-weight: 700; cursor: pointer; font-family: inherit; font-size: 0.85rem;}
@@ -201,7 +207,6 @@
                             <div class="form-group"><label>운행 거리 (km)</label><input type="number" id="km_${v}" value="0"></div>
                             
                             <div style="border-top: 1px dashed #ccc; margin-top: 15px; padding-top: 10px;">
-                                <!-- 🔥 1인배차와 수동배차 한 줄 배치 및 텍스트 축소 -->
                                 <div style="display:flex; flex-wrap:wrap; gap:15px; align-items:center; margin-bottom:12px; background:#e8f0fe; padding:6px 10px; border-radius:4px;">
                                     ${isBus ? `<div class="form-group chk-group" id="single_box_${v}" style="margin-bottom:0;"><label><input type="checkbox" id="single_${v}"> 1인 배차</label></div>` : ''}
                                     <div class="form-group chk-group" style="margin-bottom:0; color:#007bff;">
@@ -212,7 +217,11 @@
                                 <div style="display:flex; gap:10px; align-items:flex-end; margin-bottom:12px;">
                                     <div class="form-group" style="flex:1; margin-bottom:0;">
                                         <label>배정 운전원 1</label>
-                                        <select id="driver1_${v}" disabled><option value="">자동 배정</option>${_driverOptions}</select>
+                                        <select id="driver1_${v}" disabled>
+                                            <option value="">자동 배정</option>
+                                            <option value="미지정">미지정</option>
+                                            ${_driverOptions}
+                                        </select>
                                     </div>
                                     <div class="form-group chk-group" style="margin-bottom:8px;">
                                         <label><input type="checkbox" id="early1_${v}"> 선운행</label>
@@ -223,7 +232,11 @@
                                 <div style="display:flex; gap:10px; align-items:flex-end; margin-bottom:12px;">
                                     <div class="form-group" style="flex:1; margin-bottom:0;">
                                         <label>배정 운전원 2</label>
-                                        <select id="driver2_${v}" disabled><option value="">자동 배정</option>${_driverOptions}</select>
+                                        <select id="driver2_${v}" disabled>
+                                            <option value="">자동 배정</option>
+                                            <option value="미지정">미지정</option>
+                                            ${_driverOptions}
+                                        </select>
                                     </div>
                                     <div class="form-group chk-group" style="margin-bottom:8px;">
                                         <label><input type="checkbox" id="early2_${v}"> 선운행</label>
@@ -280,7 +293,12 @@
 
         const defaultDrivers = ['박기준', '변석현', '이명순', '김탁', '한상훈', '문인식', '황덕일', '강철규', '이상헌'];
         let driverListModifiers = {}; 
-        let currentYear = 2026; let currentMonth = 7; let currentDate = '2026-08-12'; 
+        
+        const _now = new Date();
+        let currentYear = _now.getFullYear(); 
+        let currentMonth = _now.getMonth(); 
+        let currentDate = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(_now.getDate()).padStart(2, '0')}`; 
+        
         const dailyDriverStatus = {}; let allReservations = []; 
 
         function getEffectiveDriverList(date) {
@@ -388,8 +406,8 @@
                         document.getElementById(`early2_${vehicleName}`).checked = existing.isEarly2 || false;
                     }
 
-                    d1.value = existing.assigned[0] || '';
-                    if (isBus && d2) d2.value = existing.assigned[1] || '';
+                    d1.value = existing.manualDrivers?.[0] || existing.assigned[0] || '';
+                    if (isBus && d2) d2.value = existing.manualDrivers?.[1] || existing.assigned[1] || '';
 
                     if (existing.isManual) {
                         d1.disabled = false;
@@ -699,7 +717,7 @@
                 
                 let assignedNamesHTML = d.assigned.map((name, idx) => {
                     let isUnderline = (idx === 0 && d.isEarly1) || (idx === 1 && d.isEarly2);
-                    return (isUnderline && !d.isCanceled) ? `<span class="early-underline">${name}</span>` : name;
+                    return (isUnderline && !d.isCanceled && name !== '미지정') ? `<span class="early-underline">${name}</span>` : name;
                 }).join(', ');
 
                 tagsHTML += `
@@ -711,7 +729,6 @@
 
             tagsContainer.innerHTML = tagsHTML;
 
-            // 🔥 당직/휴무 하단 고정 처리 (당직 -> 휴무 순서)
             const currentDrivers = getEffectiveDriverList(date);
             const statusData = dailyDriverStatus[date] || {};
             
@@ -759,7 +776,7 @@
                     
                     let assignedNamesHTML = d.assigned.map((name, idx) => {
                         let isUnderline = (idx === 0 && d.isEarly1) || (idx === 1 && d.isEarly2);
-                        return (isUnderline && !d.isCanceled) ? `<span class="early-underline">${name}</span>` : name;
+                        return (isUnderline && !d.isCanceled && name !== '미지정') ? `<span class="early-underline">${name}</span>` : name;
                     }).join(', ');
                     
                     if (d.assigned.length === 0) assignedNamesHTML = '인원 부족';
@@ -826,7 +843,7 @@
 
         window.onload = () => {
             renderCalendar();
-            selectDate('2026-08-12'); 
+            selectDate(currentDate); 
             loadFromFirebase();
         };
     </script>
