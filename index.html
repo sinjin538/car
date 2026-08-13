@@ -25,7 +25,7 @@
         .calendar-day-header.sun { color: #d9534f; }
         .calendar-day-header.sat { color: #0275d8; }
 
-        .calendar-cell { min-height: 120px; background: #fff; border: 1px solid #e1e4e8; border-radius: 4px; padding: 4px; font-size: 0.85rem; cursor: pointer; display: flex; flex-direction: column; }
+        .calendar-cell { min-height: 130px; background: #fff; border: 1px solid #e1e4e8; border-radius: 4px; padding: 4px; font-size: 0.85rem; cursor: pointer; display: flex; flex-direction: column; }
         .calendar-cell:hover { background: #fafbfc; }
         .calendar-cell.selected { border: 2px solid #007bff; background: #f0f7ff; }
         .calendar-cell.sun .date-num { color: #d9534f; font-weight: 700; }
@@ -34,7 +34,8 @@
 
         .holiday-name { font-size: 0.7rem; color: #d9534f; font-weight: 700; display: block; margin-top: 1px; letter-spacing: -0.5px;}
 
-        .tag-container { display: flex; flex-direction: column; gap: 3px; margin-top: 4px; overflow-x: auto; scrollbar-width: none; }
+        /* 🔥 태그 컨테이너: flex: 1을 주어 남는 공간을 모두 차지하게 함 (하단 고정을 위함) */
+        .tag-container { display: flex; flex-direction: column; gap: 3px; margin-top: 4px; overflow-x: auto; scrollbar-width: none; flex: 1; }
         .tag-container::-webkit-scrollbar { display: none; }
         
         .event-box { 
@@ -43,27 +44,33 @@
             font-size: 0.75rem; font-weight: 600; white-space: nowrap; 
         }
         
+        /* 🔥 타입별 색상 커스텀 (성묘, 시티 분리) */
         .event-box.pub { background-color: #e8f0fe; border: 1px solid #c6dafc; color: #333; } 
+        .event-box.grave { background-color: #e8f5e9; border: 1px solid #c8e6c9; color: #333; } /* 성묘: 연녹색 */
         .event-box.night1 { background-color: #fff8e1; border: 1px solid #ffecb3; color: #333; } 
         .event-box.night2 { background-color: #fbe9e7; border: 1px solid #ffccbc; color: #333; } 
-        .event-box.city { background-color: #e0f7fa; border: 1px solid #b2ebf2; color: #333; } 
+        .event-box.seoul { background-color: #e0f7fa; border: 1px solid #b2ebf2; color: #333; } /* 서울: 연청록 */
+        .event-box.citytour { background-color: #f3e5f5; border: 1px solid #e1bee7; color: #333; } /* 시티: 연보라 */
         .event-box.default { background-color: #f1f3f4; border: 1px solid #d8dbe0; color: #333; }
 
         .badge { padding: 2px 6px; border-radius: 12px; font-size: 0.65rem; font-weight: 700; }
         .badge.pub { background-color: #007bff; color: #fff; } 
+        .badge.grave { background-color: #28a745; color: #fff; } /* 성묘 배지: 녹색 */
         .badge.night1 { background-color: #ffc107; color: #000; } 
         .badge.night2 { background-color: #fd7e14; color: #fff; } 
-        .badge.city { background-color: #85c1e9; color: #003366; } 
+        .badge.seoul { background-color: #00bcd4; color: #fff; } /* 서울 배지: 청록 */
+        .badge.citytour { background-color: #9c27b0; color: #fff; } /* 시티 배지: 보라 */
         .badge.default { background-color: #6c757d; color: #fff; }
         .badge.manual-badge { background-color: #dc3545 !important; color: #fff !important; }
 
         .early-underline { text-decoration: underline; text-decoration-color: #dc3545; text-underline-offset: 3px; text-decoration-thickness: 2px; }
 
-        .cal-status { font-size: 0.75rem; margin-top: 2px; }
+        /* 🔥 당직 / 휴무 폰트 크기 및 디자인 통일 */
+        .cal-status { font-size: 0.7rem; margin-top: 2px; letter-spacing: -0.3px; }
         .cal-status.off .label { color: #d9534f; font-weight: 700; }
-        .cal-status.off .names { color: #888; font-weight: 400; }
-        .cal-status.duty { color: #f29900; font-weight: 700; }
-        .duty-badge { background: #f29900; color: #fff; padding: 1px 4px; border-radius: 4px; font-size: 0.65rem; margin-right: 3px; }
+        .cal-status.off .names { color: #888; font-weight: 500; }
+        .cal-status.duty .label { color: #f29900; font-weight: 700; }
+        .cal-status.duty .names { color: #888; font-weight: 500; }
 
         .status-header { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 20px; }
         .status-header h3 { margin: 0; font-size: 1.15rem; }
@@ -83,6 +90,8 @@
         .form-group select:disabled { background-color: #e9ecef; cursor: not-allowed; }
         .chk-group label { color: #d9534f; cursor: pointer; font-weight: 700; display:flex; align-items:center; gap:6px;}
         
+        .manual-box { display: none; background: #f1f3f5; padding: 12px; border-radius: 6px; border: 1px dashed #adb5bd; margin-bottom: 12px; }
+
         .btn-group { display: flex; gap: 6px; margin-top: 15px; }
         .btn-reserve { flex: 1.2; background: #007bff; color: white; border: none; padding: 10px 4px; border-radius: 4px; font-weight: 700; cursor: pointer; font-family: inherit; font-size: 0.85rem;}
         .btn-cancel { flex: 1; background: #dc3545; color: white; border: none; padding: 10px 4px; border-radius: 4px; font-weight: 700; cursor: pointer; font-family: inherit; font-size: 0.85rem;}
@@ -446,7 +455,6 @@
             db.collection('daily_status').doc(currentDate).set(dailyDriverStatus[currentDate]).catch(e=>{});
         }
 
-        // 🔥 핵심 최적화: 변경이 발생한 예약만 찾아내서 DB에 쓰는 획기적인 로직 (할당량 보호)
         function recalculateAll(shouldSaveToDB = true) {
             const originalStateString = JSON.stringify(allReservations);
 
@@ -522,7 +530,6 @@
                 }
             });
 
-            // 🔥 변경된 예약만 골라서 파이어베이스에 전송 (할당량 보호)
             if (shouldSaveToDB) {
                 const oldReservations = JSON.parse(originalStateString);
                 allReservations.forEach(res => {
@@ -667,15 +674,21 @@
             container.innerHTML = ''; 
 
             const activeReservations = allReservations.filter(r => r.dates.includes(date));
+            
+            let tagsHTML = '';
+
             activeReservations.forEach(d => {
                 let shortType = d.type.replace('예약', '').replace('지원', '').replace('투어', '').replace('동행', '').replace('운행', '');
                 let boxClass = 'default'; let badgeClass = 'default';
 
-                if (shortType === '공공' || shortType === '성묘') { boxClass = 'pub'; badgeClass = 'pub'; }
+                if (shortType === '공공') { boxClass = 'pub'; badgeClass = 'pub'; }
+                else if (shortType === '성묘') { boxClass = 'grave'; badgeClass = 'grave'; }
                 else if (shortType === '1박') { boxClass = 'night1'; badgeClass = 'night1'; }
                 else if (shortType === '2박') { boxClass = 'night2'; badgeClass = 'night2'; }
-                else if (shortType === '시티' || shortType === '서울') { boxClass = 'city'; badgeClass = 'city'; }
+                else if (shortType === '서울') { boxClass = 'seoul'; badgeClass = 'seoul'; }
+                else if (shortType === '시티') { boxClass = 'citytour'; badgeClass = 'citytour'; }
 
+                // 💡 수동 배차일 경우 배지 색상 빨간색 덮어쓰기
                 if (d.isManual) badgeClass = 'manual-badge';
 
                 let canceledBoxStyle = d.isCanceled ? 'background-color: transparent; border: 1px dashed #adb5bd; color: #adb5bd; text-decoration: line-through;' : '';
@@ -686,21 +699,29 @@
                     return (isUnderline && !d.isCanceled) ? `<span class="early-underline">${name}</span>` : name;
                 }).join(', ');
 
-                container.innerHTML += `
+                tagsHTML += `
                     <div class="event-box ${boxClass}" style="${canceledBoxStyle}">
                         <span class="badge ${badgeClass}" style="${canceledBadgeStyle}">${shortType}</span> 
                         ${d.vehicle}: ${assignedNamesHTML}
                     </div>`;
             });
 
+            container.innerHTML = tagsHTML;
+
+            // 💡 당직/휴무 하단 고정 처리
             const currentDrivers = getEffectiveDriverList(date);
             const statusData = dailyDriverStatus[date] || {};
             
             const offDrivers = currentDrivers.filter(d => statusData[d] === '휴무');
             const dutyDrivers = currentDrivers.filter(d => statusData[d] === '당직');
 
-            if (offDrivers.length > 0) container.innerHTML += `<div class="cal-status off"><span class="label">휴무:</span> <span class="names">${offDrivers.join(', ')}</span></div>`;
-            if (dutyDrivers.length > 0) container.innerHTML += `<div class="cal-status duty"><span class="duty-badge">당직</span>${dutyDrivers.join(', ')}</div>`;
+            if (dutyDrivers.length > 0 || offDrivers.length > 0) {
+                let statusHTML = `<div style="margin-top: auto; padding-top: 4px; border-top: 1px dashed #eee;">`;
+                if (dutyDrivers.length > 0) statusHTML += `<div class="cal-status duty"><span class="label">당직:</span> <span class="names">${dutyDrivers.join(', ')}</span></div>`;
+                if (offDrivers.length > 0) statusHTML += `<div class="cal-status off"><span class="label">휴무:</span> <span class="names">${offDrivers.join(', ')}</span></div>`;
+                statusHTML += `</div>`;
+                container.innerHTML += statusHTML;
+            }
         }
 
         function renderDispatchResult(date) {
@@ -716,11 +737,15 @@
             activeReservations.forEach(d => {
                 let shortType = d.type.replace('예약', '').replace('지원', '').replace('투어', '').replace('동행', '').replace('운행', '');
                 let badgeClass = 'default';
-                if (shortType === '공공' || shortType === '성묘') badgeClass = 'pub';
+
+                if (shortType === '공공') badgeClass = 'pub';
+                else if (shortType === '성묘') badgeClass = 'grave';
                 else if (shortType === '1박') badgeClass = 'night1';
                 else if (shortType === '2박') badgeClass = 'night2';
-                else if (shortType === '시티' || shortType === '서울') badgeClass = 'city';
+                else if (shortType === '서울') badgeClass = 'seoul';
+                else if (shortType === '시티') badgeClass = 'citytour';
 
+                // 💡 결과창 수동 배차 배지도 빨간색
                 if (d.isManual) badgeClass = 'manual-badge';
 
                 let canceledLiStyle = d.isCanceled ? 'color: #adb5bd; text-decoration: line-through;' : '';
