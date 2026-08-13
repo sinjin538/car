@@ -432,14 +432,19 @@
             db.collection('daily_status').doc(currentDate).set(dailyDriverStatus[currentDate]).catch(e=>{});
         }
 
-        // 🔥 엔진: 버스 > 쏠라티 우선순위 적용
+        // 🔥 엔진: 버스 > 쏠라티 우선순위를 가장 먼저 검사하도록 구조 개편
         function recalculateAll(shouldSaveToDB = true) {
             allReservations.forEach(r => r.assigned = []);
             allReservations.sort((a, b) => {
-                // 1. 날짜
+                // 1. 날짜 순
                 if (a.startDate !== b.startDate) return new Date(a.startDate) - new Date(b.startDate);
                 
-                // 2. 운행 형태 
+                // 🔥 2. 무조건 버스(1~3호)가 쏠라티(11~14호)보다 우선
+                const isBusA = ['1호차', '2호차', '3호차'].includes(a.vehicle);
+                const isBusB = ['1호차', '2호차', '3호차'].includes(b.vehicle);
+                if (isBusA !== isBusB) return isBusA ? -1 : 1; 
+
+                // 3. 차종이 같으면 운행 형태 비교 (공공/서울이 1순위 동급)
                 const typeWeight = (t) => {
                     if (t.includes('공공') || t.includes('서울')) return 1; 
                     if (t.includes('1박')) return 2; 
@@ -452,15 +457,10 @@
                 const wA = typeWeight(a.type), wB = typeWeight(b.type);
                 if (wA !== wB) return wA - wB; 
 
-                // 🔥 3. 버스가 무조건 쏠라티보다 우선 (차종)
-                const isBusA = ['1호차', '2호차', '3호차'].includes(a.vehicle);
-                const isBusB = ['1호차', '2호차', '3호차'].includes(b.vehicle);
-                if (isBusA !== isBusB) return isBusA ? -1 : 1; 
-
-                // 4. 거리(KM)
+                // 4. 형태도 같으면 거리(KM)가 적은 차 우선
                 if (a.km !== b.km) return a.km - b.km;
 
-                // 5. 차량 번호
+                // 5. KM도 같으면 차량 번호 (3>1>2, 11>12>13>14)
                 const vehWeight = (v) => {
                     if (v === '3호차') return 1; if (v === '1호차') return 2; if (v === '2호차') return 3;
                     if (v === '11호차') return 4; if (v === '12호차') return 5; if (v === '13호차') return 6; if (v === '14호차') return 7; return 99;
