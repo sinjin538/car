@@ -5,9 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>배차관리 시스템</title>
     
-    <!-- 예쁜 웹 폰트 (Pretendard) 적용 -->
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
-
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
@@ -20,7 +18,6 @@
         .sidebar-section { flex: 1.2; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); height: fit-content; }
         .card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 
-        /* 달력 스타일 */
         .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 1.25rem; font-weight: 700; }
         .calendar-header button { padding: 4px 12px; font-size: 1.1rem; cursor: pointer; border: 1px solid #ccc; background: #fff; border-radius: 4px; font-family: inherit;}
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
@@ -37,7 +34,6 @@
 
         .holiday-name { font-size: 0.7rem; color: #d9534f; font-weight: 700; display: block; margin-top: 1px; letter-spacing: -0.5px;}
 
-        /* 배차 태그 한 줄 디자인 */
         .tag-container { display: flex; flex-direction: column; gap: 3px; margin-top: 4px; overflow-x: auto; scrollbar-width: none; }
         .tag-container::-webkit-scrollbar { display: none; }
         
@@ -60,24 +56,20 @@
         .badge.city { background-color: #85c1e9; color: #003366; } 
         .badge.default { background-color: #6c757d; color: #fff; }
 
-        /* 하단 휴무/당직 텍스트 */
         .cal-status { font-size: 0.75rem; margin-top: 2px; }
         .cal-status.off .label { color: #d9534f; font-weight: 700; }
         .cal-status.off .names { color: #888; font-weight: 400; }
         .cal-status.duty { color: #f29900; font-weight: 700; }
         .duty-badge { background: #f29900; color: #fff; padding: 1px 4px; border-radius: 4px; font-size: 0.65rem; margin-right: 3px; }
 
-        /* 운전자 상태 타이틀 및 편집 버튼 */
         .status-header { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 20px; }
         .status-header h3 { margin: 0; font-size: 1.15rem; }
         .btn-edit-drivers { background: #6c757d; color: #fff; border: none; padding: 4px 10px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; font-family: inherit;}
-        .btn-edit-drivers:hover { background: #5a6268; }
 
         .status-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin-top: 10px; }
         .status-item { background: #f8f9fa; border: 1px solid #dee2e6; padding: 10px; border-radius: 6px; text-align: center; }
         .radio-group { margin-top: 8px; display: flex; justify-content: center; gap: 6px; font-size: 0.8rem; }
         
-        /* 우측 폼 */
         .sidebar-section h3 { margin-bottom: 15px; font-size: 1.15rem; border-bottom: 2px solid #007bff; padding-bottom: 8px; }
         .vehicle-item { border: 1px solid #e1e4e8; border-radius: 6px; margin-bottom: 10px; background: #fafbfc; overflow: hidden; }
         .vehicle-header { display: flex; align-items: center; padding: 14px 12px; cursor: pointer; gap: 10px; font-weight: 600; font-size: 1rem; }
@@ -87,14 +79,14 @@
         .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.95rem; font-family: inherit;}
         .chk-group label { color: #d9534f; cursor: pointer; }
         
-        .btn-group { display: flex; gap: 10px; margin-top: 15px; }
-        .btn-reserve { flex: 1; background: #007bff; color: white; border: none; padding: 12px; border-radius: 4px; font-weight: 700; cursor: pointer; font-family: inherit;}
-        .btn-cancel { flex: 1; background: #dc3545; color: white; border: none; padding: 12px; border-radius: 4px; font-weight: 700; cursor: pointer; font-family: inherit;}
+        .btn-group { display: flex; gap: 6px; margin-top: 15px; }
+        .btn-reserve { flex: 1.2; background: #007bff; color: white; border: none; padding: 10px 4px; border-radius: 4px; font-weight: 700; cursor: pointer; font-family: inherit; font-size: 0.85rem;}
+        .btn-cancel { flex: 1; background: #dc3545; color: white; border: none; padding: 10px 4px; border-radius: 4px; font-weight: 700; cursor: pointer; font-family: inherit; font-size: 0.85rem;}
+        .btn-delete-early { flex: 1; background: #6c757d; color: white; border: none; padding: 10px 4px; border-radius: 4px; font-weight: 700; cursor: pointer; font-family: inherit; font-size: 0.85rem;}
         
         .result-list { list-style: none; padding: 0; margin-top: 10px; }
         .result-list li { background: #f8f9fa; border: 1px solid #dee2e6; padding: 12px; margin-bottom: 8px; border-radius: 4px; font-size: 0.95rem; line-height: 1.5; }
         
-        /* 로딩창 & 명단 관리 모달창 */
         #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); z-index: 9999; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; font-weight: 700; color: #007bff; }
         
         #modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9000; display: none; justify-content: center; align-items: center; }
@@ -125,19 +117,15 @@
 
     <div id="loading-overlay">서버 연결 중...</div>
 
-    <!-- 운전원 명단 관리 모달창 -->
     <div id="modal-overlay">
         <div class="modal-card">
             <h4>운전원 명단/순번 관리</h4>
-            <p id="modal-date-text">※ 이 명단은 0000-00-00 이후의 배차부터 적용되며, 이전 날짜의 기록은 변경되지 않습니다.</p>
-            
+            <p id="modal-date-text"></p>
             <ul class="edit-list" id="edit-list-ul"></ul>
-            
             <div class="add-box">
                 <input type="text" id="new-driver-name" placeholder="새 운전원 이름">
                 <button onclick="addDriverToList()">추가</button>
             </div>
-            
             <div class="modal-btns">
                 <button style="background: #007bff; color:#fff;" onclick="saveDriverList()">변경 저장</button>
                 <button style="background: #ccc;" onclick="closeDriverModal()">취소</button>
@@ -146,7 +134,6 @@
     </div>
 
     <div class="dispatch-container">
-        <!-- 메인 달력 영역 -->
         <div class="main-section">
             <div class="card">
                 <div class="calendar-header">
@@ -173,7 +160,6 @@
             </div>
         </div>
 
-        <!-- 예약 폼 영역 -->
         <div class="sidebar-section">
             <h3>배차 예약 정보 입력</h3>
             <script>
@@ -203,9 +189,12 @@
                             </div>
                             <div class="form-group"><label>운행 거리 (km)</label><input type="number" id="km_${v}" value="0"></div>
                             ${isBus ? `<div class="form-group chk-group"><label><input type="checkbox" id="single_${v}"> 1인 배차 적용 (버스 전용)</label></div>` : ''}
+                            
+                            <!-- 💡 수정된 버튼: 로직에 맞게 버튼 텍스트와 함수 매칭 수정 -->
                             <div class="btn-group">
                                 <button class="btn-reserve" onclick="makeReservation('${v}', ${isBus})">예약 등록</button>
-                                <button class="btn-cancel" onclick="cancelReservation('${v}')">배차 취소</button>
+                                <button class="btn-cancel" onclick="cancelReservation('${v}')">배차 취소<br>(삭제)</button>
+                                <button class="btn-delete-early" onclick="cancelBefore4Days('${v}')">4일전 취소<br>(순번유지)</button>
                             </div>
                         </div>
                     </div>
@@ -217,32 +206,19 @@
     </div>
 
     <script>
-        // ==========================================
-        // 1. 공휴일 데이터 (대체공휴일 등 모두 포함)
-        // ==========================================
         const koreaHolidays = {
             "01-01": "신정", "03-01": "삼일절", "05-05": "어린이날", "06-06": "현충일", 
             "08-15": "광복절", "10-03": "개천절", "10-09": "한글날", "12-25": "기독탄신일",
-            
-            // 🔥 2026년 공휴일 및 대체휴일 세팅
             "2026-02-16": "설날연휴", "2026-02-17": "설날", "2026-02-18": "설날연휴",
-            "2026-03-02": "대체공휴일", // 삼일절 일요일 대체
-            "2026-05-24": "부처님오신날", "2026-05-25": "대체공휴일", // 석탄일 일요일 대체
-            "2026-06-03": "지방선거", 
-            "2026-08-17": "대체공휴일", // 광복절 토요일 대체
-            "2026-09-24": "추석연휴", "2026-09-25": "추석", "2026-09-26": "추석연휴",
-            "2026-10-05": "대체공휴일"  // 개천절 토요일 대체
+            "2026-03-02": "대체공휴일", "2026-05-24": "부처님오신날", "2026-05-25": "대체공휴일",
+            "2026-06-03": "지방선거", "2026-08-17": "대체공휴일", "2026-09-24": "추석연휴", 
+            "2026-09-25": "추석", "2026-09-26": "추석연휴", "2026-10-05": "대체공휴일"
         };
-
         function getHolidayName(year, month, day) {
             const mmdd = `${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-            const yyyymmdd = `${year}-${mmdd}`;
-            return koreaHolidays[yyyymmdd] || koreaHolidays[mmdd] || null;
+            return koreaHolidays[`${year}-${mmdd}`] || koreaHolidays[mmdd] || null;
         }
 
-        // ==========================================
-        // Firebase 설정 
-        // ==========================================
         const firebaseConfig = {
             apiKey: "AIzaSyCipeqfmU03bZQozFt8MdToxxuDyFIUd-g",
             authDomain: "park-fc66f.firebaseapp.com",
@@ -254,32 +230,20 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // ==========================================
-        // 2. 전역 상태 변수 및 명단 관리
-        // ==========================================
         const defaultDrivers = ['박기준', '변석현', '이명순', '김탁', '한상훈', '문인식', '황덕일', '강철규', '이상헌'];
         let driverListModifiers = {}; 
-        
-        let currentYear = 2026;
-        let currentMonth = 7; 
-        let currentDate = '2026-08-12'; 
-        const dailyDriverStatus = {}; 
-        let allReservations = []; 
+        let currentYear = 2026; let currentMonth = 7; let currentDate = '2026-08-12'; 
+        const dailyDriverStatus = {}; let allReservations = []; 
 
         function getEffectiveDriverList(date) {
             const modDates = Object.keys(driverListModifiers).sort();
             let effectiveList = [...defaultDrivers];
             for (const modDate of modDates) {
-                if (modDate <= date) {
-                    effectiveList = [...driverListModifiers[modDate]];
-                }
+                if (modDate <= date) effectiveList = [...driverListModifiers[modDate]];
             }
             return effectiveList;
         }
 
-        // ==========================================
-        // 3. 서버 로드
-        // ==========================================
         async function loadFromFirebase() {
             try {
                 const resSnapshot = await db.collection('reservations').get();
@@ -292,30 +256,24 @@
                 const modSnapshot = await db.collection('driver_modifiers').get();
                 modSnapshot.forEach(doc => { driverListModifiers[doc.id] = doc.data().list; });
             } catch (error) {
-                console.warn("DB 읽기 권한 없음. 로컬로 실행합니다.");
+                console.warn("DB 읽기 실패. 로컬로 실행합니다.");
             } finally {
                 recalculateAll(false); 
                 document.getElementById('loading-overlay').style.display = 'none';
             }
         }
 
-        // ==========================================
-        // 4. 모달창 (운전원 명단 편집 로직)
-        // ==========================================
         let tempEditList = [];
-
         function openDriverEditModal() {
             tempEditList = [...getEffectiveDriverList(currentDate)];
             document.getElementById('modal-date-text').innerText = `※ 이 명단은 [${currentDate}] 이후의 배차부터 영구 적용되며, 이전 날짜의 기록은 절대 변경되지 않습니다.`;
             renderDriverEditList();
             document.getElementById('modal-overlay').style.display = 'flex';
         }
-
         function closeDriverModal() {
             document.getElementById('modal-overlay').style.display = 'none';
             document.getElementById('new-driver-name').value = '';
         }
-
         function renderDriverEditList() {
             const ul = document.getElementById('edit-list-ul');
             ul.innerHTML = '';
@@ -328,48 +286,26 @@
                             <button class="btn-up" onclick="moveDriver(${idx}, 1)">▼</button>
                             <button class="btn-del" onclick="removeDriver(${idx})">삭제</button>
                         </div>
-                    </li>
-                `;
+                    </li>`;
             });
         }
-
         function moveDriver(idx, dir) {
             if(idx + dir < 0 || idx + dir >= tempEditList.length) return;
-            const temp = tempEditList[idx];
-            tempEditList[idx] = tempEditList[idx+dir];
-            tempEditList[idx+dir] = temp;
+            const temp = tempEditList[idx]; tempEditList[idx] = tempEditList[idx+dir]; tempEditList[idx+dir] = temp;
             renderDriverEditList();
         }
-
-        function removeDriver(idx) {
-            tempEditList.splice(idx, 1);
-            renderDriverEditList();
-        }
-
+        function removeDriver(idx) { tempEditList.splice(idx, 1); renderDriverEditList(); }
         function addDriverToList() {
             const name = document.getElementById('new-driver-name').value.trim();
-            if(name && !tempEditList.includes(name)) {
-                tempEditList.push(name);
-                document.getElementById('new-driver-name').value = '';
-                renderDriverEditList();
-            } else if (tempEditList.includes(name)) {
-                alert("이미 존재하는 이름입니다.");
-            }
+            if(name && !tempEditList.includes(name)) { tempEditList.push(name); document.getElementById('new-driver-name').value = ''; renderDriverEditList(); }
         }
-
         function saveDriverList() {
             if(tempEditList.length === 0) return alert("최소 1명의 운전원이 필요합니다.");
-            
             driverListModifiers[currentDate] = [...tempEditList];
             db.collection('driver_modifiers').doc(currentDate).set({ list: driverListModifiers[currentDate] }).catch(e=>{});
-            
-            closeDriverModal();
-            recalculateAll(true); 
+            closeDriverModal(); recalculateAll(true); 
         }
 
-        // ==========================================
-        // 5. 배차 예약 및 폼 토글
-        // ==========================================
         function toggleVehicleForm(vehicleName, checkbox, isBus) {
             document.getElementById(`form_${vehicleName}`).style.display = checkbox.checked ? "block" : "none";
             if (checkbox.checked) {
@@ -397,27 +333,19 @@
 
         function handleStatusChange(driver, newStatus, oldStatus) {
             if (newStatus === '휴무') {
-                if (!confirm(`${driver} 운전원 휴무 사용하시겠습니까?`)) {
-                    renderStatusPanel(currentDate); return;
-                }
+                if (!confirm(`${driver} 운전원 휴무 사용하시겠습니까?`)) { renderStatusPanel(currentDate); return; }
             }
             if (!dailyDriverStatus[currentDate]) dailyDriverStatus[currentDate] = {};
             dailyDriverStatus[currentDate][driver] = newStatus;
-            
-            recalculateAll(false); 
-            renderStatusPanel(currentDate);
-
+            recalculateAll(false); renderStatusPanel(currentDate);
             db.collection('daily_status').doc(currentDate).set(dailyDriverStatus[currentDate]).catch(e=>{});
         }
 
-        // 💡 엔진 핵심: 거리(KM) > 차량번호 우선순위 적용
         function recalculateAll(shouldSaveToDB = true) {
             allReservations.forEach(r => r.assigned = []);
             allReservations.sort((a, b) => {
-                // 1. 날짜 빠른 순
                 if (a.startDate !== b.startDate) return new Date(a.startDate) - new Date(b.startDate);
                 
-                // 2. 형태(타입) 우선
                 const typeWeight = (t) => {
                     if (t.includes('공공')) return 1; if (t.includes('1박')) return 2; if (t.includes('2박')) return 3;
                     if (t.includes('성묘')) return 4; if (t.includes('서울')) return 5; if (t.includes('나들이')) return 6;
@@ -426,23 +354,16 @@
                 const wA = typeWeight(a.type), wB = typeWeight(b.type);
                 if (wA !== wB) return wA - wB; 
 
-                // 3. 🔥 형태가 같으면 KM(거리) 적은 차량이 무조건 우선 배차
                 if (a.km !== b.km) return a.km - b.km;
 
-                // 4. KM까지 똑같으면 차량 번호 (3 > 1 > 2) 우선
                 const vehWeight = (v) => {
                     if (v === '3호차') return 1; if (v === '1호차') return 2; if (v === '2호차') return 3;
                     if (v === '11호차') return 4; if (v === '12호차') return 5; if (v === '13호차') return 6; if (v === '14호차') return 7; return 99;
                 };
-                const vA = vehWeight(a.vehicle), vB = vehWeight(b.vehicle);
-                if (vA !== vB) return vA - vB; 
-                
-                return 0;
+                return vehWeight(a.vehicle) - vehWeight(b.vehicle); 
             });
 
-            let pointer = 0;
-            let lastProcessedDate = null;
-            let currentList = [...defaultDrivers];
+            let pointer = 0; let lastProcessedDate = null; let currentList = [...defaultDrivers];
 
             allReservations.forEach(res => {
                 if (res.startDate !== lastProcessedDate) {
@@ -471,21 +392,15 @@
                     pointer = (pointer + 1) % currentList.length;
                     loopGuard++;
                 }
-
                 if (shouldSaveToDB) db.collection('reservations').doc(res.id).set(res).catch(e=>{});
             });
 
-            renderCalendar();
-            renderStatusPanel(currentDate); 
-            renderDispatchResult(currentDate);
+            renderCalendar(); renderStatusPanel(currentDate); renderDispatchResult(currentDate);
         }
 
         function getDatesForTrip(startDate, type) {
-            let days = 1;
-            if (type.includes('1박')) days = 2;
-            if (type.includes('2박')) days = 3;
-            const dates = [];
-            let cur = new Date(startDate);
+            let days = 1; if (type.includes('1박')) days = 2; if (type.includes('2박')) days = 3;
+            const dates = []; let cur = new Date(startDate);
             for(let i = 0; i < days; i++) {
                 dates.push(`${cur.getFullYear()}-${String(cur.getMonth() + 1).padStart(2, '0')}-${String(cur.getDate()).padStart(2, '0')}`);
                 cur.setDate(cur.getDate() + 1);
@@ -511,7 +426,8 @@
                 start: document.getElementById(`start_${vehicleName}`).value || '미상',
                 dest: document.getElementById(`dest_${vehicleName}`).value || '지정안됨',
                 type: type, km: parseInt(document.getElementById(`km_${vehicleName}`).value) || 0,
-                reqCount: reqCount, assigned: []
+                reqCount: reqCount, assigned: [],
+                isCanceled: false // 정상 등록
             });
 
             document.getElementById(`v_${vehicleName}`).checked = false;
@@ -519,13 +435,29 @@
             recalculateAll(true); 
         }
 
+        // 💡 1. 배차 취소 (삭제) - DB에서 지우고 순번이 당겨짐
         function cancelReservation(vehicleName) {
             const index = allReservations.findIndex(r => r.vehicle === vehicleName && r.dates.includes(currentDate));
             if (index !== -1) {
                 db.collection('reservations').doc(allReservations[index].id).delete().catch(e => {});
                 allReservations.splice(index, 1);
                 recalculateAll(true); 
-                alert(`[${vehicleName}] 배차가 취소되었습니다.`);
+                alert(`[${vehicleName}] 배차가 완전 취소(삭제) 처리되었습니다. (다음 순번이 당겨집니다)`);
+            } else {
+                alert("이 날짜에 등록된 배차 내역이 없습니다.");
+            }
+            document.getElementById(`v_${vehicleName}`).checked = false;
+            document.getElementById(`form_${vehicleName}`).style.display = "none";
+        }
+
+        // 💡 2. 4일전 취소 (취소선, 순번 유지) - DB에 취소 기록을 저장하고 렌더링에만 취소선 적용
+        function cancelBefore4Days(vehicleName) {
+            const index = allReservations.findIndex(r => r.vehicle === vehicleName && r.dates.includes(currentDate));
+            if (index !== -1) {
+                allReservations[index].isCanceled = true;
+                db.collection('reservations').doc(allReservations[index].id).set(allReservations[index]).catch(e=>{});
+                recalculateAll(true); 
+                alert(`[${vehicleName}] 4일 전 취소 처리되었습니다. (운전원 순번은 소모된 것으로 유지됩니다)`);
             } else {
                 alert("이 날짜에 등록된 배차 내역이 없습니다.");
             }
@@ -540,9 +472,6 @@
             renderCalendar();
         }
 
-        // ==========================================
-        // 6. 달력/UI 렌더링
-        // ==========================================
         function renderCalendar() {
             document.getElementById('month-display').innerText = `📅 ${currentYear}년 ${currentMonth + 1}월`;
             const grid = document.getElementById('calendar-grid');
@@ -556,17 +485,11 @@
             for (let d = 1; d <= lastDate; d++) {
                 const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
                 const dayOfWeek = (firstDay + d - 1) % 7;
-                
-                // 공휴일 연동
                 const holidayName = getHolidayName(currentYear, currentMonth + 1, d);
                 let extraClass = (dayOfWeek === 0) ? 'sun ' : (dayOfWeek === 6) ? 'sat ' : '';
                 let extraHTML = '';
 
-                if (holidayName) { 
-                    extraClass += 'holiday '; 
-                    extraHTML = `<span class="holiday-name">${holidayName}</span>`; 
-                }
-                
+                if (holidayName) { extraClass += 'holiday '; extraHTML = `<span class="holiday-name">${holidayName}</span>`; }
                 if (dateStr === currentDate) extraClass += 'selected ';
 
                 grid.innerHTML += `
@@ -586,7 +509,6 @@
             const activeReservations = allReservations.filter(r => r.dates.includes(date));
             activeReservations.forEach(d => {
                 let shortType = d.type.replace('예약', '').replace('지원', '').replace('투어', '').replace('동행', '').replace('운행', '');
-                
                 let boxClass = 'default'; let badgeClass = 'default';
 
                 if (shortType === '공공' || shortType === '성묘') { boxClass = 'pub'; badgeClass = 'pub'; }
@@ -594,9 +516,13 @@
                 else if (shortType === '2박') { boxClass = 'night2'; badgeClass = 'night2'; }
                 else if (shortType === '시티' || shortType === '서울') { boxClass = 'city'; badgeClass = 'city'; }
 
+                // 💡 취소선 처리 적용
+                let canceledBoxStyle = d.isCanceled ? 'background-color: transparent; border: 1px dashed #adb5bd; color: #adb5bd; text-decoration: line-through;' : '';
+                let canceledBadgeStyle = d.isCanceled ? 'background-color: transparent; color: #adb5bd; border: 1px solid #adb5bd;' : '';
+
                 container.innerHTML += `
-                    <div class="event-box ${boxClass}">
-                        <span class="badge ${badgeClass}">${shortType}</span> 
+                    <div class="event-box ${boxClass}" style="${canceledBoxStyle}">
+                        <span class="badge ${badgeClass}" style="${canceledBadgeStyle}">${shortType}</span> 
                         ${d.vehicle}: ${d.assigned.join(', ')}
                     </div>`;
             });
@@ -607,12 +533,8 @@
             const offDrivers = currentDrivers.filter(d => statusData[d] === '휴무');
             const dutyDrivers = currentDrivers.filter(d => statusData[d] === '당직');
 
-            if (offDrivers.length > 0) {
-                container.innerHTML += `<div class="cal-status off"><span class="label">휴무:</span> <span class="names">${offDrivers.join(', ')}</span></div>`;
-            }
-            if (dutyDrivers.length > 0) {
-                container.innerHTML += `<div class="cal-status duty"><span class="duty-badge">당직</span>${dutyDrivers.join(', ')}</div>`;
-            }
+            if (offDrivers.length > 0) container.innerHTML += `<div class="cal-status off"><span class="label">휴무:</span> <span class="names">${offDrivers.join(', ')}</span></div>`;
+            if (dutyDrivers.length > 0) container.innerHTML += `<div class="cal-status duty"><span class="duty-badge">당직</span>${dutyDrivers.join(', ')}</div>`;
         }
 
         function renderDispatchResult(date) {
@@ -633,13 +555,18 @@
                 else if (shortType === '2박') badgeClass = 'night2';
                 else if (shortType === '시티' || shortType === '서울') badgeClass = 'city';
 
+                // 💡 결과창 취소선 처리 적용
+                let canceledLiStyle = d.isCanceled ? 'color: #adb5bd; text-decoration: line-through;' : '';
+                let canceledBadgeStyle = d.isCanceled ? 'background-color: transparent; color: #adb5bd; border: 1px solid #adb5bd;' : '';
+
                 contentUl.innerHTML += `
-                    <li>
+                    <li style="${canceledLiStyle}">
                         <b>[${d.vehicle}]</b> 
-                        <span class="badge ${badgeClass}">${d.type}</span> 
-                        <span class="badge default" style="margin-right:0;">${d.km}km</span><br>
+                        <span class="badge ${badgeClass}" style="${canceledBadgeStyle}">${d.type}</span> 
+                        <span class="badge default" style="margin-right:0; ${canceledBadgeStyle}">${d.km}km</span>
+                        ${d.isCanceled ? '<span style="color:#d9534f; font-weight:bold; margin-left:5px; text-decoration:none;">[취소됨]</span>' : ''}<br>
                         출발지: ${d.start} | 목적지: ${d.dest} <br>
-                        👉 <b style="color:#28a745;">배차 운전원: ${d.assigned.length > 0 ? d.assigned.join(', ') : '인원 부족'}</b>
+                        👉 <b style="${d.isCanceled ? 'color:#adb5bd;' : 'color:#28a745;'}">배차 운전원: ${d.assigned.length > 0 ? d.assigned.join(', ') : '인원 부족'}</b>
                     </li>`;
             });
         }
