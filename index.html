@@ -34,7 +34,6 @@
 
         .holiday-name { font-size: 0.7rem; color: #d9534f; font-weight: 700; display: block; margin-top: 1px; letter-spacing: -0.5px;}
 
-        /* 🔥 태그 컨테이너: flex: 1을 주어 남는 공간을 모두 차지하게 함 (하단 고정을 위함) */
         .tag-container { display: flex; flex-direction: column; gap: 3px; margin-top: 4px; overflow-x: auto; scrollbar-width: none; flex: 1; }
         .tag-container::-webkit-scrollbar { display: none; }
         
@@ -44,28 +43,26 @@
             font-size: 0.75rem; font-weight: 600; white-space: nowrap; 
         }
         
-        /* 🔥 타입별 색상 커스텀 (성묘, 시티 분리) */
         .event-box.pub { background-color: #e8f0fe; border: 1px solid #c6dafc; color: #333; } 
-        .event-box.grave { background-color: #e8f5e9; border: 1px solid #c8e6c9; color: #333; } /* 성묘: 연녹색 */
+        .event-box.grave { background-color: #e8f5e9; border: 1px solid #c8e6c9; color: #333; } 
         .event-box.night1 { background-color: #fff8e1; border: 1px solid #ffecb3; color: #333; } 
         .event-box.night2 { background-color: #fbe9e7; border: 1px solid #ffccbc; color: #333; } 
-        .event-box.seoul { background-color: #e0f7fa; border: 1px solid #b2ebf2; color: #333; } /* 서울: 연청록 */
-        .event-box.citytour { background-color: #f3e5f5; border: 1px solid #e1bee7; color: #333; } /* 시티: 연보라 */
+        .event-box.seoul { background-color: #e0f7fa; border: 1px solid #b2ebf2; color: #333; } 
+        .event-box.citytour { background-color: #f3e5f5; border: 1px solid #e1bee7; color: #333; } 
         .event-box.default { background-color: #f1f3f4; border: 1px solid #d8dbe0; color: #333; }
 
         .badge { padding: 2px 6px; border-radius: 12px; font-size: 0.65rem; font-weight: 700; }
         .badge.pub { background-color: #007bff; color: #fff; } 
-        .badge.grave { background-color: #28a745; color: #fff; } /* 성묘 배지: 녹색 */
+        .badge.grave { background-color: #28a745; color: #fff; } 
         .badge.night1 { background-color: #ffc107; color: #000; } 
         .badge.night2 { background-color: #fd7e14; color: #fff; } 
-        .badge.seoul { background-color: #00bcd4; color: #fff; } /* 서울 배지: 청록 */
-        .badge.citytour { background-color: #9c27b0; color: #fff; } /* 시티 배지: 보라 */
+        .badge.seoul { background-color: #00bcd4; color: #fff; } 
+        .badge.citytour { background-color: #9c27b0; color: #fff; } 
         .badge.default { background-color: #6c757d; color: #fff; }
         .badge.manual-badge { background-color: #dc3545 !important; color: #fff !important; }
 
         .early-underline { text-decoration: underline; text-decoration-color: #dc3545; text-underline-offset: 3px; text-decoration-thickness: 2px; }
 
-        /* 🔥 당직 / 휴무 폰트 크기 및 디자인 통일 */
         .cal-status { font-size: 0.7rem; margin-top: 2px; letter-spacing: -0.3px; }
         .cal-status.off .label { color: #d9534f; font-weight: 700; }
         .cal-status.off .names { color: #888; font-weight: 500; }
@@ -90,8 +87,6 @@
         .form-group select:disabled { background-color: #e9ecef; cursor: not-allowed; }
         .chk-group label { color: #d9534f; cursor: pointer; font-weight: 700; display:flex; align-items:center; gap:6px;}
         
-        .manual-box { display: none; background: #f1f3f5; padding: 12px; border-radius: 6px; border: 1px dashed #adb5bd; margin-bottom: 12px; }
-
         .btn-group { display: flex; gap: 6px; margin-top: 15px; }
         .btn-reserve { flex: 1.2; background: #007bff; color: white; border: none; padding: 10px 4px; border-radius: 4px; font-weight: 700; cursor: pointer; font-family: inherit; font-size: 0.85rem;}
         .btn-cancel { flex: 1; background: #dc3545; color: white; border: none; padding: 10px 4px; border-radius: 4px; font-weight: 700; cursor: pointer; font-family: inherit; font-size: 0.85rem;}
@@ -199,6 +194,7 @@
                                     <option value="나들이동행">나들이동행</option>
                                     <option value="시티투어">시티투어</option>
                                     <option value="서울운행">서울운행</option>
+                                    <option value="기타">기타</option> <!-- 🔥 기타 추가됨 -->
                                 </select>
                             </div>
                             <div class="form-group"><label>운행 거리 (km)</label><input type="number" id="km_${v}" value="0"></div>
@@ -384,6 +380,7 @@
                     
                     document.getElementById(`manual_${vehicleName}`).checked = existing.isManual || false;
                     document.getElementById(`next_pointer_${vehicleName}`).value = existing.nextPointerDriver || '';
+
                     document.getElementById(`early1_${vehicleName}`).checked = existing.isEarly1 || false;
                     if(isBus && document.getElementById(`early2_${vehicleName}`)) {
                         document.getElementById(`early2_${vehicleName}`).checked = existing.isEarly2 || false;
@@ -623,6 +620,7 @@
             const index = allReservations.findIndex(r => r.vehicle === vehicleName && r.dates.includes(currentDate));
             if (index !== -1) {
                 allReservations[index].isCanceled = true;
+                db.collection('reservations').doc(allReservations[index].id).set(allReservations[index]).catch(e=>{});
                 recalculateAll(true); 
                 alert(`[${vehicleName}] 4일 전 취소 처리되었습니다. (운전원 순번은 소모된 것으로 유지됩니다)`);
             } else {
@@ -687,8 +685,8 @@
                 else if (shortType === '2박') { boxClass = 'night2'; badgeClass = 'night2'; }
                 else if (shortType === '서울') { boxClass = 'seoul'; badgeClass = 'seoul'; }
                 else if (shortType === '시티') { boxClass = 'citytour'; badgeClass = 'citytour'; }
+                else if (shortType === '기타') { boxClass = 'default'; badgeClass = 'default'; }
 
-                // 💡 수동 배차일 경우 배지 색상 빨간색 덮어쓰기
                 if (d.isManual) badgeClass = 'manual-badge';
 
                 let canceledBoxStyle = d.isCanceled ? 'background-color: transparent; border: 1px dashed #adb5bd; color: #adb5bd; text-decoration: line-through;' : '';
@@ -708,7 +706,6 @@
 
             container.innerHTML = tagsHTML;
 
-            // 💡 당직/휴무 하단 고정 처리
             const currentDrivers = getEffectiveDriverList(date);
             const statusData = dailyDriverStatus[date] || {};
             
@@ -728,46 +725,66 @@
             const contentUl = document.getElementById('result-content');
             const activeReservations = allReservations.filter(r => r.dates.includes(date));
 
+            let html = '';
+
             if (activeReservations.length === 0) {
-                contentUl.innerHTML = `<li style="color:#666;">${date} 등록된 예약 내역이 없습니다.</li>`;
-                return;
+                html += `<li style="color:#666; border:none; background:transparent; padding:0 0 10px 0;">${date} 등록된 예약 내역이 없습니다.</li>`;
+            } else {
+                activeReservations.forEach(d => {
+                    let shortType = d.type.replace('예약', '').replace('지원', '').replace('투어', '').replace('동행', '').replace('운행', '');
+                    let badgeClass = 'default';
+
+                    if (shortType === '공공') badgeClass = 'pub';
+                    else if (shortType === '성묘') badgeClass = 'grave';
+                    else if (shortType === '1박') badgeClass = 'night1';
+                    else if (shortType === '2박') badgeClass = 'night2';
+                    else if (shortType === '서울') badgeClass = 'seoul';
+                    else if (shortType === '시티') badgeClass = 'citytour';
+                    else if (shortType === '기타') badgeClass = 'default';
+
+                    if (d.isManual) badgeClass = 'manual-badge';
+
+                    let canceledLiStyle = d.isCanceled ? 'color: #adb5bd; text-decoration: line-through;' : '';
+                    let canceledBadgeStyle = d.isCanceled ? 'background-color: transparent; color: #adb5bd; border: 1px solid #adb5bd;' : '';
+                    
+                    let assignedNamesHTML = d.assigned.map((name, idx) => {
+                        let isUnderline = (idx === 0 && d.isEarly1) || (idx === 1 && d.isEarly2);
+                        return (isUnderline && !d.isCanceled) ? `<span class="early-underline">${name}</span>` : name;
+                    }).join(', ');
+                    
+                    if (d.assigned.length === 0) assignedNamesHTML = '인원 부족';
+
+                    html += `
+                        <li style="${canceledLiStyle}">
+                            <b>[${d.vehicle}]</b> 
+                            <span class="badge ${badgeClass}" style="${canceledBadgeStyle}">${d.type}</span> 
+                            <span class="badge default" style="margin-right:0; ${canceledBadgeStyle}">${d.km}km</span>
+                            ${d.isCanceled ? '<span style="color:#d9534f; font-weight:bold; margin-left:5px; text-decoration:none;">[취소됨]</span>' : ''}<br>
+                            출발지: ${d.start} | 목적지: ${d.dest} <br>
+                            👉 <b style="${d.isCanceled ? 'color:#adb5bd;' : 'color:#28a745;'}">배차 운전원: ${assignedNamesHTML}</b>
+                        </li>`;
+                });
             }
 
-            contentUl.innerHTML = '';
-            activeReservations.forEach(d => {
-                let shortType = d.type.replace('예약', '').replace('지원', '').replace('투어', '').replace('동행', '').replace('운행', '');
-                let badgeClass = 'default';
+            // 💡 결과창 하단에 당직/휴무자 표시 추가
+            const currentDrivers = getEffectiveDriverList(date);
+            const statusData = dailyDriverStatus[date] || {};
+            
+            const offDrivers = currentDrivers.filter(d => statusData[d] === '휴무');
+            const dutyDrivers = currentDrivers.filter(d => statusData[d] === '당직');
 
-                if (shortType === '공공') badgeClass = 'pub';
-                else if (shortType === '성묘') badgeClass = 'grave';
-                else if (shortType === '1박') badgeClass = 'night1';
-                else if (shortType === '2박') badgeClass = 'night2';
-                else if (shortType === '서울') badgeClass = 'seoul';
-                else if (shortType === '시티') badgeClass = 'citytour';
+            if (dutyDrivers.length > 0 || offDrivers.length > 0) {
+                html += `<li style="background-color: #fff; border: 2px dashed #007bff; margin-top: 10px; border-radius: 6px;">`;
+                if (dutyDrivers.length > 0) {
+                    html += `<div style="margin-bottom: ${offDrivers.length > 0 ? '8px' : '0'};"><span class="duty-badge" style="padding: 3px 6px; font-size: 0.8rem;">당직</span> <b style="color:#333;">${dutyDrivers.join(', ')}</b></div>`;
+                }
+                if (offDrivers.length > 0) {
+                    html += `<div><span style="background:#d9534f; color:#fff; padding: 3px 6px; border-radius:4px; font-size: 0.8rem; font-weight:bold; margin-right:5px;">휴무</span> <span style="color:#666;">${offDrivers.join(', ')}</span></div>`;
+                }
+                html += `</li>`;
+            }
 
-                // 💡 결과창 수동 배차 배지도 빨간색
-                if (d.isManual) badgeClass = 'manual-badge';
-
-                let canceledLiStyle = d.isCanceled ? 'color: #adb5bd; text-decoration: line-through;' : '';
-                let canceledBadgeStyle = d.isCanceled ? 'background-color: transparent; color: #adb5bd; border: 1px solid #adb5bd;' : '';
-                
-                let assignedNamesHTML = d.assigned.map((name, idx) => {
-                    let isUnderline = (idx === 0 && d.isEarly1) || (idx === 1 && d.isEarly2);
-                    return (isUnderline && !d.isCanceled) ? `<span class="early-underline">${name}</span>` : name;
-                }).join(', ');
-                
-                if (d.assigned.length === 0) assignedNamesHTML = '인원 부족';
-
-                contentUl.innerHTML += `
-                    <li style="${canceledLiStyle}">
-                        <b>[${d.vehicle}]</b> 
-                        <span class="badge ${badgeClass}" style="${canceledBadgeStyle}">${d.type}</span> 
-                        <span class="badge default" style="margin-right:0; ${canceledBadgeStyle}">${d.km}km</span>
-                        ${d.isCanceled ? '<span style="color:#d9534f; font-weight:bold; margin-left:5px; text-decoration:none;">[취소됨]</span>' : ''}<br>
-                        출발지: ${d.start} | 목적지: ${d.dest} <br>
-                        👉 <b style="${d.isCanceled ? 'color:#adb5bd;' : 'color:#28a745;'}">배차 운전원: ${assignedNamesHTML}</b>
-                    </li>`;
-            });
+            contentUl.innerHTML = html;
         }
 
         function renderStatusPanel(date) {
