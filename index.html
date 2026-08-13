@@ -13,23 +13,23 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; background-color: #f4f6f9; color: #333; letter-spacing: -0.3px; }
         
-        .dispatch-container { display: flex; max-width: 1500px; margin: 20px auto; gap: 20px; padding: 0 20px; }
-        .main-section { flex: 3; display: flex; flex-direction: column; gap: 20px; }
-        .sidebar-section { flex: 1.2; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); height: fit-content; }
+        /* 🔥 전체 폭을 넓히고 달력 영역(main-section)의 비율을 늘림 */
+        .dispatch-container { display: flex; max-width: 1650px; margin: 20px auto; gap: 20px; padding: 0 20px; }
+        .main-section { flex: 3.5; display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+        .sidebar-section { flex: 1.2; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); height: fit-content; min-width: 320px; }
         .card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 
         .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 1.25rem; font-weight: 700; }
         .calendar-header button { padding: 4px 12px; font-size: 1.1rem; cursor: pointer; border: 1px solid #ccc; background: #fff; border-radius: 4px; font-family: inherit;}
         
-        /* 🔥 요일별 가로 넓이 무조건 동일하게 고정 (minmax 0, 1fr) */
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+        /* 🔥 하루 칸의 최소 가로 넓이를 180px로 고정하여 긴 이름도 한 줄에 다 보이게 함 + 화면 작으면 전체 가로 스크롤 허용 */
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(180px, 1fr)); gap: 4px; overflow-x: auto; padding-bottom: 5px; }
         
         .calendar-day-header { font-weight: 700; text-align: center; padding: 8px; background: #eef2f7; border-radius: 4px; font-size: 0.95rem; }
         .calendar-day-header.sun { color: #d9534f; }
         .calendar-day-header.sat { color: #0275d8; }
 
-        /* 🔥 달력 셀 높이 원복 (밑으로 늘어나게) + 가로 오버플로우 숨김 */
-        .calendar-cell { min-height: 130px; background: #fff; border: 1px solid #e1e4e8; border-radius: 4px; padding: 4px; font-size: 0.85rem; cursor: pointer; display: flex; flex-direction: column; overflow: hidden; }
+        .calendar-cell { min-height: 220px; background: #fff; border: 1px solid #e1e4e8; border-radius: 4px; padding: 4px; font-size: 0.85rem; cursor: pointer; display: flex; flex-direction: column; overflow: hidden; }
         .calendar-cell:hover { background: #fafbfc; }
         .calendar-cell.selected { border: 2px solid #007bff; background: #f0f7ff; }
         .calendar-cell.sun .date-num { color: #d9534f; font-weight: 700; }
@@ -38,7 +38,6 @@
 
         .holiday-name { font-size: 0.65rem; color: #d9534f; font-weight: 700; letter-spacing: -0.5px; text-align: right; word-break: keep-all; margin-left: 4px; }
 
-        /* 🔥 태그들이 칸 밖으로 삐져나가지 않고 안에서만 스크롤되도록 설정 */
         .tag-container { display: flex; flex-direction: column; gap: 3px; margin-top: 4px; overflow-x: auto; scrollbar-width: none; flex: 1; width: 100%; }
         .tag-container::-webkit-scrollbar { display: none; }
         
@@ -121,7 +120,7 @@
         @media (max-width: 768px) {
             .dispatch-container { flex-direction: column; padding: 10px; margin: 10px auto; gap: 10px; }
             .sidebar-section { width: 100%; padding: 15px; }
-            .calendar-cell { min-height: 90px; padding: 3px; font-size: 0.75rem; }
+            /* 모바일에서도 180px 유지하여 가로 스크롤 유도 */
             .event-box { font-size: 0.7rem; padding: 2px 4px; }
             .status-header { flex-direction: column; align-items: flex-start; gap: 8px; }
         }
