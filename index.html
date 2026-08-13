@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>배차관리 시스템</title>
     
-    <!-- 💡 예쁜 웹 폰트 (Pretendard) 적용 -->
+    <!-- 예쁜 웹 폰트 (Pretendard) 적용 -->
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
 
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -13,7 +13,6 @@
 
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        /* 폰트 적용 */
         body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; background-color: #f4f6f9; color: #333; letter-spacing: -0.3px; }
         
         .dispatch-container { display: flex; max-width: 1500px; margin: 20px auto; gap: 20px; padding: 0 20px; }
@@ -36,7 +35,6 @@
         .calendar-cell.sat .date-num { color: #0275d8; font-weight: 700; }
         .calendar-cell.holiday .date-num { color: #d9534f !important; font-weight: 700; }
 
-        /* 공휴일 이름 작고 이쁘게 */
         .holiday-name { font-size: 0.7rem; color: #d9534f; font-weight: 700; display: block; margin-top: 1px; letter-spacing: -0.5px;}
 
         /* 배차 태그 한 줄 디자인 */
@@ -127,7 +125,7 @@
 
     <div id="loading-overlay">서버 연결 중...</div>
 
-    <!-- 💡 운전원 명단 관리 모달창 -->
+    <!-- 운전원 명단 관리 모달창 -->
     <div id="modal-overlay">
         <div class="modal-card">
             <h4>운전원 명단/순번 관리</h4>
@@ -220,15 +218,20 @@
 
     <script>
         // ==========================================
-        // 1. 공휴일 데이터 (매년 고정 + 2026년 설/추석 등 달력 데이터)
+        // 1. 공휴일 데이터 (대체공휴일 등 모두 포함)
         // ==========================================
         const koreaHolidays = {
             "01-01": "신정", "03-01": "삼일절", "05-05": "어린이날", "06-06": "현충일", 
             "08-15": "광복절", "10-03": "개천절", "10-09": "한글날", "12-25": "기독탄신일",
-            // 2026년 음력 휴일 수동 지정
+            
+            // 🔥 2026년 공휴일 및 대체휴일 세팅
             "2026-02-16": "설날연휴", "2026-02-17": "설날", "2026-02-18": "설날연휴",
-            "2026-03-03": "대통령선거", "2026-05-24": "부처님오신날", "2026-05-25": "대체공휴일",
-            "2026-06-03": "지방선거", "2026-09-24": "추석연휴", "2026-09-25": "추석", "2026-09-26": "추석연휴"
+            "2026-03-02": "대체공휴일", // 삼일절 일요일 대체
+            "2026-05-24": "부처님오신날", "2026-05-25": "대체공휴일", // 석탄일 일요일 대체
+            "2026-06-03": "지방선거", 
+            "2026-08-17": "대체공휴일", // 광복절 토요일 대체
+            "2026-09-24": "추석연휴", "2026-09-25": "추석", "2026-09-26": "추석연휴",
+            "2026-10-05": "대체공휴일"  // 개천절 토요일 대체
         };
 
         function getHolidayName(year, month, day) {
@@ -255,7 +258,7 @@
         // 2. 전역 상태 변수 및 명단 관리
         // ==========================================
         const defaultDrivers = ['박기준', '변석현', '이명순', '김탁', '한상훈', '문인식', '황덕일', '강철규', '이상헌'];
-        let driverListModifiers = {}; // 날짜별로 변경된 운전원 명단 기록 { '2026-08-13': ['김탁', '새사람', ...] }
+        let driverListModifiers = {}; 
         
         let currentYear = 2026;
         let currentMonth = 7; 
@@ -263,7 +266,6 @@
         const dailyDriverStatus = {}; 
         let allReservations = []; 
 
-        // 특정 날짜에 적용될 운전원 명단을 찾는 함수 (과거는 과거명단, 현재는 수정된 명단 적용)
         function getEffectiveDriverList(date) {
             const modDates = Object.keys(driverListModifiers).sort();
             let effectiveList = [...defaultDrivers];
@@ -287,7 +289,6 @@
                 const statusSnapshot = await db.collection('daily_status').get();
                 statusSnapshot.forEach(doc => { dailyDriverStatus[doc.id] = doc.data(); });
 
-                // 변경된 명단 히스토리 가져오기
                 const modSnapshot = await db.collection('driver_modifiers').get();
                 modSnapshot.forEach(doc => { driverListModifiers[doc.id] = doc.data().list; });
             } catch (error) {
@@ -390,7 +391,7 @@
         }
 
         function getDriverStatus(date, driver) {
-            if (!dailyDriverStatus[date]) return '출근'; // 없으면 기본 출근
+            if (!dailyDriverStatus[date]) return '출근'; 
             return dailyDriverStatus[date][driver] || '출근';
         }
 
@@ -409,11 +410,14 @@
             db.collection('daily_status').doc(currentDate).set(dailyDriverStatus[currentDate]).catch(e=>{});
         }
 
-        // 💡 엔진 핵심: 과거 기록 보호를 위해 순차적 시뮬레이션 적용 
+        // 💡 엔진 핵심: 거리(KM) > 차량번호 우선순위 적용
         function recalculateAll(shouldSaveToDB = true) {
             allReservations.forEach(r => r.assigned = []);
             allReservations.sort((a, b) => {
+                // 1. 날짜 빠른 순
                 if (a.startDate !== b.startDate) return new Date(a.startDate) - new Date(b.startDate);
+                
+                // 2. 형태(타입) 우선
                 const typeWeight = (t) => {
                     if (t.includes('공공')) return 1; if (t.includes('1박')) return 2; if (t.includes('2박')) return 3;
                     if (t.includes('성묘')) return 4; if (t.includes('서울')) return 5; if (t.includes('나들이')) return 6;
@@ -422,13 +426,18 @@
                 const wA = typeWeight(a.type), wB = typeWeight(b.type);
                 if (wA !== wB) return wA - wB; 
 
+                // 3. 🔥 형태가 같으면 KM(거리) 적은 차량이 무조건 우선 배차
+                if (a.km !== b.km) return a.km - b.km;
+
+                // 4. KM까지 똑같으면 차량 번호 (3 > 1 > 2) 우선
                 const vehWeight = (v) => {
                     if (v === '3호차') return 1; if (v === '1호차') return 2; if (v === '2호차') return 3;
                     if (v === '11호차') return 4; if (v === '12호차') return 5; if (v === '13호차') return 6; if (v === '14호차') return 7; return 99;
                 };
                 const vA = vehWeight(a.vehicle), vB = vehWeight(b.vehicle);
                 if (vA !== vB) return vA - vB; 
-                return a.km - b.km;
+                
+                return 0;
             });
 
             let pointer = 0;
@@ -436,11 +445,10 @@
             let currentList = [...defaultDrivers];
 
             allReservations.forEach(res => {
-                // 예약의 시작 날짜가 바뀌면 해당 시점의 명단으로 갈아끼움
                 if (res.startDate !== lastProcessedDate) {
                     lastProcessedDate = res.startDate;
                     currentList = getEffectiveDriverList(res.startDate);
-                    if (currentList.length > 0) pointer = pointer % currentList.length; // 포인터 이월
+                    if (currentList.length > 0) pointer = pointer % currentList.length; 
                 }
 
                 let loopGuard = 0;
@@ -468,7 +476,7 @@
             });
 
             renderCalendar();
-            renderStatusPanel(currentDate); // 명단 변경 시 하단 패널도 다시 그리기
+            renderStatusPanel(currentDate); 
             renderDispatchResult(currentDate);
         }
 
@@ -549,7 +557,7 @@
                 const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
                 const dayOfWeek = (firstDay + d - 1) % 7;
                 
-                // 💡 공휴일 계산기 연동
+                // 공휴일 연동
                 const holidayName = getHolidayName(currentYear, currentMonth + 1, d);
                 let extraClass = (dayOfWeek === 0) ? 'sun ' : (dayOfWeek === 6) ? 'sat ' : '';
                 let extraHTML = '';
@@ -593,7 +601,6 @@
                     </div>`;
             });
 
-            // 해당 날짜에 적용되는 명단을 가져와서 상태 뿌려줌
             const currentDrivers = getEffectiveDriverList(date);
             const statusData = dailyDriverStatus[date] || {};
             
