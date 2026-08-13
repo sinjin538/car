@@ -55,8 +55,6 @@
         .badge.night2 { background-color: #fd7e14; color: #fff; } 
         .badge.city { background-color: #85c1e9; color: #003366; } 
         .badge.default { background-color: #6c757d; color: #fff; }
-
-        /* 🔥 수동 배차 전용 빨간색 배지 CSS */
         .badge.manual-badge { background-color: #dc3545 !important; color: #fff !important; }
 
         .early-underline { text-decoration: underline; text-decoration-color: #dc3545; text-underline-offset: 3px; text-decoration-thickness: 2px; }
@@ -85,8 +83,6 @@
         .form-group select:disabled { background-color: #e9ecef; cursor: not-allowed; }
         .chk-group label { color: #d9534f; cursor: pointer; font-weight: 700; display:flex; align-items:center; gap:6px;}
         
-        .manual-box { display: none; background: #f1f3f5; padding: 12px; border-radius: 6px; border: 1px dashed #adb5bd; margin-bottom: 12px; }
-
         .btn-group { display: flex; gap: 6px; margin-top: 15px; }
         .btn-reserve { flex: 1.2; background: #007bff; color: white; border: none; padding: 10px 4px; border-radius: 4px; font-weight: 700; cursor: pointer; font-family: inherit; font-size: 0.85rem;}
         .btn-cancel { flex: 1; background: #dc3545; color: white; border: none; padding: 10px 4px; border-radius: 4px; font-weight: 700; cursor: pointer; font-family: inherit; font-size: 0.85rem;}
@@ -200,7 +196,6 @@
                             
                             ${isBus ? `<div class="form-group chk-group" id="single_box_${v}"><label><input type="checkbox" id="single_${v}"> 1인 배차 적용 (버스 전용)</label></div>` : ''}
                             
-                            <!-- 🔥 UI 업데이트: 운전원 옆에 각각 선운행 분리 & 수동배차 상단 강조 -->
                             <div style="border-top: 1px dashed #ccc; margin-top: 15px; padding-top: 10px;">
                                 <div class="form-group chk-group" style="color:#007bff; margin-bottom: 12px; background: #e8f0fe; padding: 6px; border-radius: 4px;">
                                     <label><input type="checkbox" id="manual_${v}" onchange="toggleManual('${v}', ${isBus})"> 수동 배차 적용 (체크해야 운전원 수정 가능)</label>
@@ -380,8 +375,6 @@
                     
                     document.getElementById(`manual_${vehicleName}`).checked = existing.isManual || false;
                     document.getElementById(`next_pointer_${vehicleName}`).value = existing.nextPointerDriver || '';
-
-                    // 개별 선운행 체크
                     document.getElementById(`early1_${vehicleName}`).checked = existing.isEarly1 || false;
                     if(isBus && document.getElementById(`early2_${vehicleName}`)) {
                         document.getElementById(`early2_${vehicleName}`).checked = existing.isEarly2 || false;
@@ -453,7 +446,10 @@
             db.collection('daily_status').doc(currentDate).set(dailyDriverStatus[currentDate]).catch(e=>{});
         }
 
+        // 🔥 핵심 최적화: 변경이 발생한 예약만 찾아내서 DB에 쓰는 획기적인 로직 (할당량 보호)
         function recalculateAll(shouldSaveToDB = true) {
+            const originalStateString = JSON.stringify(allReservations);
+
             allReservations.forEach(r => r.assigned = []);
             allReservations.sort((a, b) => {
                 if (a.startDate !== b.startDate) return new Date(a.startDate) - new Date(b.startDate);
@@ -465,19 +461,13 @@
                 const getTypeWeight = (t, isBus) => {
                     if (isBus) {
                         if (t.includes('공공') || t.includes('서울')) return 1; 
-                        if (t.includes('1박')) return 2; 
-                        if (t.includes('2박')) return 3;
-                        if (t.includes('성묘')) return 4; 
-                        if (t.includes('나들이')) return 5;
-                        if (t.includes('시티')) return 6; 
-                        return 99;
+                        if (t.includes('1박')) return 2; if (t.includes('2박')) return 3;
+                        if (t.includes('성묘')) return 4; if (t.includes('나들이')) return 5;
+                        if (t.includes('시티')) return 6; return 99;
                     } else { 
                         if (t.includes('공공') || t.includes('서울') || t.includes('성묘')) return 1; 
-                        if (t.includes('1박')) return 2; 
-                        if (t.includes('2박')) return 3;
-                        if (t.includes('나들이')) return 4;
-                        if (t.includes('시티')) return 5; 
-                        return 99;
+                        if (t.includes('1박')) return 2; if (t.includes('2박')) return 3;
+                        if (t.includes('나들이')) return 4; if (t.includes('시티')) return 5; return 99;
                     }
                 };
                 const wA = getTypeWeight(a.type, isBusA);
@@ -530,9 +520,18 @@
                 if (res.nextPointerDriver && currentList.includes(res.nextPointerDriver)) {
                     pointer = currentList.indexOf(res.nextPointerDriver);
                 }
-
-                if (shouldSaveToDB) db.collection('reservations').doc(res.id).set(res).catch(e=>{});
             });
+
+            // 🔥 변경된 예약만 골라서 파이어베이스에 전송 (할당량 보호)
+            if (shouldSaveToDB) {
+                const oldReservations = JSON.parse(originalStateString);
+                allReservations.forEach(res => {
+                    const oldRes = oldReservations.find(o => o.id === res.id);
+                    if (!oldRes || JSON.stringify(oldRes) !== JSON.stringify(res)) {
+                        db.collection('reservations').doc(res.id).set(res).catch(e=>{});
+                    }
+                });
+            }
 
             renderCalendar(); renderStatusPanel(currentDate); renderDispatchResult(currentDate);
         }
@@ -552,8 +551,6 @@
             const dates = getDatesForTrip(currentDate, type);
             
             let isManual = document.getElementById(`manual_${vehicleName}`).checked;
-            
-            // 💡 분리된 선운행 개별 체크박스 수집
             let isEarly1 = document.getElementById(`early1_${vehicleName}`).checked;
             let isEarly2 = isBus && document.getElementById(`early2_${vehicleName}`) ? document.getElementById(`early2_${vehicleName}`).checked : false;
 
@@ -619,7 +616,6 @@
             const index = allReservations.findIndex(r => r.vehicle === vehicleName && r.dates.includes(currentDate));
             if (index !== -1) {
                 allReservations[index].isCanceled = true;
-                db.collection('reservations').doc(allReservations[index].id).set(allReservations[index]).catch(e=>{});
                 recalculateAll(true); 
                 alert(`[${vehicleName}] 4일 전 취소 처리되었습니다. (운전원 순번은 소모된 것으로 유지됩니다)`);
             } else {
@@ -680,13 +676,11 @@
                 else if (shortType === '2박') { boxClass = 'night2'; badgeClass = 'night2'; }
                 else if (shortType === '시티' || shortType === '서울') { boxClass = 'city'; badgeClass = 'city'; }
 
-                // 💡 수동 배차일 경우 배지 배경 빨간색으로 변경
                 if (d.isManual) badgeClass = 'manual-badge';
 
                 let canceledBoxStyle = d.isCanceled ? 'background-color: transparent; border: 1px dashed #adb5bd; color: #adb5bd; text-decoration: line-through;' : '';
                 let canceledBadgeStyle = d.isCanceled ? 'background-color: transparent; color: #adb5bd; border: 1px solid #adb5bd;' : '';
                 
-                // 💡 개별 선운행 밑줄 표시 로직
                 let assignedNamesHTML = d.assigned.map((name, idx) => {
                     let isUnderline = (idx === 0 && d.isEarly1) || (idx === 1 && d.isEarly2);
                     return (isUnderline && !d.isCanceled) ? `<span class="early-underline">${name}</span>` : name;
@@ -727,13 +721,11 @@
                 else if (shortType === '2박') badgeClass = 'night2';
                 else if (shortType === '시티' || shortType === '서울') badgeClass = 'city';
 
-                // 💡 수동 배차일 경우 배지 배경 빨간색으로 변경
                 if (d.isManual) badgeClass = 'manual-badge';
 
                 let canceledLiStyle = d.isCanceled ? 'color: #adb5bd; text-decoration: line-through;' : '';
                 let canceledBadgeStyle = d.isCanceled ? 'background-color: transparent; color: #adb5bd; border: 1px solid #adb5bd;' : '';
                 
-                // 💡 개별 선운행 밑줄 표시 로직
                 let assignedNamesHTML = d.assigned.map((name, idx) => {
                     let isUnderline = (idx === 0 && d.isEarly1) || (idx === 1 && d.isEarly2);
                     return (isUnderline && !d.isCanceled) ? `<span class="early-underline">${name}</span>` : name;
