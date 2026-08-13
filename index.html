@@ -13,30 +13,27 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; background-color: #f4f6f9; color: #333; letter-spacing: -0.3px; }
         
-        /* 🔥 전체 폭을 넓히고 달력 영역(main-section)의 비율을 늘림 */
         .dispatch-container { display: flex; max-width: 1500px; margin: 20px auto; gap: 20px; padding: 0 20px; }
         .main-section { flex: 3; display: flex; flex-direction: column; gap: 20px; min-width: 0; }
-        /* 2. 우측 배차 예약 폼: 마우스 드래그 넓이 조절(resize) 및 스크롤(overflow) 추가 */
-.sidebar-section { 
-    width: 280px; /* 처음에 보여질 기본 넓이 */
-    min-width: 180px; /* 아무리 줄여도 이 이하로는 안 줄어듦 */
-    max-width: 800px; /* 최대로 늘어날 수 있는 넓이 */
-    flex-shrink: 0; 
-    background: #fff; 
-    padding: 20px; 
-    border-radius: 8px; 
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
-    max-height: 90vh; /* 🔥 메뉴를 많이 열어서 화면보다 길어지면 세로 스크롤 생성 */
-    resize: horizontal; /* 🔥 우측 하단 모서리를 잡고 드래그하면 가로 넓이 조절 가능 */
-    overflow: auto; /* 내용이 넘치면 자동으로 스크롤바 생성 (크기 조절의 필수 조건) */
-}
+        .sidebar-section { 
+            width: 280px; 
+            min-width: 180px; 
+            max-width: 800px; 
+            flex-shrink: 0; 
+            background: #fff; 
+            padding: 20px; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
+            max-height: 90vh; 
+            resize: horizontal; 
+            overflow: auto; 
+        }
         .card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 
         .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 1.25rem; font-weight: 700; }
         .calendar-header button { padding: 4px 12px; font-size: 1.1rem; cursor: pointer; border: 1px solid #ccc; background: #fff; border-radius: 4px; font-family: inherit;}
         
-        /* 🔥 하루 칸의 최소 가로 넓이를 180px로 고정하여 긴 이름도 한 줄에 다 보이게 함 + 화면 작으면 전체 가로 스크롤 허용 */
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(155px, 1fr)); gap: 4px; overflow-x: auto; padding-bottom: 5px; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(160px, 1fr)); gap: 4px; overflow-x: auto; padding-bottom: 5px; }
         
         .calendar-day-header { font-weight: 700; text-align: center; padding: 8px; background: #eef2f7; border-radius: 4px; font-size: 0.95rem; }
         .calendar-day-header.sun { color: #d9534f; }
@@ -133,7 +130,6 @@
         @media (max-width: 768px) {
             .dispatch-container { flex-direction: column; padding: 10px; margin: 10px auto; gap: 10px; }
             .sidebar-section { width: 100%; padding: 15px; }
-            /* 모바일에서도 180px 유지하여 가로 스크롤 유도 */
             .event-box { font-size: 0.7rem; padding: 2px 4px; }
             .status-header { flex-direction: column; align-items: flex-start; gap: 8px; }
         }
@@ -192,6 +188,8 @@
                 const busList = ['1호차', '2호차', '3호차'];
                 const solatiList = ['11호차', '12호차', '13호차', '14호차'];
                 const _baseDrivers = ['박기준', '변석현', '이명순', '김탁', '한상훈', '문인식', '황덕일', '강철규', '이상헌'];
+                
+                // 껍데기만 만들어두고 Firebase 데이터가 오면 덮어씌웁니다.
                 const _driverOptions = _baseDrivers.map(d => `<option value="${d}">${d}</option>`).join('');
                 
                 const formTemplate = (v, isBus) => `
@@ -322,6 +320,38 @@
             return effectiveList;
         }
 
+        // 🔥 핵심: 데이터베이스의 최신 명단을 불러와 드롭다운을 덮어씌우는 기능 추가
+        function updateDropdownOptions(date) {
+            const activeDrivers = getEffectiveDriverList(date);
+            const optionsHtml = activeDrivers.map(d => `<option value="${d}">${d}</option>`).join('');
+            
+            const allVehicles = ['1호차', '2호차', '3호차', '11호차', '12호차', '13호차', '14호차'];
+            allVehicles.forEach(v => {
+                const d1 = document.getElementById(`driver1_${v}`);
+                const d2 = document.getElementById(`driver2_${v}`);
+                const np = document.getElementById(`next_pointer_${v}`);
+                
+                if (d1) {
+                    const old1 = d1.value;
+                    d1.innerHTML = `<option value="">자동 배정</option><option value="미지정">미지정</option>` + optionsHtml;
+                    if (activeDrivers.includes(old1) || old1 === '미지정' || old1 === '') d1.value = old1;
+                    else d1.value = '';
+                }
+                if (d2) {
+                    const old2 = d2.value;
+                    d2.innerHTML = `<option value="">자동 배정</option><option value="미지정">미지정</option>` + optionsHtml;
+                    if (activeDrivers.includes(old2) || old2 === '미지정' || old2 === '') d2.value = old2;
+                    else d2.value = '';
+                }
+                if (np) {
+                    const oldNp = np.value;
+                    np.innerHTML = `<option value="">자동 유지 (지정 안함)</option>` + optionsHtml;
+                    if (activeDrivers.includes(oldNp) || oldNp === '') np.value = oldNp;
+                    else np.value = '';
+                }
+            });
+        }
+
         async function loadFromFirebase() {
             try {
                 const resSnapshot = await db.collection('reservations').get();
@@ -337,6 +367,7 @@
                 console.warn("DB 읽기 실패. 로컬로 실행합니다.");
             } finally {
                 recalculateAll(false); 
+                updateDropdownOptions(currentDate); // 🔥 데이터 불러온 직후 최신 명단으로 세팅!
                 document.getElementById('loading-overlay').style.display = 'none';
             }
         }
@@ -381,7 +412,9 @@
             if(tempEditList.length === 0) return alert("최소 1명의 운전원이 필요합니다.");
             driverListModifiers[currentDate] = [...tempEditList];
             db.collection('driver_modifiers').doc(currentDate).set({ list: driverListModifiers[currentDate] }).catch(e=>{});
-            closeDriverModal(); recalculateAll(true); 
+            closeDriverModal(); 
+            recalculateAll(true); 
+            updateDropdownOptions(currentDate); // 🔥 운전원 삭제 후 바로 드롭다운도 리셋!
         }
 
         function toggleManual(vehicleName, isBus) {
@@ -851,6 +884,7 @@
             document.getElementById('result-title').innerText = `최종 배차 결과 (${dateStr})`;
             renderStatusPanel(dateStr); 
             renderDispatchResult(dateStr); 
+            updateDropdownOptions(dateStr); // 🔥 날짜를 클릭할 때마다 해당 날짜의 최신 명단으로 선택창을 갈아 끼움!
         }
 
         window.onload = () => {
