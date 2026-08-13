@@ -56,7 +56,6 @@
         .badge.city { background-color: #85c1e9; color: #003366; } 
         .badge.default { background-color: #6c757d; color: #fff; }
 
-        /* 🔥 선운행 빨간 밑줄 스타일 */
         .early-underline { text-decoration: underline; text-decoration-color: #dc3545; text-underline-offset: 3px; text-decoration-thickness: 2px; }
 
         .cal-status { font-size: 0.75rem; margin-top: 2px; }
@@ -83,6 +82,8 @@
         .form-group select:disabled { background-color: #e9ecef; cursor: not-allowed; }
         .chk-group label { color: #d9534f; cursor: pointer; font-weight: 700; display:flex; align-items:center; gap:6px;}
         
+        .manual-box { display: none; background: #f1f3f5; padding: 12px; border-radius: 6px; border: 1px dashed #adb5bd; margin-bottom: 12px; }
+
         .btn-group { display: flex; gap: 6px; margin-top: 15px; }
         .btn-reserve { flex: 1.2; background: #007bff; color: white; border: none; padding: 10px 4px; border-radius: 4px; font-weight: 700; cursor: pointer; font-family: inherit; font-size: 0.85rem;}
         .btn-cancel { flex: 1; background: #dc3545; color: white; border: none; padding: 10px 4px; border-radius: 4px; font-weight: 700; cursor: pointer; font-family: inherit; font-size: 0.85rem;}
@@ -196,7 +197,6 @@
                             
                             ${isBus ? `<div class="form-group chk-group" id="single_box_${v}"><label><input type="checkbox" id="single_${v}"> 1인 배차 적용 (버스 전용)</label></div>` : ''}
                             
-                            <!-- 🔥 상시 노출되는 배차 디테일 설정 박스 -->
                             <div style="border-top: 1px dashed #ccc; margin-top: 15px; padding-top: 10px;">
                                 <div class="form-group chk-group" style="margin-bottom: 10px;">
                                     <label><input type="checkbox" id="early_${v}"> 선운행 적용 (이름 밑줄 빨갛게 표시)</label>
@@ -296,7 +296,6 @@
             }
         }
 
-        // 운전원 명단 모달
         let tempEditList = [];
         function openDriverEditModal() {
             tempEditList = [...getEffectiveDriverList(currentDate)];
@@ -340,7 +339,6 @@
             closeDriverModal(); recalculateAll(true); 
         }
 
-        // 💡 수동 배차 체크 시 운전원 선택 잠금 해제
         function toggleManual(vehicleName, isBus) {
             const isManual = document.getElementById(`manual_${vehicleName}`).checked;
             const d1 = document.getElementById(`driver1_${vehicleName}`);
@@ -349,18 +347,15 @@
             d1.disabled = !isManual;
             if(d2) d2.disabled = !isManual;
             
-            // 수동 체크 시 1인 배차 체크박스 숨김
             if (isBus) {
                 document.getElementById(`single_box_${vehicleName}`).style.display = isManual ? 'none' : 'block';
             }
         }
 
-        // 💡 폼 열기 및 기존 데이터 불러오기 로직 강화
         function toggleVehicleForm(vehicleName, checkbox, isBus) {
             document.getElementById(`form_${vehicleName}`).style.display = checkbox.checked ? "block" : "none";
             if (checkbox.checked) {
                 const existing = allReservations.find(r => r.vehicle === vehicleName && r.dates.includes(currentDate));
-                
                 const d1 = document.getElementById(`driver1_${vehicleName}`);
                 const d2 = document.getElementById(`driver2_${vehicleName}`);
                 
@@ -369,16 +364,15 @@
                     document.getElementById(`dest_${vehicleName}`).value = existing.dest;
                     document.getElementById(`type_${vehicleName}`).value = existing.type;
                     document.getElementById(`km_${vehicleName}`).value = existing.km;
+                    if(isBus) document.getElementById(`single_${vehicleName}`).checked = (existing.reqCount === 1);
                     
                     document.getElementById(`early_${vehicleName}`).checked = existing.isEarly || false;
                     document.getElementById(`manual_${vehicleName}`).checked = existing.isManual || false;
                     document.getElementById(`next_pointer_${vehicleName}`).value = existing.nextPointerDriver || '';
 
-                    // 배정된 인원 보여주기 (수동이든 자동이든 표시)
                     d1.value = existing.assigned[0] || '';
                     if (isBus && d2) d2.value = existing.assigned[1] || '';
 
-                    // 잠금 여부 및 1인배차 표시 여부
                     if (existing.isManual) {
                         d1.disabled = false;
                         if(d2) d2.disabled = false;
@@ -391,12 +385,12 @@
                             document.getElementById(`single_${vehicleName}`).checked = (existing.reqCount === 1);
                         }
                     }
-
                 } else {
                     document.getElementById(`start_${vehicleName}`).value = '';
                     document.getElementById(`dest_${vehicleName}`).value = '';
                     document.getElementById(`type_${vehicleName}`).value = '공공예약';
                     document.getElementById(`km_${vehicleName}`).value = '0';
+                    if(isBus) document.getElementById(`single_${vehicleName}`).checked = false;
                     
                     document.getElementById(`early_${vehicleName}`).checked = false;
                     document.getElementById(`manual_${vehicleName}`).checked = false;
@@ -413,7 +407,6 @@
             }
         }
 
-        // 💡 다른 날짜 선택 시 모든 열린 창 닫기
         function closeAllForms() {
             const allVehicles = ['1호차', '2호차', '3호차', '11호차', '12호차', '13호차', '14호차'];
             allVehicles.forEach(v => {
@@ -443,16 +436,24 @@
             allReservations.forEach(r => r.assigned = []);
             allReservations.sort((a, b) => {
                 if (a.startDate !== b.startDate) return new Date(a.startDate) - new Date(b.startDate);
+                
+                // 💡 공공과 서울은 동등한 최우선 순위 (1순위)
                 const typeWeight = (t) => {
-                    if (t.includes('공공')) return 1; if (t.includes('1박')) return 2; if (t.includes('2박')) return 3;
-                    if (t.includes('성묘')) return 4; if (t.includes('서울')) return 5; if (t.includes('나들이')) return 6;
-                    if (t.includes('시티')) return 7; return 99;
+                    if (t.includes('공공') || t.includes('서울')) return 1; 
+                    if (t.includes('1박')) return 2; 
+                    if (t.includes('2박')) return 3;
+                    if (t.includes('성묘')) return 4; 
+                    if (t.includes('나들이')) return 5;
+                    if (t.includes('시티')) return 6; 
+                    return 99;
                 };
                 const wA = typeWeight(a.type), wB = typeWeight(b.type);
                 if (wA !== wB) return wA - wB; 
 
+                // 🔥 형태가 같으면 무조건 KM 순서 (적은 차가 우선)
                 if (a.km !== b.km) return a.km - b.km;
 
+                // KM까지 같으면 차량 우선순위
                 const vehWeight = (v) => {
                     if (v === '3호차') return 1; if (v === '1호차') return 2; if (v === '2호차') return 3;
                     if (v === '11호차') return 4; if (v === '12호차') return 5; if (v === '13호차') return 6; if (v === '14호차') return 7; return 99;
@@ -470,10 +471,8 @@
                 }
 
                 if (res.isManual && res.manualDrivers && res.manualDrivers.length > 0) {
-                    // 수동 배차 시 자동 배정 로직 무시
                     res.assigned = [...res.manualDrivers];
                 } else {
-                    // 일반 자동 배차
                     let loopGuard = 0;
                     while (res.assigned.length < res.reqCount && loopGuard < 50 && currentList.length > 0) {
                         const candidate = currentList[pointer];
@@ -496,7 +495,6 @@
                     }
                 }
 
-                // 🔥 다음 순번 리셋 지정 로직
                 if (res.nextPointerDriver && currentList.includes(res.nextPointerDriver)) {
                     pointer = currentList.indexOf(res.nextPointerDriver);
                 }
@@ -521,7 +519,6 @@
             const type = document.getElementById(`type_${vehicleName}`).value;
             const dates = getDatesForTrip(currentDate, type);
             
-            // 수집 로직
             let isManual = document.getElementById(`manual_${vehicleName}`).checked;
             let isEarly = document.getElementById(`early_${vehicleName}`).checked;
             let manualDrivers = [];
@@ -649,7 +646,6 @@
                 let canceledBoxStyle = d.isCanceled ? 'background-color: transparent; border: 1px dashed #adb5bd; color: #adb5bd; text-decoration: line-through;' : '';
                 let canceledBadgeStyle = d.isCanceled ? 'background-color: transparent; color: #adb5bd; border: 1px solid #adb5bd;' : '';
                 
-                // 🔥 선운행 빨간 밑줄 달력창 적용
                 let assignedNames = d.assigned.join(', ');
                 if (d.isEarly && !d.isCanceled) {
                     assignedNames = `<span class="early-underline">${assignedNames}</span>`;
@@ -693,7 +689,6 @@
                 let canceledLiStyle = d.isCanceled ? 'color: #adb5bd; text-decoration: line-through;' : '';
                 let canceledBadgeStyle = d.isCanceled ? 'background-color: transparent; color: #adb5bd; border: 1px solid #adb5bd;' : '';
                 
-                // 🔥 선운행 하단 결과창 적용
                 let assignedNames = d.assigned.length > 0 ? d.assigned.join(', ') : '인원 부족';
                 if (d.isEarly && !d.isCanceled) {
                     assignedNames = `<span class="early-underline">${assignedNames}</span>`;
@@ -732,7 +727,7 @@
 
         function selectDate(dateStr) {
             currentDate = dateStr;
-            closeAllForms(); // 💡 다른 날짜 클릭 시 모든 입력 창 닫기
+            closeAllForms(); 
             renderCalendar(); 
             document.getElementById('result-title').innerText = `최종 배차 결과 (${dateStr})`;
             renderStatusPanel(dateStr); 
