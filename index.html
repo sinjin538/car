@@ -18,8 +18,8 @@
         .main-section { flex: 3; display: flex; flex-direction: column; gap: 20px; min-width: 0; }
         /* 2. 우측 배차 예약 폼: 마우스 드래그 넓이 조절(resize) 및 스크롤(overflow) 추가 */
 .sidebar-section { 
-    width: 350px; /* 처음에 보여질 기본 넓이 */
-    min-width: 280px; /* 아무리 줄여도 이 이하로는 안 줄어듦 */
+    width: 280px; /* 처음에 보여질 기본 넓이 */
+    min-width: 180px; /* 아무리 줄여도 이 이하로는 안 줄어듦 */
     max-width: 800px; /* 최대로 늘어날 수 있는 넓이 */
     flex-shrink: 0; 
     background: #fff; 
@@ -36,7 +36,7 @@
         .calendar-header button { padding: 4px 12px; font-size: 1.1rem; cursor: pointer; border: 1px solid #ccc; background: #fff; border-radius: 4px; font-family: inherit;}
         
         /* 🔥 하루 칸의 최소 가로 넓이를 180px로 고정하여 긴 이름도 한 줄에 다 보이게 함 + 화면 작으면 전체 가로 스크롤 허용 */
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(160px, 1fr)); gap: 4px; overflow-x: auto; padding-bottom: 5px; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(155px, 1fr)); gap: 4px; overflow-x: auto; padding-bottom: 5px; }
         
         .calendar-day-header { font-weight: 700; text-align: center; padding: 8px; background: #eef2f7; border-radius: 4px; font-size: 0.95rem; }
         .calendar-day-header.sun { color: #d9534f; }
