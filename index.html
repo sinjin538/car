@@ -25,14 +25,14 @@
         #app-container { display: none; }
 
         .dispatch-container { display: flex; max-width: 1500px; margin: 20px auto; gap: 20px; padding: 0 20px; }
-        .main-section { flex: 3; display: flex; flex-direction: column; gap: 20px; min-width: 0; }
-        .sidebar-section { width: 280px; min-width: 180px; max-width: 800px; flex-shrink: 0; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); max-height: 90vh; resize: horizontal; overflow: auto; }
+        .main-section { flex: 3.5; display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+        .sidebar-section { width: 320px; min-width: 250px; max-width: 800px; flex-shrink: 0; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); height: fit-content; max-height: 90vh; overflow: auto; }
         .card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 
         .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 1.25rem; font-weight: 700; }
         .calendar-header button { padding: 4px 12px; font-size: 1.1rem; cursor: pointer; border: 1px solid #ccc; background: #fff; border-radius: 4px; font-family: inherit;}
         
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(160px, 1fr)); gap: 4px; overflow-x: auto; padding-bottom: 5px; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(140px, 1fr)); gap: 4px; overflow-x: auto; padding-bottom: 5px; }
         .calendar-day-header { font-weight: 700; text-align: center; padding: 8px; background: #eef2f7; border-radius: 4px; font-size: 0.95rem; }
         .calendar-day-header.sun { color: #d9534f; }
         .calendar-day-header.sat { color: #0275d8; }
