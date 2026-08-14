@@ -320,7 +320,11 @@
             const statusContainer = document.getElementById(`cell_status_${date}`);
             if (!tagsContainer || !statusContainer) return;
 
-            const activeReservations = allReservations.filter(r => r.dates.includes(date));
+            // 🔥 [핵심 수정] 전체 배차 중 '내 이름(currentUser)'이 포함된 배차만 필터링!
+            const activeReservations = allReservations.filter(r => 
+                r.dates.includes(date) && r.assigned.includes(currentUser)
+            );
+            
             let tagsHTML = '';
 
             activeReservations.forEach(d => {
@@ -333,6 +337,7 @@
                 else if (shortType === '2박') { boxClass = 'night2'; badgeClass = 'night2'; }
                 else if (shortType === '서울') { boxClass = 'seoul'; badgeClass = 'seoul'; }
                 else if (shortType === '시티') { boxClass = 'citytour'; badgeClass = 'citytour'; }
+                else if (shortType === '기타') { boxClass = 'default'; badgeClass = 'default'; }
 
                 if (d.isManual) badgeClass = 'manual-badge';
 
@@ -341,6 +346,7 @@
                 
                 let assignedNamesHTML = d.assigned.map((name, idx) => {
                     let isUnderline = (idx === 0 && d.isEarly1) || (idx === 1 && d.isEarly2);
+                    // 내 배차만 나오므로 무조건 내 이름 강조
                     if(name === currentUser && !d.isCanceled) name = `<span style="color:#0056b3; font-weight:900;">${name}</span>`;
                     return (isUnderline && !d.isCanceled && name !== '미지정') ? `<span class="early-underline">${name}</span>` : name;
                 }).join(', ');
@@ -355,6 +361,7 @@
             tagsContainer.innerHTML = tagsHTML;
 
             const statusData = dailyDriverStatus[date] || {};
+            // 휴무나 당직 상태 표시
             const offDrivers = Object.keys(statusData).filter(d => statusData[d] === '휴무');
             const dutyDrivers = Object.keys(statusData).filter(d => statusData[d] === '당직');
 
@@ -403,12 +410,17 @@
 
         function renderDispatchResult(date) {
             const contentUl = document.getElementById('result-content');
-            const activeReservations = allReservations.filter(r => r.dates.includes(date));
+            
+            // 🔥 [핵심 수정] 하단 리스트에도 '내 이름(currentUser)'이 들어간 배차만 필터링!
+            const activeReservations = allReservations.filter(r => 
+                r.dates.includes(date) && r.assigned.includes(currentUser)
+            );
 
             let html = '';
 
             if (activeReservations.length === 0) {
-                html += `<li style="color:#666; border:none; background:transparent; padding:0 0 10px 0;">이 날짜에 배차 내역이 없습니다.</li>`;
+                // 문구도 '내 배차'에 맞게 수정
+                html += `<li style="color:#666; border:none; background:transparent; padding:0 0 10px 0;">이 날짜에 배정된 <b>내 배차 내역</b>이 없습니다.</li>`;
             } else {
                 activeReservations.forEach(d => {
                     let shortType = d.type.replace('예약', '').replace('지원', '').replace('투어', '').replace('동행', '').replace('운행', '');
@@ -420,18 +432,16 @@
                     else if (shortType === '2박') badgeClass = 'night2';
                     else if (shortType === '서울') badgeClass = 'seoul';
                     else if (shortType === '시티') badgeClass = 'citytour';
+                    else if (shortType === '기타') badgeClass = 'default';
 
                     if (d.isManual) badgeClass = 'manual-badge';
 
                     let canceledLiStyle = d.isCanceled ? 'color: #adb5bd; text-decoration: line-through;' : '';
                     let canceledBadgeStyle = d.isCanceled ? 'background-color: transparent; color: #adb5bd; border: 1px solid #adb5bd;' : '';
                     
-                    let isMyDispatch = false;
-
                     let assignedNamesHTML = d.assigned.map((name, idx) => {
                         let isUnderline = (idx === 0 && d.isEarly1) || (idx === 1 && d.isEarly2);
                         if (name === currentUser && !d.isCanceled) {
-                            isMyDispatch = true;
                             name = `<span style="color:#0056b3; font-weight:900;">${name}</span>`; 
                         }
                         return (isUnderline && !d.isCanceled && name !== '미지정') ? `<span class="early-underline">${name}</span>` : name;
@@ -439,8 +449,8 @@
                     
                     if (d.assigned.length === 0) assignedNamesHTML = '인원 부족';
 
-                    let liStyle = canceledLiStyle;
-                    if (isMyDispatch) liStyle += ' border: 2px solid #007bff; background-color: #f0f7ff;';
+                    // 내 배차이므로 파란 테두리 고정
+                    let liStyle = canceledLiStyle + ' border: 2px solid #007bff; background-color: #f0f7ff;';
 
                     html += `
                         <li style="${liStyle}">
@@ -454,6 +464,7 @@
                 });
             }
 
+            // 하단 당직/휴무자 현황은 동일하게 유지
             const statusData = dailyDriverStatus[date] || {};
             const offDrivers = Object.keys(statusData).filter(d => statusData[d] === '휴무');
             const dutyDrivers = Object.keys(statusData).filter(d => statusData[d] === '당직');
@@ -469,6 +480,8 @@
                 html += `</li>`;
             }
 
+            contentUl.innerHTML = html;
+        }
             contentUl.innerHTML = html;
         }
 
