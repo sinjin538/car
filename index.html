@@ -128,35 +128,20 @@
 </head>
 <body>
 
-    <!-- 🔥 로그인 창 -->
+    <!-- 🔥 로그인 창 (보안 강화형: 명단 숨김 및 직접 입력) -->
     <div id="login-container">
         <div class="login-card">
             <h2>배차 시스템 로그인</h2>
-            <select id="login-id" class="login-input">
-                <option value="">이름 (또는 아이디) 선택</option>
-                <optgroup label="[ 관리자 ]">
-                    <option value="admin1">admin1 (관리자)</option>
-                    <option value="admin2">admin2 (관리자)</option>
-                </optgroup>
-                <optgroup label="[ 운전원 ]">
-                    <option value="박기준">박기준</option>
-                    <option value="변석현">변석현</option>
-                    <option value="이명순">이명순</option>
-                    <option value="김탁">김탁</option>
-                    <option value="한상훈">한상훈</option>
-                    <option value="문인식">문인식</option>
-                    <option value="황덕일">황덕일</option>
-                    <option value="강철규">강철규</option>
-                    <option value="이상헌">이상헌</option>
-                    <option value="함동한">함동한</option>
-                </optgroup>
-            </select>
-            <input type="password" id="login-pw" class="login-input" placeholder="비밀번호 6자리" maxlength="6">
+            
+            <!-- 리스트(select) 대신 직접 입력(input) 방식으로 변경 -->
+            <input type="text" id="login-id" class="login-input" placeholder="이름 (또는 아이디) 입력">
+            
+            <input type="password" id="login-pw" class="login-input" placeholder="비밀번호 입력">
             <button id="btn-login" class="btn-login" onclick="handleLogin()">접속하기</button>
-            <p style="margin-top:15px; font-size:0.8rem; color:#888;">초기 비밀번호: 123456</p>
+            
+            <!-- 초기 비밀번호 안내 문구 삭제됨 -->
         </div>
     </div>
-
     <!-- 🔥 메인 앱 화면 -->
     <div id="app-container">
         <div id="loading-overlay">
