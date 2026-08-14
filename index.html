@@ -1062,10 +1062,13 @@
         }
 
         // 🔥 관리자용 팝업 열기 함수 (사진 띄우기)
+        // 🔥 관리자용 팝업 열기 함수 (기사님이 클릭하면 사진은 숨김 처리!)
         function showDispatchDetail(event, id) {
             event.stopPropagation(); 
             const d = allReservations.find(r => r.id === id);
             if (!d) return;
+
+            const currentUserRole = localStorage.getItem('userRole'); // 현재 로그인한 사람의 권한 확인
 
             let assigned = (d.assigned && d.assigned.length > 0) ? d.assigned.join(', ') : '미정';
             document.getElementById('detail-modal-title').innerText = `[${d.vehicle}] ${d.type}`;
@@ -1074,12 +1077,20 @@
             document.getElementById('detail-modal-dest').innerText = d.dest || '지정안됨';
 
             const imgContainer = document.getElementById('detail-modal-img-container');
-            if (d.photoUrl) {
-                imgContainer.innerHTML = `<img src="${d.photoUrl}" style="width: 100%; border-radius: 8px; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">`;
-                imgContainer.style.display = 'block';
-            } else {
-                imgContainer.innerHTML = '<p style="color:#888; font-size:0.9rem;">첨부된 사진이 없습니다.</p>';
-                imgContainer.style.display = 'block';
+            
+            // 🚫 만약 로그인한 사람이 '기사님(driver)'이라면 사진 공간을 완전히 숨깁니다!
+            if (currentUserRole === 'driver') {
+                imgContainer.style.display = 'none';
+            } 
+            // ✅ 관리자(admin)라면 정상적으로 사진을 보여줍니다.
+            else {
+                if (d.photoUrl) {
+                    imgContainer.innerHTML = `<img src="${d.photoUrl}" style="width: 100%; border-radius: 8px; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">`;
+                    imgContainer.style.display = 'block';
+                } else {
+                    imgContainer.innerHTML = '<p style="color:#888; font-size:0.9rem;">첨부된 사진이 없습니다.</p>';
+                    imgContainer.style.display = 'block';
+                }
             }
 
             document.getElementById('detail-modal-overlay').style.display = 'flex';
