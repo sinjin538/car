@@ -636,6 +636,7 @@
         }
 
         // 🔥 예약 폼 열때 사진 입력 초기화
+       // 🔥 1. 예약 폼 열때 데이터 세팅
         function toggleVehicleForm(vehicleName, checkbox, isBus) {
             document.getElementById(`form_${vehicleName}`).style.display = checkbox.checked ? "block" : "none";
             if (checkbox.checked) {
@@ -648,7 +649,6 @@
                 if (photoInput) photoInput.value = ''; 
                 
                 if (existing) {
-                    document.getElementById(`start_${vehicleName}`).value = existing.start || '';
                     document.getElementById(`dest_${vehicleName}`).value = existing.dest || '';
                     document.getElementById(`type_${vehicleName}`).value = existing.type || '공공예약';
                     document.getElementById(`km_${vehicleName}`).value = existing.km || 0;
@@ -679,7 +679,6 @@
                         }
                     }
                 } else {
-                    document.getElementById(`start_${vehicleName}`).value = '';
                     document.getElementById(`dest_${vehicleName}`).value = '';
                     document.getElementById(`type_${vehicleName}`).value = '공공예약';
                     document.getElementById(`km_${vehicleName}`).value = '0';
@@ -860,7 +859,7 @@
             });
         }
 
-        // 🔥 예약 저장 (사진 업로드 포함)
+       // 🔥 2. 예약 등록 로직
         async function makeReservation(vehicleName, isBus) {
             const type = document.getElementById(`type_${vehicleName}`).value;
             const dates = getDatesForTrip(currentDate, type);
@@ -896,20 +895,24 @@
                 allReservations.splice(existingIndex, 1);
             }
 
-            // 사진 업로드
             const photoInput = document.getElementById(`photo_${vehicleName}`);
             if (photoInput && photoInput.files.length > 0) {
-                showLoading('사진 업로드 중...');
+                showLoading('사진 업로드 중... (10초 이상 걸리면 실패)');
                 try {
                     const file = photoInput.files[0];
                     const compressedBlob = await compressImage(file);
+                    
                     const storageRef = storage.ref(`reservation_photos/${docId}_${Date.now()}.jpg`);
-                    await storageRef.put(compressedBlob);
+                    const uploadTask = storageRef.put(compressedBlob);
+                    const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('서버 응답 시간 초과 (저장소 설정을 확인하세요)')), 15000));
+                    
+                    await Promise.race([uploadTask, timeout]);
                     photoUrl = await storageRef.getDownloadURL();
+                    
                 } catch (error) {
-                    alert("사진 업로드 중 에러가 발생했습니다: " + error.message);
-                    hideLoading();
-                    return;
+                    alert("⚠️ 사진 업로드 실패!\n원인: " + error.message + "\n\n※ 파이어베이스 Storage 설정을 다시 한 번 확인해 주세요.");
+                    hideLoading(); 
+                    return; 
                 }
             } else {
                 showLoading('예약 등록 중...');
@@ -917,8 +920,8 @@
 
             allReservations.push({
                 id: docId, startDate: currentDate, dates: dates, vehicle: vehicleName,
-                start: document.getElementById(`start_${vehicleName}`).value || '미상',
-                dest: document.getElementById(`dest_${vehicleName}`).value || '지정안됨',
+                start: '', // 🔥 출발지 데이터 삭제
+                dest: document.getElementById(`dest_${vehicleName}`).value || '내용 없음',
                 type: type, km: parseInt(document.getElementById(`km_${vehicleName}`).value) || 0,
                 reqCount: reqCount, assigned: [],
                 isCanceled: false,
@@ -935,7 +938,6 @@
             recalculateAll(true); 
             hideLoading();
         }
-
         function cancelReservation(vehicleName) {
             const index = allReservations.findIndex(r => r.vehicle === vehicleName && r.dates.includes(currentDate));
             if (index !== -1) {
@@ -1062,27 +1064,24 @@
         }
 
         // 🔥 관리자용 팝업 열기 함수 (사진 띄우기)
-        // 🔥 관리자용 팝업 열기 함수 (기사님이 클릭하면 사진은 숨김 처리!)
+        // 🔥 3. 팝업 열기 함수
         function showDispatchDetail(event, id) {
             event.stopPropagation(); 
             const d = allReservations.find(r => r.id === id);
             if (!d) return;
 
-            const currentUserRole = localStorage.getItem('userRole'); // 현재 로그인한 사람의 권한 확인
+            const currentUserRole = localStorage.getItem('userRole'); 
 
             let assigned = (d.assigned && d.assigned.length > 0) ? d.assigned.join(', ') : '미정';
             document.getElementById('detail-modal-title').innerText = `[${d.vehicle}] ${d.type}`;
             document.getElementById('detail-modal-drivers').innerText = assigned;
-            document.getElementById('detail-modal-start').innerText = d.start || '지정안됨';
-            document.getElementById('detail-modal-dest').innerText = d.dest || '지정안됨';
+            document.getElementById('detail-modal-dest').innerText = d.dest || '내용 없음'; // 🔥 출발지 삭제됨
 
             const imgContainer = document.getElementById('detail-modal-img-container');
             
-            // 🚫 만약 로그인한 사람이 '기사님(driver)'이라면 사진 공간을 완전히 숨깁니다!
             if (currentUserRole === 'driver') {
                 imgContainer.style.display = 'none';
             } 
-            // ✅ 관리자(admin)라면 정상적으로 사진을 보여줍니다.
             else {
                 if (d.photoUrl) {
                     imgContainer.innerHTML = `<img src="${d.photoUrl}" style="width: 100%; border-radius: 8px; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">`;
@@ -1099,6 +1098,7 @@
             document.getElementById('detail-modal-overlay').style.display = 'none';
         }
 
+       // 🔥 4. 리스트 출력
         function renderDispatchResult(date) {
             const contentUl = document.getElementById('result-content');
             const activeReservations = allReservations.filter(r => (r.dates || []).includes(date));
@@ -1138,7 +1138,7 @@
                             <span class="badge ${badgeClass}" style="${canceledBadgeStyle}">${shortType}</span> 
                             <span class="badge default" style="margin-right:0; ${canceledBadgeStyle}">${d.km}km</span>
                             ${d.isCanceled ? '<span style="color:#d9534f; font-weight:bold; margin-left:5px; text-decoration:none;">[취소됨]</span>' : ''}<br>
-                            출발지: ${d.start} | 목적지: ${d.dest} <br>
+                            📝 내용: ${d.dest} <br>
                             👉 <b style="${d.isCanceled ? 'color:#adb5bd;' : 'color:#28a745;'}">배차 운전원: ${assignedNamesHTML}</b>
                         </li>`;
                 });
@@ -1161,7 +1161,6 @@
 
             contentUl.innerHTML = html;
         }
-
         function renderStatusPanel(date) {
             const container = document.getElementById('status-container');
             container.innerHTML = '';
