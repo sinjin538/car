@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>배차관리 시스템 (기사 전용)</title>
+    
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; background-color: #f4f6f9; color: #333; letter-spacing: -0.3px; }
+        
+        .dispatch-container { display: flex; max-width: 1500px; margin: 20px auto; gap: 20px; padding: 0 20px; }
+        .main-section { flex: 3.5; display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+        .sidebar-section { width: 320px; min-width: 250px; flex-shrink: 0; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); height: fit-content; }
+        .card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+
+        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 1.25rem; font-weight: 700; }
+        .calendar-header button { padding: 4px 12px; font-size: 1.1rem; cursor: pointer; border: 1px solid #ccc; background: #fff; border-radius: 4px; font-family: inherit;}
+        
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(140px, 1fr)); gap: 4px; overflow-x: auto; padding-bottom: 5px; }
+        
+        .calendar-day-header { font-weight: 700; text-align: center; padding: 8px; background: #eef2f7; border-radius: 4px; font-size: 0.95rem; }
+        .calendar-day-header.sun { color: #d9534f; }
+        .calendar-day-header.sat { color: #0275d8; }
+
+        .calendar-cell { min-height: 180px; background: #fff; border: 1px solid #e1e4e8; border-radius: 4px; padding: 4px; font-size: 0.85rem; cursor: pointer; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+        .calendar-cell:hover { background: #fafbfc; }
+        .calendar-cell.selected { border: 2px solid #28a745; background: #f0fdf4; }
+        .calendar-cell.sun .date-num { color: #d9534f; font-weight: 700; }
+        .calendar-cell.sat .date-num { color: #0275d8; font-weight: 700; }
+        .calendar-cell.holiday .date-num { color: #d9534f !important; font-weight: 700; }
+
+        .holiday-name { font-size: 0.65rem; color: #d9534f; font-weight: 700; letter-spacing: -0.5px; text-align: right; word-break: keep-all; margin-left: 4px; }
+
+        .tag-container { display: flex; flex-direction: column; gap: 3px; margin-top: 4px; overflow-x: auto; scrollbar-width: none; flex: 1; width: 100%; }
+        .tag-container::-webkit-scrollbar { display: none; }
+        
+        .event-box { display: inline-flex; align-items: center; gap: 4px; width: max-content; padding: 3px 5px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; white-space: nowrap; transition: all 0.2s; }
+        .event-box.pub { background-color: #e8f0fe; border: 1px solid #c6dafc; color: #333; } 
+        .event-box.grave { background-color: #e8f5e9; border: 1px solid #c8e6c9; color: #333; } 
+        .event-box.night1 { background-color: #fff8e1; border: 1px solid #ffecb3; color: #333; } 
+        .event-box.night2 { background-color: #fbe9e7; border: 1px solid #ffccbc; color: #333; } 
+        .event-box.seoul { background-color: #e0f7fa; border: 1px solid #b2ebf2; color: #333; } 
+        .event-box.citytour { background-color: #f3e5f5; border: 1px solid #e1bee7; color: #333; } 
+        .event-box.default { background-color: #f1f3f4; border: 1px solid #d8dbe0; color: #333; }
+
+        .badge { padding: 2px 6px; border-radius: 12px; font-size: 0.65rem; font-weight: 700; }
+        .badge.pub { background-color: #007bff; color: #fff; } 
+        .badge.grave { background-color: #28a745; color: #fff; } 
+        .badge.night1 { background-color: #ffc107; color: #000; } 
+        .badge.night2 { background-color: #fd7e14; color: #fff; } 
+        .badge.seoul { background-color: #00bcd4; color: #fff; } 
+        .badge.citytour { background-color: #9c27b0; color: #fff; } 
+        .badge.default { background-color: #6c757d; color: #fff; }
+        .badge.manual-badge { background-color: #dc3545 !important; color: #fff !important; }
+
+        .early-underline { text-decoration: underline; text-decoration-color: #dc3545; text-underline-offset: 3px; text-decoration-thickness: 2px; }
+
+        .cal-status { font-size: 0.7rem; margin-top: 2px; letter-spacing: -0.3px; }
+        .cal-status.off .label { color: #d9534f; font-weight: 700; }
+        .cal-status.off .names { color: #888; font-weight: 500; }
+        .cal-status.duty .label { color: #f29900; font-weight: 700; }
+        .cal-status.duty .names { color: #888; font-weight: 500; }
+
+        .result-list { list-style: none; padding: 0; margin-top: 10px; }
+        .result-list li { background: #f8f9fa; border: 1px solid #dee2e6; padding: 12px; margin-bottom: 8px; border-radius: 4px; font-size: 0.95rem; line-height: 1.5; }
+        
+        #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); z-index: 9999; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; font-weight: 700; color: #28a745; flex-direction: column; gap: 10px; }
+
+        /* 상태 변경 전용 패널 */
+        .my-status-box { background: #f0fdf4; border: 2px solid #28a745; padding: 20px; border-radius: 8px; text-align: center; }
+        .my-status-box h4 { margin-bottom: 15px; color: #155724; font-size: 1.1rem; }
+        .radio-group { display: flex; justify-content: space-around; gap: 10px; font-size: 1rem; font-weight: bold; }
+        .radio-group label { cursor: pointer; display: flex; align-items: center; gap: 5px; }
+        .radio-group input[type="radio"] { transform: scale(1.2); }
+
+        @media (max-width: 768px) {
+            .dispatch-container { flex-direction: column; padding: 10px; margin: 10px auto; gap: 10px; }
+            .sidebar-section { width: 100%; padding: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loading-overlay">
+        <div id="loading-text">배차 데이터 동기화 중...</div>
+    </div>
+
+    <!-- 상단 헤더: 접속정보 및 로그아웃 -->
+    <div style="max-width: 1500px; margin: 10px auto 0; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+        <h2 style="margin:0; color: #28a745;">🚐 배차 현황 (기사 전용)</h2>
+        <div>
+            <span id="welcome-msg" style="font-weight: bold; color: #333; margin-right: 15px;"></span>
+            <button id="btn-admin-return" onclick="goToAdmin()" style="display:none; background: #007bff; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.85rem; margin-right: 5px;">관리자 창으로</button>
+            <button onclick="logout()" style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.85rem;">로그아웃</button>
+        </div>
+    </div>
+
+    <div class="dispatch-container">
+        <!-- 메인 배차 달력 -->
+        <div class="main-section">
+            <div class="card">
+                <div class="calendar-header">
+                    <span id="month-display">📅 2026년 8월</span>
+                    <div>
+                        <button onclick="changeMonth(-1)">&lt;</button>
+                        <button onclick="changeMonth(1)">&gt;</button>
+                    </div>
+                </div>
+                <div class="calendar-grid" id="calendar-grid"></div>
+            </div>
+        </div>
+
+        <!-- 사이드바: 내 상태 관리 및 선택 날짜 상세 -->
+        <div class="sidebar-section">
+            <div class="my-status-box">
+                <h4 id="status-date-title">8월 14일 상태 변경</h4>
+                <div class="radio-group" id="my-status-radios">
+                    <!-- JS에서 라디오 버튼 그려짐 -->
+                </div>
+            </div>
+
+            <h3 style="margin-top: 25px; border-bottom: 2px solid #28a745; padding-bottom: 8px;">선택 날짜 배차 내역</h3>
+            <ul id="result-content" class="result-list">
+                <li style="color:#666;">선택된 날짜의 예약 내역이 없습니다.</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // 🔥 파이어베이스 설정 (모듈 1과 동일해야 연동됨)
+        const firebaseConfig = {
+            apiKey: "AIzaSyCipeqfmU03bZQozFt8MdToxxuDyFIUd-g",
+            authDomain: "park-fc66f.firebaseapp.com",
+            projectId: "park-fc66f",
+            storageBucket: "park-fc66f.firebasestorage.app",
+            messagingSenderId: "93011031366",
+            appId: "1:93011031366:web:72438cb8d71dd5a7902147"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        let currentUser = '';
+        let userRole = '';
+        let currentDate = '';
+        let currentYear, currentMonth;
+        let allReservations = [];
+        let dailyDriverStatus = {};
+
+        // 🔥 로그인 상태 체크
+        function checkAuth() {
+            currentUser = localStorage.getItem('loggedInUser');
+            userRole = localStorage.getItem('userRole');
+
+            if (!currentUser) {
+                alert('로그인이 필요합니다.');
+                window.location.href = 'index.html'; // 비로그인 시 모듈 1(로그인 창)로 강제 추방
+                return false;
+            }
+
+            document.getElementById('welcome-msg').innerText = `👨‍✈️ ${currentUser} 기사님`;
+            
+            // 관리자가 테스트차 넘어온 경우 돌아가기 버튼 표시
+            if (userRole === 'admin') {
+                document.getElementById('btn-admin-return').style.display = 'inline-block';
+            }
+            return true;
+        }
+
+        function logout() {
+            localStorage.removeItem('loggedInUser');
+            localStorage.removeItem('userRole');
+            window.location.href = 'index.html';
+        }
+
+        function goToAdmin() {
+            window.location.href = 'index.html';
+        }
+
+        const koreaHolidays = {
+            "01-01": "신정", "03-01": "삼일절", "05-05": "어린이날", "06-06": "현충일", 
+            "08-15": "광복절", "10-03": "개천절", "10-09": "한글날", "12-25": "기독탄신일",
+            "2026-02-16": "설날연휴", "2026-02-17": "설날", "2026-02-18": "설날연휴",
+            "2026-03-02": "대체공휴일", "2026-05-24": "부처님오신날", "2026-05-25": "대체공휴일",
+            "2026-06-03": "지방선거", "2026-08-17": "대체공휴일", "2026-09-24": "추석연휴", 
+            "2026-09-25": "추석", "2026-09-26": "추석연휴", "2026-10-05": "대체공휴일"
+        };
+        function getHolidayName(year, month, day) {
+            const mmdd = `${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            return koreaHolidays[`${year}-${mmdd}`] || koreaHolidays[mmdd] || null;
+        }
+
+        async function loadFromFirebase() {
+            try {
+                const resSnapshot = await db.collection('reservations').get();
+                allReservations = [];
+                resSnapshot.forEach(doc => allReservations.push(doc.data()));
+
+                const statusSnapshot = await db.collection('daily_status').get();
+                dailyDriverStatus = {};
+                statusSnapshot.forEach(doc => { dailyDriverStatus[doc.id] = doc.data(); });
+                
+            } catch (error) {
+                console.warn("DB 읽기 실패", error);
+            } finally {
+                renderCalendar();
+                selectDate(currentDate);
+                document.getElementById('loading-overlay').style.display = 'none';
+            }
+        }
+
+        function changeMonth(offset) {
+            currentMonth += offset;
+            if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+            else if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+            renderCalendar();
+        }
+
+        function renderCalendar() {
+            document.getElementById('month-display').innerText = `📅 ${currentYear}년 ${currentMonth + 1}월`;
+            const grid = document.getElementById('calendar-grid');
+            grid.innerHTML = `<div class="calendar-day-header sun">일</div><div class="calendar-day-header">월</div><div class="calendar-day-header">화</div><div class="calendar-day-header">수</div><div class="calendar-day-header">목</div><div class="calendar-day-header">금</div><div class="calendar-day-header sat">토</div>`;
+
+            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+            const lastDate = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+            for (let i = 0; i < firstDay; i++) grid.innerHTML += `<div class="calendar-cell" style="background:#f4f6f9; cursor:default;"></div>`;
+
+            for (let d = 1; d <= lastDate; d++) {
+                const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                const dayOfWeek = (firstDay + d - 1) % 7;
+                const holidayName = getHolidayName(currentYear, currentMonth + 1, d);
+                let extraClass = (dayOfWeek === 0) ? 'sun ' : (dayOfWeek === 6) ? 'sat ' : '';
+                let extraHTML = '';
+
+                if (holidayName) { extraClass += 'holiday '; extraHTML = `<span class="holiday-name">${holidayName}</span>`; }
+                if (dateStr === currentDate) extraClass += 'selected ';
+
+                grid.innerHTML += `
+                    <div class="calendar-cell ${extraClass}" data-date="${dateStr}" onclick="selectDate('${dateStr}')">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                            <span class="date-num">${d}</span>${extraHTML}
+                        </div>
+                        <div class="tag-container" id="tags_${dateStr}"></div>
+                        <div id="cell_status_${dateStr}" style="margin-top:auto; padding-top:4px; border-top:1px dashed #eee; display:none; flex-direction:column; gap:2px;"></div>
+                    </div>`;
+            }
+            for (let d = 1; d <= lastDate; d++) updateCalendarCellUI(`${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`);
+        }
+
+        function updateCalendarCellUI(date) {
+            const tagsContainer = document.getElementById(`tags_${date}`);
+            const statusContainer = document.getElementById(`cell_status_${date}`);
+            if (!tagsContainer || !statusContainer) return;
+
+            const activeReservations = allReservations.filter(r => r.dates.includes(date));
+            
+            let tagsHTML = '';
+
+            activeReservations.forEach(d => {
+                let shortType = d.type.replace('예약', '').replace('지원', '').replace('투어', '').replace('동행', '').replace('운행', '');
+                let boxClass = 'default'; let badgeClass = 'default';
+
+                if (shortType === '공공') { boxClass = 'pub'; badgeClass = 'pub'; }
+                else if (shortType === '성묘') { boxClass = 'grave'; badgeClass = 'grave'; }
+                else if (shortType === '1박') { boxClass = 'night1'; badgeClass = 'night1'; }
+                else if (shortType === '2박') { boxClass = 'night2'; badgeClass = 'night2'; }
+                else if (shortType === '서울') { boxClass = 'seoul'; badgeClass = 'seoul'; }
+                else if (shortType === '시티') { boxClass = 'citytour'; badgeClass = 'citytour'; }
+
+                if (d.isManual) badgeClass = 'manual-badge';
+
+                let canceledBoxStyle = d.isCanceled ? 'background-color: transparent; border: 1px dashed #adb5bd; color: #adb5bd; text-decoration: line-through;' : '';
+                let canceledBadgeStyle = d.isCanceled ? 'background-color: transparent; color: #adb5bd; border: 1px solid #adb5bd;' : '';
+                
+                let assignedNamesHTML = d.assigned.map((name, idx) => {
+                    let isUnderline = (idx === 0 && d.isEarly1) || (idx === 1 && d.isEarly2);
+                    // 내 이름 강조
+                    if(name === currentUser && !d.isCanceled) name = `<span style="color:#0056b3; font-weight:900;">${name}</span>`;
+                    return (isUnderline && !d.isCanceled && name !== '미지정') ? `<span class="early-underline">${name}</span>` : name;
+                }).join(', ');
+
+                tagsHTML += `
+                    <div class="event-box ${boxClass}" style="${canceledBoxStyle}">
+                        <span class="badge ${badgeClass}" style="${canceledBadgeStyle}">${shortType}</span> 
+                        ${d.vehicle}: ${assignedNamesHTML}
+                    </div>`;
+            });
+
+            tagsContainer.innerHTML = tagsHTML;
+
+            const statusData = dailyDriverStatus[date] || {};
+            // 휴무나 당직 상태인 기사 찾기
+            const offDrivers = Object.keys(statusData).filter(d => statusData[d] === '휴무');
+            const dutyDrivers = Object.keys(statusData).filter(d => statusData[d] === '당직');
+
+            let statusHTML = '';
+            if (dutyDrivers.length > 0) statusHTML += `<div class="cal-status duty"><span class="label">당직:</span> <span class="names">${dutyDrivers.join(', ')}</span></div>`;
+            if (offDrivers.length > 0) statusHTML += `<div class="cal-status off"><span class="label">휴무:</span> <span class="names">${offDrivers.join(', ')}</span></div>`;
+            
+            if (statusHTML !== '') {
+                statusContainer.style.display = 'flex';
+                statusContainer.innerHTML = statusHTML;
+            } else {
+                statusContainer.style.display = 'none';
+                statusContainer.innerHTML = '';
+            }
+        }
+
+        // 🔥 내 휴무/당직 상태 패널 그리기 및 기능 처리
+        function renderMyStatusPanel(date) {
+            const dObj = new Date(date);
+            document.getElementById('status-date-title').innerText = `${dObj.getMonth() + 1}월 ${dObj.getDate()}일 나의 상태`;
+
+            const currentStatus = (dailyDriverStatus[date] && dailyDriverStatus[date][currentUser]) ? dailyDriverStatus[date][currentUser] : '출근';
+            
+            const radioContainer = document.getElementById('my-status-radios');
+            radioContainer.innerHTML = `
+                <label style="color:#333;"><input type="radio" name="my_st" value="출근" ${currentStatus === '출근' ? 'checked' : ''} onchange="updateMyStatus('${date}', '출근')"> 출근</label>
+                <label style="color:#f29900;"><input type="radio" name="my_st" value="당직" ${currentStatus === '당직' ? 'checked' : ''} onchange="updateMyStatus('${date}', '당직')"> 당직</label>
+                <label style="color:#d9534f;"><input type="radio" name="my_st" value="휴무" ${currentStatus === '휴무' ? 'checked' : ''} onchange="updateMyStatus('${date}', '휴무')"> 휴무</label>
+            `;
+        }
+
+        // 휴무 클릭 시 파이어베이스로 전송 (모듈 1에 즉각 반영)
+        function updateMyStatus(date, newStatus) {
+            if(userRole === 'admin') return alert('관리자 계정은 달력 상태를 변경할 수 없습니다.');
+
+            if (!dailyDriverStatus[date]) dailyDriverStatus[date] = {};
+            dailyDriverStatus[date][currentUser] = newStatus;
+            
+            db.collection('daily_status').doc(date).set(dailyDriverStatus[date])
+            .then(() => {
+                renderCalendar(); // 달력 다시 그리기
+                renderDispatchResult(date); // 결과 리스트 갱신
+            })
+            .catch(e => {
+                alert("상태 업데이트 실패. 다시 시도해주세요.");
+            });
+        }
+
+        function renderDispatchResult(date) {
+            const contentUl = document.getElementById('result-content');
+            const activeReservations = allReservations.filter(r => r.dates.includes(date));
+
+            let html = '';
+
+            if (activeReservations.length === 0) {
+                html += `<li style="color:#666; border:none; background:transparent; padding:0 0 10px 0;">이 날짜에 배차 내역이 없습니다.</li>`;
+            } else {
+                activeReservations.forEach(d => {
+                    let shortType = d.type.replace('예약', '').replace('지원', '').replace('투어', '').replace('동행', '').replace('운행', '');
+                    let badgeClass = 'default';
+
+                    if (shortType === '공공') badgeClass = 'pub';
+                    else if (shortType === '성묘') badgeClass = 'grave';
+                    else if (shortType === '1박') badgeClass = 'night1';
+                    else if (shortType === '2박') badgeClass = 'night2';
+                    else if (shortType === '서울') badgeClass = 'seoul';
+                    else if (shortType === '시티') badgeClass = 'citytour';
+
+                    if (d.isManual) badgeClass = 'manual-badge';
+
+                    let canceledLiStyle = d.isCanceled ? 'color: #adb5bd; text-decoration: line-through;' : '';
+                    let canceledBadgeStyle = d.isCanceled ? 'background-color: transparent; color: #adb5bd; border: 1px solid #adb5bd;' : '';
+                    
+                    let isMyDispatch = false;
+
+                    let assignedNamesHTML = d.assigned.map((name, idx) => {
+                        let isUnderline = (idx === 0 && d.isEarly1) || (idx === 1 && d.isEarly2);
+                        if (name === currentUser && !d.isCanceled) {
+                            isMyDispatch = true;
+                            name = `<span style="color:#0056b3; font-weight:900;">${name}</span>`; // 내 이름 강조
+                        }
+                        return (isUnderline && !d.isCanceled && name !== '미지정') ? `<span class="early-underline">${name}</span>` : name;
+                    }).join(', ');
+                    
+                    if (d.assigned.length === 0) assignedNamesHTML = '인원 부족';
+
+                    // 내 배차면 박스 색상을 다르게
+                    let liStyle = canceledLiStyle;
+                    if (isMyDispatch) liStyle += ' border: 2px solid #007bff; background-color: #f0f7ff;';
+
+                    html += `
+                        <li style="${liStyle}">
+                            <b>[${d.vehicle}]</b> 
+                            <span class="badge ${badgeClass}" style="${canceledBadgeStyle}">${d.type}</span> 
+                            <span class="badge default" style="margin-right:0; ${canceledBadgeStyle}">${d.km}km</span>
+                            ${d.isCanceled ? '<span style="color:#d9534f; font-weight:bold; margin-left:5px; text-decoration:none;">[취소됨]</span>' : ''}<br>
+                            출발지: ${d.start} | 목적지: ${d.dest} <br>
+                            👉 <b style="${d.isCanceled ? 'color:#adb5bd;' : 'color:#28a745;'}">운전원: ${assignedNamesHTML}</b>
+                        </li>`;
+                });
+            }
+
+            // 하단 휴무자 당직자 표시
+            const statusData = dailyDriverStatus[date] || {};
+            const offDrivers = Object.keys(statusData).filter(d => statusData[d] === '휴무');
+            const dutyDrivers = Object.keys(statusData).filter(d => statusData[d] === '당직');
+
+            if (dutyDrivers.length > 0 || offDrivers.length > 0) {
+                html += `<li style="background-color: #fff; border: 2px dashed #28a745; margin-top: 10px; border-radius: 6px;">`;
+                if (dutyDrivers.length > 0) {
+                    html += `<div style="margin-bottom: ${offDrivers.length > 0 ? '8px' : '0'};"><span class="badge" style="background:#f29900; color:#fff;">당직</span> <b style="color:#333;">${dutyDrivers.join(', ')}</b></div>`;
+                }
+                if (offDrivers.length > 0) {
+                    html += `<div><span class="badge" style="background:#d9534f; color:#fff;">휴무</span> <span style="color:#666;">${offDrivers.join(', ')}</span></div>`;
+                }
+                html += `</li>`;
+            }
+
+            contentUl.innerHTML = html;
+        }
+
+        function selectDate(dateStr) {
+            currentDate = dateStr;
+            renderCalendar(); 
+            renderMyStatusPanel(dateStr);
+            renderDispatchResult(dateStr); 
+        }
+
+        // 앱 시작점
+        window.onload = () => {
+            if(checkAuth()) {
+                const _now = new Date();
+                currentYear = _now.getFullYear(); 
+                currentMonth = _now.getMonth(); 
+                currentDate = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(_now.getDate()).padStart(2, '0')}`; 
+                
+                loadFromFirebase();
+            }
+        };
+    </script>
+</body>
+</html>
