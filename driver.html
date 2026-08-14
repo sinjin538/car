@@ -80,7 +80,7 @@
         .radio-group input[type="radio"] { transform: scale(1.2); }
 
         .modal-overlay-custom { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9000; display: none; justify-content: center; align-items: center; }
-        .modal-card { background: #fff; padding: 20px; border-radius: 8px; width: 90%; max-width: 400px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .modal-card { background: #fff; padding: 20px; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-height: 90vh; overflow-y: auto; }
         .form-group { margin-bottom: 12px; }
         .form-group input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.95rem; font-family: inherit;}
         .modal-btns { display: flex; gap: 10px; }
@@ -129,13 +129,16 @@
         </div>
     </div>
 
-    <!-- 상단 헤더 -->
+    <!-- 🔥 상단 헤더: 종합창 가기 버튼 추가 -->
     <div style="max-width: 1500px; margin: 10px auto 0; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; gap: 10px;">
         <h2 style="margin:0; color: #28a745;">🚐 배차 현황 (기사 전용)</h2>
         <div>
             <span id="welcome-msg" style="font-weight: bold; color: #333; margin-right: 15px;"></span>
+            
+            <!-- 종합창(index.html)으로 돌아가는 버튼 -->
+            <button onclick="goToAdmin()" style="background: #007bff; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.85rem; margin-right: 5px;">👈 전체 종합창 가기</button>
+            
             <button onclick="openPwModal()" style="background: #6c757d; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.85rem; margin-right: 5px;">비밀번호 변경</button>
-            <button id="btn-admin-return" onclick="goToAdmin()" style="display:none; background: #007bff; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.85rem; margin-right: 5px;">관리자 창으로</button>
             <button onclick="logout()" style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.85rem;">로그아웃</button>
         </div>
     </div>
@@ -182,7 +185,7 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-        const storage = firebase.storage(); // 🔥 기사님 창에서도 스토리지 권한 열어두기
+        const storage = firebase.storage(); 
 
         let currentUser = '';
         let userRole = '';
@@ -202,10 +205,6 @@
             }
 
             document.getElementById('welcome-msg').innerText = `👨‍✈️ ${currentUser} 기사님`;
-            
-            if (userRole === 'admin') {
-                document.getElementById('btn-admin-return').style.display = 'inline-block';
-            }
             return true;
         }
 
@@ -257,6 +256,7 @@
             window.location.href = 'index.html';
         }
 
+        // 🔥 돌아가기 버튼을 누르면 index.html(종합창)로 이동
         function goToAdmin() {
             window.location.href = 'index.html';
         }
@@ -336,7 +336,7 @@
             for (let d = 1; d <= lastDate; d++) updateCalendarCellUI(`${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`);
         }
 
-        // 🔥 달력에 '내 배차'만 필터링해서 표시 + 클릭 이벤트
+        // 달력에 '내 배차'만 필터링해서 표시 + 클릭 이벤트
         function updateCalendarCellUI(date) {
             const tagsContainer = document.getElementById(`tags_${date}`);
             const statusContainer = document.getElementById(`cell_status_${date}`);
@@ -371,7 +371,6 @@
                     return (isUnderline && !d.isCanceled && name !== '미지정') ? `<span class="early-underline">${name}</span>` : name;
                 }).join(', ');
 
-                // 🔥 클릭 이벤트 추가
                 tagsHTML += `
                     <div class="event-box ${boxClass}" style="${canceledBoxStyle}; cursor:pointer;" onclick="showDispatchDetail(event, '${d.id}')">
                         <span class="badge ${badgeClass}" style="${canceledBadgeStyle}">${shortType}</span> 
@@ -398,7 +397,7 @@
             }
         }
 
-        // 🔥 사진 보여주는 팝업창 
+        // 사진 보여주는 팝업창 (내 배차에서는 사진 보임)
         function showDispatchDetail(event, id) {
             event.stopPropagation(); 
             const d = allReservations.find(r => r.id === id);
@@ -456,6 +455,7 @@
             });
         }
 
+        // 우측 리스트에 '내 배차'만 필터링해서 표시
         function renderDispatchResult(date) {
             const contentUl = document.getElementById('result-content');
             
