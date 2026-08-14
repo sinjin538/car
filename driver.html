@@ -8,6 +8,8 @@
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <!-- 🔥 스토리지(사진) 스크립트 추가 -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
 
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -96,7 +98,7 @@
         <div id="loading-text">배차 데이터 동기화 중...</div>
     </div>
 
-    <!-- 🔥 비밀번호 변경 모달 -->
+    <!-- 비밀번호 변경 모달 -->
     <div id="pw-modal-overlay" class="modal-overlay-custom" onclick="closePwModal()">
         <div class="modal-card" style="max-width: 320px;" onclick="event.stopPropagation()">
             <h4 style="color: #007bff; margin-bottom:15px;">🔑 비밀번호 변경</h4>
@@ -106,6 +108,23 @@
             <div class="modal-btns" style="margin-top: 15px;">
                 <button style="background: #28a745; color:#fff;" onclick="changePassword()">변경 저장</button>
                 <button style="background: #ccc;" onclick="closePwModal()">취소</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🔥 배차 상세 팝업 (사진 포함) -->
+    <div id="detail-modal-overlay" class="modal-overlay-custom" onclick="closeDetailModal()">
+        <div class="modal-card" style="max-width: 500px; width: 95%; max-height: 90vh; overflow-y: auto;" onclick="event.stopPropagation()">
+            <h4 id="detail-modal-title" style="color: #007bff; font-size: 1.3rem; margin-bottom: 15px;"></h4>
+            <div style="font-size: 1.05rem; line-height: 2; margin-bottom: 15px;">
+                <p style="margin:0;"><span style="color:#888; display:inline-block; width:65px;">👨‍✈️ 운전원</span> <b id="detail-modal-drivers" style="color:#333;"></b></p>
+                <p style="margin:0;"><span style="color:#888; display:inline-block; width:65px;">📍 출발지</span> <b id="detail-modal-start" style="color:#28a745;"></b></p>
+                <p style="margin:0;"><span style="color:#888; display:inline-block; width:65px;">🏁 목적지</span> <b id="detail-modal-dest" style="color:#d9534f;"></b></p>
+            </div>
+            <!-- 사진 표시 영역 -->
+            <div id="detail-modal-img-container" style="text-align: center; margin-bottom: 15px; display: none;"></div>
+            <div style="text-align: right;">
+                <button style="padding: 8px 20px; background: #6c757d; color: #fff; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;" onclick="closeDetailModal()">닫기</button>
             </div>
         </div>
     </div>
@@ -153,7 +172,6 @@
     </div>
 
     <script>
-        // 파이어베이스 설정
         const firebaseConfig = {
             apiKey: "AIzaSyCipeqfmU03bZQozFt8MdToxxuDyFIUd-g",
             authDomain: "park-fc66f.firebaseapp.com",
@@ -164,6 +182,7 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
+        const storage = firebase.storage(); // 🔥 기사님 창에서도 스토리지 권한 열어두기
 
         let currentUser = '';
         let userRole = '';
@@ -198,7 +217,6 @@
             document.getElementById('loading-overlay').style.display = 'none';
         }
 
-        // 비밀번호 변경 기능
         function openPwModal() {
             document.getElementById('current-pw').value = '';
             document.getElementById('new-pw').value = '';
@@ -256,7 +274,6 @@
             return koreaHolidays[`${year}-${mmdd}`] || koreaHolidays[mmdd] || null;
         }
 
-        // 데이터 로드
         async function loadFromFirebase() {
             try {
                 const resSnapshot = await db.collection('reservations').get();
@@ -276,7 +293,7 @@
                 } catch(e) {
                     console.error("렌더링 에러:", e);
                 }
-                hideLoading(); // 🔥 에러가 나도 무조건 로딩 화면을 없애주는 안전장치
+                hideLoading(); 
             }
         }
 
@@ -319,13 +336,12 @@
             for (let d = 1; d <= lastDate; d++) updateCalendarCellUI(`${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`);
         }
 
-        // 🔥 달력에 '내 배차'만 필터링해서 표시
+        // 🔥 달력에 '내 배차'만 필터링해서 표시 + 클릭 이벤트
         function updateCalendarCellUI(date) {
             const tagsContainer = document.getElementById(`tags_${date}`);
             const statusContainer = document.getElementById(`cell_status_${date}`);
             if (!tagsContainer || !statusContainer) return;
 
-            // 내 이름이 포함된 배차만 가져오기 (에러 방지 || [] 추가)
             const activeReservations = allReservations.filter(r => 
                 (r.dates || []).includes(date) && (r.assigned || []).includes(currentUser)
             );
@@ -355,8 +371,9 @@
                     return (isUnderline && !d.isCanceled && name !== '미지정') ? `<span class="early-underline">${name}</span>` : name;
                 }).join(', ');
 
+                // 🔥 클릭 이벤트 추가
                 tagsHTML += `
-                    <div class="event-box ${boxClass}" style="${canceledBoxStyle}">
+                    <div class="event-box ${boxClass}" style="${canceledBoxStyle}; cursor:pointer;" onclick="showDispatchDetail(event, '${d.id}')">
                         <span class="badge ${badgeClass}" style="${canceledBadgeStyle}">${shortType}</span> 
                         ${d.vehicle}: ${assignedNamesHTML}
                     </div>`;
@@ -379,6 +396,34 @@
                 statusContainer.style.display = 'none';
                 statusContainer.innerHTML = '';
             }
+        }
+
+        // 🔥 사진 보여주는 팝업창 
+        function showDispatchDetail(event, id) {
+            event.stopPropagation(); 
+            const d = allReservations.find(r => r.id === id);
+            if (!d) return;
+
+            let assigned = (d.assigned && d.assigned.length > 0) ? d.assigned.join(', ') : '미정';
+            document.getElementById('detail-modal-title').innerText = `[${d.vehicle}] ${d.type}`;
+            document.getElementById('detail-modal-drivers').innerText = assigned;
+            document.getElementById('detail-modal-start').innerText = d.start || '지정안됨';
+            document.getElementById('detail-modal-dest').innerText = d.dest || '지정안됨';
+
+            const imgContainer = document.getElementById('detail-modal-img-container');
+            if (d.photoUrl) {
+                imgContainer.innerHTML = `<img src="${d.photoUrl}" style="width: 100%; border-radius: 8px; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">`;
+                imgContainer.style.display = 'block';
+            } else {
+                imgContainer.innerHTML = '<p style="color:#888; font-size:0.9rem;">첨부된 사진이 없습니다.</p>';
+                imgContainer.style.display = 'block';
+            }
+
+            document.getElementById('detail-modal-overlay').style.display = 'flex';
+        }
+
+        function closeDetailModal() {
+            document.getElementById('detail-modal-overlay').style.display = 'none';
         }
 
         function renderMyStatusPanel(date) {
@@ -411,7 +456,6 @@
             });
         }
 
-        // 🔥 우측 리스트에 '내 배차'만 필터링해서 표시
         function renderDispatchResult(date) {
             const contentUl = document.getElementById('result-content');
             
