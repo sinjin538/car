@@ -14,16 +14,18 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; background-color: #f4f6f9; color: #333; letter-spacing: -0.3px; }
         
-        /* 🔥 로그인 화면 UI */
+        /* 🔥 로그인 화면 UI (직접 입력 및 명단 숨김) */
         #login-container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #eef2f7; }
         .login-card { background: #fff; padding: 40px 30px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); width: 340px; text-align: center; }
         .login-card h2 { margin-bottom: 25px; color: #007bff; font-size: 1.5rem; letter-spacing: -1px; }
         .login-input { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 6px; border: 1px solid #ced4da; font-size: 1rem; font-family: inherit; }
         .btn-login { width: 100%; padding: 14px; background: #007bff; color: #fff; border: none; border-radius: 6px; font-weight: 700; font-size: 1.05rem; cursor: pointer; transition: 0.2s; }
         .btn-login:hover { background: #0056b3; }
+        .btn-login:disabled { background: #888; cursor: not-allowed; }
 
         #app-container { display: none; }
 
+        /* 🔥 너비 비율 관리자창(모듈1)과 완벽 통일 */
         .dispatch-container { display: flex; max-width: 1500px; margin: 20px auto; gap: 20px; padding: 0 20px; }
         .main-section { flex: 3.5; display: flex; flex-direction: column; gap: 20px; min-width: 0; }
         .sidebar-section { width: 320px; min-width: 250px; max-width: 800px; flex-shrink: 0; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); height: fit-content; max-height: 90vh; overflow: auto; }
@@ -112,7 +114,7 @@
         </div>
     </div>
 
-    <!-- 🔥 메인 앱 화면 -->
+    <!-- 메인 앱 화면 -->
     <div id="app-container">
         <div id="loading-overlay">
             <div id="loading-text">배차 데이터 동기화 중...</div>
@@ -132,7 +134,7 @@
             </div>
         </div>
 
-        <!-- 배차 상세 팝업 (사진 포함, 출발지 삭제) -->
+        <!-- 🔥 배차 상세 & 정산 팝업 (사진 포함, 출발지 삭제) -->
         <div id="detail-modal-overlay" class="modal-overlay-custom" onclick="closeDetailModal()">
             <div class="modal-card" style="max-width: 500px; width: 95%; max-height: 90vh; overflow-y: auto;" onclick="event.stopPropagation()">
                 <h4 id="detail-modal-title" style="color: #007bff; font-size: 1.3rem; margin-bottom: 15px;"></h4>
@@ -140,8 +142,40 @@
                     <p style="margin:0;"><span style="color:#888; display:inline-block; width:65px;">👨‍✈️ 운전원</span> <b id="detail-modal-drivers" style="color:#333;"></b></p>
                     <p style="margin:0;"><span style="color:#888; display:inline-block; width:65px;">📝 내 용</span> <b id="detail-modal-dest" style="color:#d9534f;"></b></p>
                 </div>
+
+                <!-- 🔥 정산 입력 폼 (기사님 전용) -->
+                <div id="settlement-container" style="background:#f0fdf4; border:2px solid #28a745; border-radius:6px; padding:15px; margin-bottom:15px;">
+                    <h5 style="margin-bottom:10px; color:#155724; font-size:1.05rem;">💰 운행 정산 입력</h5>
+                    
+                    <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+                        <label style="font-weight:bold; cursor:pointer; color:#d9534f;">
+                            <input type="checkbox" id="settle-early" style="transform:scale(1.2); margin-right:5px;"> 선운행 하셨나요?
+                        </label>
+                    </div>
+                    
+                    <div style="display:flex; gap:10px; margin-bottom:10px;">
+                        <div style="flex:1;">
+                            <label style="font-size:0.85rem; font-weight:bold; color:#555;">출근 시간 (예: 7.5)</label>
+                            <input type="number" id="settle-in" step="0.1" placeholder="시간.분" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px; margin-top:5px;">
+                        </div>
+                        <div style="flex:1;">
+                            <label style="font-size:0.85rem; font-weight:bold; color:#555;">퇴근 시간 (예: 18.5)</label>
+                            <input type="number" id="settle-out" step="0.1" placeholder="시간.분" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px; margin-top:5px;">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label style="font-size:0.85rem; font-weight:bold; color:#555;">지출 비용 (원)</label>
+                        <input type="number" id="settle-exp" placeholder="예: 5000 (통행료/주차비 등)" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px; margin-top:5px;">
+                    </div>
+                    
+                    <button onclick="saveSettlement()" style="width:100%; padding:12px; background:#28a745; color:#fff; border:none; border-radius:4px; font-weight:bold; margin-top:15px; cursor:pointer; font-size:1rem;">💾 정산 제출하기</button>
+                    <input type="hidden" id="settle-res-id">
+                </div>
+
                 <!-- 사진 표시 영역 -->
                 <div id="detail-modal-img-container" style="text-align: center; margin-bottom: 15px; display: none;"></div>
+                
                 <div style="text-align: right;">
                     <button style="padding: 8px 20px; background: #6c757d; color: #fff; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;" onclick="closeDetailModal()">닫기</button>
                 </div>
@@ -226,13 +260,20 @@
         let allReservations = [];
         let dailyDriverStatus = {};
 
+        // 🔥 오류 알림 및 로딩 방지 방어 로직 강화
         async function handleLogin() {
             const id = document.getElementById('login-id').value.trim();
             const pw = document.getElementById('login-pw').value;
             const btn = document.getElementById('btn-login');
 
             if (!id) return alert('이름(또는 아이디)을 입력해주세요.');
-            if (!systemUsers[id]) return alert('등록되지 않은 사용자입니다.');
+            
+            if (!systemUsers[id]) {
+                alert('등록되지 않은 사용자입니다. 이름을 정확히 확인해 주세요.');
+                document.getElementById('login-id').value = ''; 
+                return;
+            }
+
             if (!pw) return alert('비밀번호를 입력해주세요.');
 
             btn.innerText = '인증 확인 중...';
@@ -251,7 +292,11 @@
             btn.innerText = '접속하기';
             btn.disabled = false;
 
-            if (pw !== realPw) return alert('비밀번호가 틀렸습니다.');
+            if (pw !== realPw) {
+                alert('비밀번호가 틀렸습니다.');
+                document.getElementById('login-pw').value = ''; 
+                return;
+            }
 
             localStorage.setItem('loggedInUser', id);
             localStorage.setItem('userRole', systemUsers[id].role);
@@ -317,10 +362,17 @@
             hideLoading();
         }
 
+        // 🔥 로그아웃 시 흔적(아이디/비번) 싹 청소하기
         function logout() {
             localStorage.removeItem('loggedInUser');
             localStorage.removeItem('userRole');
             localStorage.removeItem('loggedInPw');
+            
+            const idInput = document.getElementById('login-id');
+            const pwInput = document.getElementById('login-pw');
+            if(idInput) idInput.value = '';
+            if(pwInput) pwInput.value = '';
+
             window.location.reload();
         }
 
@@ -464,7 +516,7 @@
             }
         }
 
-        // 사진 보여주는 팝업창 (내 배차에서는 사진 보임)
+        // 🔥 사진 및 정산폼 띄우기
         function showDispatchDetail(event, id) {
             event.stopPropagation(); 
             const d = allReservations.find(r => r.id === id);
@@ -474,6 +526,13 @@
             document.getElementById('detail-modal-title').innerText = `[${d.vehicle}] ${d.type}`;
             document.getElementById('detail-modal-drivers').innerText = assigned;
             document.getElementById('detail-modal-dest').innerText = d.dest || '내용 없음'; 
+
+            // 🔥 정산 폼에 기존에 적어둔 데이터 불러오기
+            document.getElementById('settle-res-id').value = d.id;
+            document.getElementById('settle-early').checked = d.isEarlyDriver || false;
+            document.getElementById('settle-in').value = d.clockIn || '';
+            document.getElementById('settle-out').value = d.clockOut || '';
+            document.getElementById('settle-exp').value = d.expense || '';
 
             const imgContainer = document.getElementById('detail-modal-img-container');
             if (d.photoUrl) {
@@ -489,6 +548,46 @@
 
         function closeDetailModal() {
             document.getElementById('detail-modal-overlay').style.display = 'none';
+        }
+
+        // 🔥 기사님이 쓴 정산 데이터를 저장하는 함수
+        function saveSettlement() {
+            const resId = document.getElementById('settle-res-id').value;
+            const isEarly = document.getElementById('settle-early').checked;
+            const clockIn = document.getElementById('settle-in').value;
+            const clockOut = document.getElementById('settle-out').value;
+            const expense = document.getElementById('settle-exp').value;
+
+            if (!resId) return;
+
+            showLoading('정산 데이터를 저장하는 중입니다...');
+            
+            // 파이어베이스에 직접 업데이트
+            db.collection('reservations').doc(resId).set({
+                isEarlyDriver: isEarly,
+                clockIn: clockIn,
+                clockOut: clockOut,
+                expense: expense
+            }, { merge: true })
+            .then(() => {
+                // 현재 화면의 로컬 데이터도 바로 업데이트 해줌 (새로고침 없이 반영)
+                const idx = allReservations.findIndex(r => r.id === resId);
+                if (idx !== -1) {
+                    allReservations[idx].isEarlyDriver = isEarly;
+                    allReservations[idx].clockIn = clockIn;
+                    allReservations[idx].clockOut = clockOut;
+                    allReservations[idx].expense = expense;
+                }
+                
+                alert('정산 데이터가 성공적으로 제출되었습니다!');
+                renderDispatchResult(currentDate); 
+                closeDetailModal();
+                hideLoading();
+            })
+            .catch(error => {
+                alert('오류가 발생했습니다. 다시 시도해주세요.');
+                hideLoading();
+            });
         }
 
         function renderMyStatusPanel(date) {
@@ -521,7 +620,7 @@
             });
         }
 
-        // 우측 리스트에 '내 배차'만 필터링해서 표시
+        // 🔥 우측 리스트에 제출한 정산(출근/퇴근/비용) 내용 실시간 표기
         function renderDispatchResult(date) {
             const contentUl = document.getElementById('result-content');
             
@@ -561,6 +660,14 @@
                     
                     if ((d.assigned || []).length === 0) assignedNamesHTML = '인원 부족';
 
+                    // 정산 입력 데이터가 있으면 멋지게 띄워주기
+                    let reportText = '';
+                    if (d.clockIn || d.clockOut || d.expense || d.isEarlyDriver) {
+                        reportText = `<div style="margin-top:8px; font-size:0.85rem; color:#155724; background:#d4edda; padding:6px 10px; border-radius:4px; border: 1px solid #c3e6cb;">
+                            ${d.isEarlyDriver ? '🚀 <b>[선운행]</b> ' : ''}⏰ 출근: ${d.clockIn || '-'} | 퇴근: ${d.clockOut || '-'} | 💳 비용: ${d.expense || '0'}원
+                        </div>`;
+                    }
+
                     let liStyle = canceledLiStyle + ' border: 2px solid #007bff; background-color: #f0f7ff;';
 
                     html += `
@@ -571,6 +678,7 @@
                             ${d.isCanceled ? '<span style="color:#d9534f; font-weight:bold; margin-left:5px; text-decoration:none;">[취소됨]</span>' : ''}<br>
                             📝 내용: ${d.dest} <br>
                             👉 <b style="${d.isCanceled ? 'color:#adb5bd;' : 'color:#28a745;'}">운전원: ${assignedNamesHTML}</b>
+                            ${reportText}
                         </li>`;
                 });
             }
