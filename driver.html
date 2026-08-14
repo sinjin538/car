@@ -96,7 +96,7 @@
         <div id="loading-text">배차 데이터 동기화 중...</div>
     </div>
 
-    <!-- 🔥 비밀번호 변경 모달 (기사님 창 전용) -->
+    <!-- 🔥 비밀번호 변경 모달 -->
     <div id="pw-modal-overlay" class="modal-overlay-custom" onclick="closePwModal()">
         <div class="modal-card" style="max-width: 320px;" onclick="event.stopPropagation()">
             <h4 style="color: #007bff; margin-bottom:15px;">🔑 비밀번호 변경</h4>
@@ -110,12 +110,11 @@
         </div>
     </div>
 
-    <!-- 상단 헤더: 접속정보 및 버튼 -->
+    <!-- 상단 헤더 -->
     <div style="max-width: 1500px; margin: 10px auto 0; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; gap: 10px;">
         <h2 style="margin:0; color: #28a745;">🚐 배차 현황 (기사 전용)</h2>
         <div>
             <span id="welcome-msg" style="font-weight: bold; color: #333; margin-right: 15px;"></span>
-            <!-- 🔥 비밀번호 변경 버튼 -->
             <button onclick="openPwModal()" style="background: #6c757d; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.85rem; margin-right: 5px;">비밀번호 변경</button>
             <button id="btn-admin-return" onclick="goToAdmin()" style="display:none; background: #007bff; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.85rem; margin-right: 5px;">관리자 창으로</button>
             <button onclick="logout()" style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.85rem;">로그아웃</button>
@@ -140,13 +139,13 @@
         <!-- 사이드바: 내 상태 관리 및 선택 날짜 상세 -->
         <div class="sidebar-section">
             <div class="my-status-box">
-                <h4 id="status-date-title">8월 14일 상태 변경</h4>
+                <h4 id="status-date-title">상태 변경</h4>
                 <div class="radio-group" id="my-status-radios">
                     <!-- JS에서 라디오 버튼 그려짐 -->
                 </div>
             </div>
 
-            <h3 style="margin-top: 25px; border-bottom: 2px solid #28a745; padding-bottom: 8px;">선택 날짜 배차 내역</h3>
+            <h3 style="margin-top: 25px; border-bottom: 2px solid #28a745; padding-bottom: 8px;">선택 날짜 내 배차 내역</h3>
             <ul id="result-content" class="result-list">
                 <li style="color:#666;">선택된 날짜의 예약 내역이 없습니다.</li>
             </ul>
@@ -191,7 +190,6 @@
             return true;
         }
 
-        // 🔥 비밀번호 변경 관련 기능
         function showLoading(msg = '서버 처리 중...') {
             document.getElementById('loading-text').innerText = msg;
             document.getElementById('loading-overlay').style.display = 'flex';
@@ -200,6 +198,7 @@
             document.getElementById('loading-overlay').style.display = 'none';
         }
 
+        // 비밀번호 변경 기능
         function openPwModal() {
             document.getElementById('current-pw').value = '';
             document.getElementById('new-pw').value = '';
@@ -257,6 +256,7 @@
             return koreaHolidays[`${year}-${mmdd}`] || koreaHolidays[mmdd] || null;
         }
 
+        // 데이터 로드
         async function loadFromFirebase() {
             try {
                 const resSnapshot = await db.collection('reservations').get();
@@ -270,9 +270,13 @@
             } catch (error) {
                 console.warn("DB 읽기 실패", error);
             } finally {
-                renderCalendar();
-                selectDate(currentDate);
-                hideLoading();
+                try {
+                    renderCalendar();
+                    selectDate(currentDate);
+                } catch(e) {
+                    console.error("렌더링 에러:", e);
+                }
+                hideLoading(); // 🔥 에러가 나도 무조건 로딩 화면을 없애주는 안전장치
             }
         }
 
@@ -315,20 +319,21 @@
             for (let d = 1; d <= lastDate; d++) updateCalendarCellUI(`${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`);
         }
 
+        // 🔥 달력에 '내 배차'만 필터링해서 표시
         function updateCalendarCellUI(date) {
             const tagsContainer = document.getElementById(`tags_${date}`);
             const statusContainer = document.getElementById(`cell_status_${date}`);
             if (!tagsContainer || !statusContainer) return;
 
-            // 🔥 [핵심 수정] 전체 배차 중 '내 이름(currentUser)'이 포함된 배차만 필터링!
+            // 내 이름이 포함된 배차만 가져오기 (에러 방지 || [] 추가)
             const activeReservations = allReservations.filter(r => 
-                r.dates.includes(date) && r.assigned.includes(currentUser)
+                (r.dates || []).includes(date) && (r.assigned || []).includes(currentUser)
             );
             
             let tagsHTML = '';
 
             activeReservations.forEach(d => {
-                let shortType = d.type.replace('예약', '').replace('지원', '').replace('투어', '').replace('동행', '').replace('운행', '');
+                let shortType = (d.type || '').replace('예약', '').replace('지원', '').replace('투어', '').replace('동행', '').replace('운행', '');
                 let boxClass = 'default'; let badgeClass = 'default';
 
                 if (shortType === '공공') { boxClass = 'pub'; badgeClass = 'pub'; }
@@ -344,9 +349,8 @@
                 let canceledBoxStyle = d.isCanceled ? 'background-color: transparent; border: 1px dashed #adb5bd; color: #adb5bd; text-decoration: line-through;' : '';
                 let canceledBadgeStyle = d.isCanceled ? 'background-color: transparent; color: #adb5bd; border: 1px solid #adb5bd;' : '';
                 
-                let assignedNamesHTML = d.assigned.map((name, idx) => {
+                let assignedNamesHTML = (d.assigned || []).map((name, idx) => {
                     let isUnderline = (idx === 0 && d.isEarly1) || (idx === 1 && d.isEarly2);
-                    // 내 배차만 나오므로 무조건 내 이름 강조
                     if(name === currentUser && !d.isCanceled) name = `<span style="color:#0056b3; font-weight:900;">${name}</span>`;
                     return (isUnderline && !d.isCanceled && name !== '미지정') ? `<span class="early-underline">${name}</span>` : name;
                 }).join(', ');
@@ -361,7 +365,6 @@
             tagsContainer.innerHTML = tagsHTML;
 
             const statusData = dailyDriverStatus[date] || {};
-            // 휴무나 당직 상태 표시
             const offDrivers = Object.keys(statusData).filter(d => statusData[d] === '휴무');
             const dutyDrivers = Object.keys(statusData).filter(d => statusData[d] === '당직');
 
@@ -408,22 +411,21 @@
             });
         }
 
+        // 🔥 우측 리스트에 '내 배차'만 필터링해서 표시
         function renderDispatchResult(date) {
             const contentUl = document.getElementById('result-content');
             
-            // 🔥 [핵심 수정] 하단 리스트에도 '내 이름(currentUser)'이 들어간 배차만 필터링!
             const activeReservations = allReservations.filter(r => 
-                r.dates.includes(date) && r.assigned.includes(currentUser)
+                (r.dates || []).includes(date) && (r.assigned || []).includes(currentUser)
             );
 
             let html = '';
 
             if (activeReservations.length === 0) {
-                // 문구도 '내 배차'에 맞게 수정
                 html += `<li style="color:#666; border:none; background:transparent; padding:0 0 10px 0;">이 날짜에 배정된 <b>내 배차 내역</b>이 없습니다.</li>`;
             } else {
                 activeReservations.forEach(d => {
-                    let shortType = d.type.replace('예약', '').replace('지원', '').replace('투어', '').replace('동행', '').replace('운행', '');
+                    let shortType = (d.type || '').replace('예약', '').replace('지원', '').replace('투어', '').replace('동행', '').replace('운행', '');
                     let badgeClass = 'default';
 
                     if (shortType === '공공') badgeClass = 'pub';
@@ -439,7 +441,7 @@
                     let canceledLiStyle = d.isCanceled ? 'color: #adb5bd; text-decoration: line-through;' : '';
                     let canceledBadgeStyle = d.isCanceled ? 'background-color: transparent; color: #adb5bd; border: 1px solid #adb5bd;' : '';
                     
-                    let assignedNamesHTML = d.assigned.map((name, idx) => {
+                    let assignedNamesHTML = (d.assigned || []).map((name, idx) => {
                         let isUnderline = (idx === 0 && d.isEarly1) || (idx === 1 && d.isEarly2);
                         if (name === currentUser && !d.isCanceled) {
                             name = `<span style="color:#0056b3; font-weight:900;">${name}</span>`; 
@@ -447,15 +449,14 @@
                         return (isUnderline && !d.isCanceled && name !== '미지정') ? `<span class="early-underline">${name}</span>` : name;
                     }).join(', ');
                     
-                    if (d.assigned.length === 0) assignedNamesHTML = '인원 부족';
+                    if ((d.assigned || []).length === 0) assignedNamesHTML = '인원 부족';
 
-                    // 내 배차이므로 파란 테두리 고정
                     let liStyle = canceledLiStyle + ' border: 2px solid #007bff; background-color: #f0f7ff;';
 
                     html += `
                         <li style="${liStyle}">
                             <b>[${d.vehicle}]</b> 
-                            <span class="badge ${badgeClass}" style="${canceledBadgeStyle}">${d.type}</span> 
+                            <span class="badge ${badgeClass}" style="${canceledBadgeStyle}">${shortType}</span> 
                             <span class="badge default" style="margin-right:0; ${canceledBadgeStyle}">${d.km}km</span>
                             ${d.isCanceled ? '<span style="color:#d9534f; font-weight:bold; margin-left:5px; text-decoration:none;">[취소됨]</span>' : ''}<br>
                             출발지: ${d.start} | 목적지: ${d.dest} <br>
@@ -464,7 +465,6 @@
                 });
             }
 
-            // 하단 당직/휴무자 현황은 동일하게 유지
             const statusData = dailyDriverStatus[date] || {};
             const offDrivers = Object.keys(statusData).filter(d => statusData[d] === '휴무');
             const dutyDrivers = Object.keys(statusData).filter(d => statusData[d] === '당직');
@@ -482,7 +482,6 @@
 
             contentUl.innerHTML = html;
         }
-            
 
         function selectDate(dateStr) {
             currentDate = dateStr;
