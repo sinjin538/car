@@ -217,7 +217,7 @@
         <div style="max-width: 1500px; margin: 10px auto 0; padding: 10px 20px; display: flex; justify-content: flex-end; align-items: center; gap: 10px;">
             <span id="welcome-msg" style="font-weight: bold; color: #333;"></span>
             <button onclick="openPwModal()" style="background: #6c757d; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.85rem;">비밀번호 변경</button>
-            <button onclick="goToModule2()" style="background: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.85rem;">[모듈2] 기사창 이동</button>
+            <button onclick="goToModule2()" style="background: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.85rem;">[모듈2] 내배차 이동</button>
             <button onclick="logout()" style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.85rem;">로그아웃</button>
         </div>
 
@@ -458,16 +458,27 @@
             const userRole = localStorage.getItem('userRole');
 
             if (!currentUser) {
+                // 비로그인 상태면 로그인 창 표시
                 document.getElementById('login-container').style.display = 'flex';
                 document.getElementById('app-container').style.display = 'none';
-            } else if (userRole === 'driver') {
-                alert(`${currentUser} 기사님, 환영합니다!\n기사님 전용 페이지로 이동합니다.`);
-                window.location.href = 'driver.html'; 
-            } else if (userRole === 'admin') {
+            } else {
+                // 🔥 관리자, 기사님 상관없이 일단 무조건 종합 달력(메인) 화면으로 진입!
                 document.getElementById('login-container').style.display = 'none';
                 document.getElementById('app-container').style.display = 'block';
-                document.getElementById('welcome-msg').innerText = `[관리자] ${currentUser}님 접속중`;
                 
+                if (userRole === 'admin') {
+                    // ✅ 관리자일 경우: 모든 권한 오픈
+                    document.getElementById('welcome-msg').innerText = `[관리자] ${currentUser}님`;
+                    document.querySelector('.sidebar-section').style.display = 'block'; // 우측 예약 입력창 보이기
+                    document.querySelector('.btn-edit-drivers').style.display = 'block'; // 순번 관리 버튼 보이기
+                } else if (userRole === 'driver') {
+                    // 🚫 기사님일 경우: 보기만 가능하도록 통제 기능 싹 숨기기!
+                    document.getElementById('welcome-msg').innerText = `👨‍✈️ ${currentUser} 기사님 (전체 보기)`;
+                    document.querySelector('.sidebar-section').style.display = 'none'; // 예약 입력창 숨기기!
+                    document.querySelector('.btn-edit-drivers').style.display = 'none'; // 순번 관리 버튼 숨기기!
+                }
+                
+                // 달력 및 데이터 불러오기
                 renderCalendar();
                 selectDate(currentDate);
                 loadFromFirebase();
