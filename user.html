@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>모듈2 - 내 페이지 (운전원 전용)</title>
+    <style>
+        body { font-family: 'Malgun Gothic', sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; }
+        .box { border: 1px solid #ccc; padding: 15px; margin-top: 15px; border-radius: 8px; }
+        .my-box { background-color: #eef7ff; border-color: #007bff; }
+        .readonly-box { background-color: #f9f9f9; }
+        .readonly-list { color: #555; }
+        input[type="date"] { padding: 10px; font-size: 16px; margin-right: 10px; }
+        button { padding: 10px 15px; cursor: pointer; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <button onclick="goToModule1()">⬅ 모듈1로 돌아가기</button>
+    <hr>
+    
+    <h2>👤 접속 운전자: <span id="driver-name" style="color: #007bff;"></span></h2>
+
+    <!-- 본인 휴무 신청 영역 -->
+    <div class="box my-box">
+        <h3>🗓 내 휴무 신청 (기본 달력)</h3>
+        <input type="date" id="my-holiday-date">
+        <button onclick="applyMyHoliday()" style="background-color:#007bff; color:white; border:none; border-radius:4px;">휴무 체크 (적용)</button>
+        
+        <h4>✅ 나의 휴무 일정</h4>
+        <ul id="my-holiday-list"></ul>
+    </div>
+
+    <!-- 전체 일정 보기 영역 (읽기 전용) -->
+    <div class="box readonly-box">
+        <h3>👀 전체 휴무 현황 (읽기 전용)</h3>
+        <p style="font-size:0.8em; color:gray;">* 모듈1에서 관리되는 전체 휴무 일정입니다.</p>
+        <ul id="all-holiday-list" class="readonly-list"></ul>
+    </div>
+
+    <script>
+        const currentUser = localStorage.getItem('currentUser');
+        
+        // 로그인 상태 검증
+        if(!currentUser) {
+            alert('로그인이 필요합니다. 모듈1로 이동합니다.');
+            window.location.href = 'index.html';
+        }
+
+        document.getElementById('driver-name').innerText = currentUser;
+
+        function getHolidays() { return JSON.parse(localStorage.getItem('holidays') || '[]'); }
+        function saveHolidays(data) { localStorage.setItem('holidays', JSON.stringify(data)); }
+
+        function goToModule1() {
+            window.location.href = 'index.html';
+        }
+
+        // 운전원 본인 휴무 신청 로직
+        function applyMyHoliday() {
+            const date = document.getElementById('my-holiday-date').value;
+            if(!date) return alert('달력에서 날짜를 선택하세요.');
+            
+            const holidays = getHolidays();
+            if(holidays.find(h => h.date === date && h.name === currentUser)) {
+                return alert('이미 해당 날짜에 휴무를 신청하셨습니다.');
+            }
+
+            holidays.push({ date: date, name: currentUser });
+            saveHolidays(holidays);
+            alert('휴무가 성공적으로 적용되었습니다. (모듈1에 동기화 완료)');
+            
+            // 입력창 초기화 및 리스트 갱신
+            document.getElementById('my-holiday-date').value = '';
+            renderLists();
+        }
+
+        // 휴무 리스트 렌더링 로직
+        function renderLists() {
+            const holidays = getHolidays();
+            holidays.sort((a,b) => a.date.localeCompare(b.date)); // 날짜순 정렬
+
+            const myUl = document.getElementById('my-holiday-list');
+            const allUl = document.getElementById('all-holiday-list');
+            myUl.innerHTML = '';
+            allUl.innerHTML = '';
+
+            holidays.forEach((h, index) => {
+                // 전체 목록 (읽기 전용)
+                const allLi = document.createElement('li');
+                allLi.innerHTML = `🗓 ${h.date} - <strong>${h.name}</strong>`;
+                allUl.appendChild(allLi);
+
+                // 내 목록 (본인 휴무만 취소 가능)
+                if(h.name === currentUser) {
+                    const myLi = document.createElement('li');
+                    myLi.innerHTML = `🗓 ${h.date} 휴무 `;
+                    
+                    const cancelBtn = document.createElement('button');
+                    cancelBtn.innerText = '취소';
+                    cancelBtn.style.padding = '2px 8px';
+                    cancelBtn.onclick = () => {
+                        if(confirm('이 휴무를 취소하시겠습니까?')) {
+                            const newHolidays = getHolidays();
+                            newHolidays.splice(index, 1); // 해당 휴무 삭제
+                            saveHolidays(newHolidays);
+                            renderLists(); // 화면 새로고침
+                        }
+                    };
+                    myLi.appendChild(cancelBtn);
+                    myUl.appendChild(myLi);
+                }
+            });
+        }
+
+        // 페이지 로딩 시 초기 렌더링
+        renderLists();
+    </script>
+</body>
+</html>
