@@ -8,7 +8,6 @@
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-    <!-- 🔥 스토리지(사진) 스크립트 추가 -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
 
     <style>
@@ -16,14 +15,15 @@
         body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; background-color: #f4f6f9; color: #333; letter-spacing: -0.3px; }
         
         .dispatch-container { display: flex; max-width: 1500px; margin: 20px auto; gap: 20px; padding: 0 20px; }
+        
+        /* 🔥 너비 비율 완벽 통일 */
         .main-section { flex: 3.5; display: flex; flex-direction: column; gap: 20px; min-width: 0; }
-        .sidebar-section { width: 320px; min-width: 250px; flex-shrink: 0; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); height: fit-content; }
+        .sidebar-section { width: 320px; min-width: 250px; max-width: 800px; flex-shrink: 0; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); height: fit-content; max-height: 90vh; overflow: auto; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(140px, 1fr)); gap: 4px; overflow-x: auto; padding-bottom: 5px; }
+        
         .card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-
         .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 1.25rem; font-weight: 700; }
         .calendar-header button { padding: 4px 12px; font-size: 1.1rem; cursor: pointer; border: 1px solid #ccc; background: #fff; border-radius: 4px; font-family: inherit;}
-        
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(140px, 1fr)); gap: 4px; overflow-x: auto; padding-bottom: 5px; }
         
         .calendar-day-header { font-weight: 700; text-align: center; padding: 8px; background: #eef2f7; border-radius: 4px; font-size: 0.95rem; }
         .calendar-day-header.sun { color: #d9534f; }
@@ -112,14 +112,13 @@
         </div>
     </div>
 
-    <!-- 🔥 배차 상세 팝업 (사진 포함) -->
+    <!-- 🔥 배차 상세 팝업 (사진 포함, 출발지 삭제) -->
     <div id="detail-modal-overlay" class="modal-overlay-custom" onclick="closeDetailModal()">
         <div class="modal-card" style="max-width: 500px; width: 95%; max-height: 90vh; overflow-y: auto;" onclick="event.stopPropagation()">
             <h4 id="detail-modal-title" style="color: #007bff; font-size: 1.3rem; margin-bottom: 15px;"></h4>
             <div style="font-size: 1.05rem; line-height: 2; margin-bottom: 15px;">
                 <p style="margin:0;"><span style="color:#888; display:inline-block; width:65px;">👨‍✈️ 운전원</span> <b id="detail-modal-drivers" style="color:#333;"></b></p>
-                <p style="margin:0;"><span style="color:#888; display:inline-block; width:65px;">📍 출발지</span> <b id="detail-modal-start" style="color:#28a745;"></b></p>
-                <p style="margin:0;"><span style="color:#888; display:inline-block; width:65px;">🏁 목적지</span> <b id="detail-modal-dest" style="color:#d9534f;"></b></p>
+                <p style="margin:0;"><span style="color:#888; display:inline-block; width:65px;">📝 내 용</span> <b id="detail-modal-dest" style="color:#d9534f;"></b></p>
             </div>
             <!-- 사진 표시 영역 -->
             <div id="detail-modal-img-container" style="text-align: center; margin-bottom: 15px; display: none;"></div>
@@ -129,15 +128,12 @@
         </div>
     </div>
 
-    <!-- 🔥 상단 헤더: 종합창 가기 버튼 추가 -->
+    <!-- 상단 헤더: 종합창 가기 버튼 -->
     <div style="max-width: 1500px; margin: 10px auto 0; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; gap: 10px;">
-        <h2 style="margin:0; color: #28a745;">🚐 배차 현황 (기사 전용)</h2>
+        <h2 style="margin:0; color: #28a745;">🚐 배차 현황 (내 배차)</h2>
         <div>
             <span id="welcome-msg" style="font-weight: bold; color: #333; margin-right: 15px;"></span>
-            
-            <!-- 종합창(index.html)으로 돌아가는 버튼 -->
             <button onclick="goToAdmin()" style="background: #007bff; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.85rem; margin-right: 5px;">👈 전체 종합창 가기</button>
-            
             <button onclick="openPwModal()" style="background: #6c757d; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.85rem; margin-right: 5px;">비밀번호 변경</button>
             <button onclick="logout()" style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.85rem;">로그아웃</button>
         </div>
@@ -256,7 +252,6 @@
             window.location.href = 'index.html';
         }
 
-        // 🔥 돌아가기 버튼을 누르면 index.html(종합창)로 이동
         function goToAdmin() {
             window.location.href = 'index.html';
         }
@@ -336,7 +331,7 @@
             for (let d = 1; d <= lastDate; d++) updateCalendarCellUI(`${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`);
         }
 
-        // 달력에 '내 배차'만 필터링해서 표시 + 클릭 이벤트
+        // 달력에 '내 배차'만 필터링해서 표시
         function updateCalendarCellUI(date) {
             const tagsContainer = document.getElementById(`tags_${date}`);
             const statusContainer = document.getElementById(`cell_status_${date}`);
@@ -397,7 +392,7 @@
             }
         }
 
-        // 사진 보여주는 팝업창 (내 배차에서는 사진 보임)
+        // 🔥 사진 보여주는 팝업창 (내 배차에서는 사진 보임)
         function showDispatchDetail(event, id) {
             event.stopPropagation(); 
             const d = allReservations.find(r => r.id === id);
@@ -406,8 +401,7 @@
             let assigned = (d.assigned && d.assigned.length > 0) ? d.assigned.join(', ') : '미정';
             document.getElementById('detail-modal-title').innerText = `[${d.vehicle}] ${d.type}`;
             document.getElementById('detail-modal-drivers').innerText = assigned;
-            document.getElementById('detail-modal-start').innerText = d.start || '지정안됨';
-            document.getElementById('detail-modal-dest').innerText = d.dest || '지정안됨';
+            document.getElementById('detail-modal-dest').innerText = d.dest || '내용 없음'; // 🔥 출발지 삭제됨
 
             const imgContainer = document.getElementById('detail-modal-img-container');
             if (d.photoUrl) {
@@ -455,7 +449,7 @@
             });
         }
 
-        // 우측 리스트에 '내 배차'만 필터링해서 표시
+        // 🔥 우측 리스트 (출발지 삭제됨)
         function renderDispatchResult(date) {
             const contentUl = document.getElementById('result-content');
             
@@ -503,7 +497,7 @@
                             <span class="badge ${badgeClass}" style="${canceledBadgeStyle}">${shortType}</span> 
                             <span class="badge default" style="margin-right:0; ${canceledBadgeStyle}">${d.km}km</span>
                             ${d.isCanceled ? '<span style="color:#d9534f; font-weight:bold; margin-left:5px; text-decoration:none;">[취소됨]</span>' : ''}<br>
-                            출발지: ${d.start} | 목적지: ${d.dest} <br>
+                            📝 내용: ${d.dest} <br>
                             👉 <b style="${d.isCanceled ? 'color:#adb5bd;' : 'color:#28a745;'}">운전원: ${assignedNamesHTML}</b>
                         </li>`;
                 });
