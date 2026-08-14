@@ -254,15 +254,15 @@
                     const _baseDrivers = ['박기준', '변석현', '이명순', '김탁', '한상훈', '문인식', '황덕일', '강철규', '이상헌', '함동한'];
                     const _driverOptions = _baseDrivers.map(d => `<option value="${d}">${d}</option>`).join('');
                     
-                    const formTemplate = (v, isBus) => `
+                   const formTemplate = (v, isBus) => `
                         <div class="vehicle-item">
                             <div class="vehicle-header">
                                 <input type="checkbox" id="v_${v}" onclick="toggleVehicleForm('${v}', this, ${isBus})">
                                 <label for="v_${v}" style="cursor: pointer; flex: 1;">${v} (${isBus ? '버스' : '쏠라티'})</label>
                             </div>
                             <div class="vehicle-body" id="form_${v}">
-                                <div class="form-group"><label>출발지</label><input type="text" id="start_${v}"></div>
-                                <div class="form-group"><label>목적지</label><input type="text" id="dest_${v}"></div>
+                                <!-- 🔥 출발지 삭제됨, 목적지가 내용으로 변경됨 -->
+                                <div class="form-group"><label>내용</label><input type="text" id="dest_${v}"></div>
                                 <div class="form-group">
                                     <label>운행 형태</label>
                                     <select id="type_${v}">
