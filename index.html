@@ -14,6 +14,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; background-color: #f4f6f9; color: #333; letter-spacing: -0.3px; }
         
+        /* 🔥 로그인 화면 UI */
         #login-container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #eef2f7; }
         .login-card { background: #fff; padding: 40px 30px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); width: 340px; text-align: center; }
         .login-card h2 { margin-bottom: 25px; color: #007bff; font-size: 1.5rem; letter-spacing: -1px; }
@@ -128,7 +129,7 @@
 </head>
 <body>
 
-    <!-- 🔥 로그인 창 (방어 로직 및 명단 숨김) -->
+    <!-- 🔥 로그인 창 (명단 숨김, 직접 입력 방식) -->
     <div id="login-container">
         <div class="login-card">
             <h2>배차 시스템 로그인</h2>
@@ -192,7 +193,7 @@
             </div>
         </div>
 
-        <!-- 상단 헤더 -->
+        <!-- 상단 헤더: 접속정보 및 버튼들 -->
         <div style="max-width: 1500px; margin: 10px auto 0; padding: 10px 20px; display: flex; justify-content: flex-end; align-items: center; gap: 10px;">
             <span id="welcome-msg" style="font-weight: bold; color: #333;"></span>
             <button onclick="openPwModal()" style="background: #6c757d; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.85rem;">비밀번호 변경</button>
@@ -234,6 +235,7 @@
                     const busList = ['1호차', '2호차', '3호차'];
                     const solatiList = ['11호차', '12호차', '13호차', '14호차'];
                     const _baseDrivers = ['박기준', '변석현', '이명순', '김탁', '한상훈', '문인식', '황덕일', '강철규', '이상헌', '함동한'];
+                    const _driverOptions = _baseDrivers.map(d => `<option value="${d}">${d}</option>`).join('');
                     
                     const formTemplate = (v, isBus) => `
                         <div class="vehicle-item">
@@ -272,6 +274,7 @@
                                         </div>
                                     </div>
                                     
+                                    <!-- 🔥 선운행 체크박스 삭제됨 -->
                                     <div style="display:flex; gap:10px; align-items:flex-end; margin-bottom:12px;">
                                         <div class="form-group" style="flex:1; margin-bottom:0;">
                                             <label>배정 운전원 1</label>
@@ -346,7 +349,6 @@
 
         let currentUser = ''; 
 
-        // 🔥 로그인 방어 로직 강화
         async function handleLogin() {
             const id = document.getElementById('login-id').value.trim();
             const pw = document.getElementById('login-pw').value;
@@ -354,6 +356,7 @@
 
             if (!id) return alert('이름(또는 아이디)을 입력해주세요.');
             
+            // 🔥 무한 로딩 해결 방어 로직 (없는 이름 치면 즉시 차단)
             if (!systemUsers[id]) {
                 alert('등록되지 않은 사용자입니다. 이름을 정확히 확인해 주세요.');
                 document.getElementById('login-id').value = ''; 
@@ -380,7 +383,7 @@
 
             if (pw !== realPw) {
                 alert('비밀번호가 틀렸습니다.');
-                document.getElementById('login-pw').value = ''; 
+                document.getElementById('login-pw').value = ''; // 비밀번호 틀리면 비워주기
                 return;
             }
 
@@ -424,12 +427,12 @@
             hideLoading();
         }
 
-        // 🔥 로그아웃 시 입력창 강제 초기화
         function logout() {
             localStorage.removeItem('loggedInUser');
             localStorage.removeItem('userRole');
             localStorage.removeItem('loggedInPw');
             
+            // 🔥 로그아웃 시 찌꺼기 완벽 삭제
             const idInput = document.getElementById('login-id');
             const pwInput = document.getElementById('login-pw');
             if(idInput) idInput.value = '';
@@ -623,6 +626,7 @@
             }
         }
 
+        // 🔥 선운행 데이터는 안보여줘도 변수로는 관리
         function toggleVehicleForm(vehicleName, checkbox, isBus) {
             document.getElementById(`form_${vehicleName}`).style.display = checkbox.checked ? "block" : "none";
             if (checkbox.checked) {
@@ -842,10 +846,11 @@
             });
         }
 
-        // 🔥 관리자가 배차 수정 시 기사님들 개별 정산 데이터 보존!
+        // 🔥 관리자가 덮어써도 기사님 정산 데이터 보존 로직 추가
         async function makeReservation(vehicleName, isBus) {
             const type = document.getElementById(`type_${vehicleName}`).value;
             const dates = getDatesForTrip(currentDate, type);
+            
             let isManual = document.getElementById(`manual_${vehicleName}`).checked;
 
             let manualDrivers = [];
@@ -869,14 +874,21 @@
             let docId = Date.now().toString(); 
             let photoUrl = null;
             
-            // 🔥 기사님별 개별 정산 데이터 구조 보존
-            let settlement = {};
+            // 🔥 기사님이 쓴 정산 데이터 보존 변수들
+            let isEarly1 = false, isEarly2 = false, clockIn = '', clockOut = '', expense = '';
 
             if (existingIndex !== -1) {
                 let existing = allReservations[existingIndex];
                 docId = existing.id; 
                 photoUrl = existing.photoUrl || null; 
-                settlement = existing.settlement || {};
+                
+                // 관리자가 예약만 수정할 때, 기사님이 써둔 정산 데이터가 날아가지 않도록 그대로 살림!
+                isEarly1 = existing.isEarly1 || false;
+                isEarly2 = existing.isEarly2 || false;
+                clockIn = existing.clockIn || '';
+                clockOut = existing.clockOut || '';
+                expense = existing.expense || '';
+
                 allReservations.splice(existingIndex, 1);
             }
 
@@ -911,10 +923,17 @@
                 reqCount: reqCount, assigned: [],
                 isCanceled: false,
                 isManual: isManual,
+                
+                // 기사님 정산 데이터 저장
+                isEarly1: isEarly1,
+                isEarly2: isEarly2,
+                clockIn: clockIn,
+                clockOut: clockOut,
+                expense: expense,
+
                 manualDrivers: manualDrivers,
                 nextPointerDriver: nextPointerDriver,
-                photoUrl: photoUrl,
-                settlement: settlement // 기사님이 올린 개별 정산 데이터 덮어쓰지 않고 보존
+                photoUrl: photoUrl 
             });
 
             document.getElementById(`v_${vehicleName}`).checked = false;
@@ -951,7 +970,45 @@
             document.getElementById(`form_${vehicleName}`).style.display = "none";
         }
 
-        // 🔥 달력에 빨간 밑줄(선운행) 그리기 복구 (새 구조에 맞춤)
+        function changeMonth(offset) {
+            currentMonth += offset;
+            if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+            else if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+            renderCalendar();
+        }
+
+        function renderCalendar() {
+            document.getElementById('month-display').innerText = `📅 ${currentYear}년 ${currentMonth + 1}월`;
+            const grid = document.getElementById('calendar-grid');
+            grid.innerHTML = `<div class="calendar-day-header sun">일</div><div class="calendar-day-header">월</div><div class="calendar-day-header">화</div><div class="calendar-day-header">수</div><div class="calendar-day-header">목</div><div class="calendar-day-header">금</div><div class="calendar-day-header sat">토</div>`;
+
+            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+            const lastDate = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+            for (let i = 0; i < firstDay; i++) grid.innerHTML += `<div class="calendar-cell" style="background:#f4f6f9; cursor:default;"></div>`;
+
+            for (let d = 1; d <= lastDate; d++) {
+                const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                const dayOfWeek = (firstDay + d - 1) % 7;
+                const holidayName = getHolidayName(currentYear, currentMonth + 1, d);
+                let extraClass = (dayOfWeek === 0) ? 'sun ' : (dayOfWeek === 6) ? 'sat ' : '';
+                let extraHTML = '';
+
+                if (holidayName) { extraClass += 'holiday '; extraHTML = `<span class="holiday-name">${holidayName}</span>`; }
+                if (dateStr === currentDate) extraClass += 'selected ';
+
+                grid.innerHTML += `
+                    <div class="calendar-cell ${extraClass}" data-date="${dateStr}" onclick="selectDate('${dateStr}')">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                            <span class="date-num">${d}</span>${extraHTML}
+                        </div>
+                        <div class="tag-container" id="tags_${dateStr}"></div>
+                        <div id="cell_status_${dateStr}" style="margin-top:auto; padding-top:4px; border-top:1px dashed #eee; display:none; flex-direction:column; gap:2px;"></div>
+                    </div>`;
+            }
+            for (let d = 1; d <= lastDate; d++) updateCalendarCellUI(`${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`);
+        }
+
         function updateCalendarCellUI(date) {
             const tagsContainer = document.getElementById(`tags_${date}`);
             const statusContainer = document.getElementById(`cell_status_${date}`);
@@ -979,8 +1036,7 @@
                 let canceledBadgeStyle = d.isCanceled ? 'background-color: transparent; color: #adb5bd; border: 1px solid #adb5bd;' : '';
                 
                 let assignedNamesHTML = (d.assigned || []).map((name, idx) => {
-                    // 기사님별 선운행 데이터 체크하여 빨간 밑줄 긋기!
-                    let isUnderline = (d.settlement && d.settlement[name] && d.settlement[name].isEarly) || false;
+                    let isUnderline = (idx === 0 && d.isEarly1) || (idx === 1 && d.isEarly2);
                     return (isUnderline && !d.isCanceled && name !== '미지정') ? `<span class="early-underline">${name}</span>` : name;
                 }).join(', ');
 
@@ -1044,7 +1100,6 @@
             document.getElementById('detail-modal-overlay').style.display = 'none';
         }
 
-        // 🔥 관리자 창 리스트에도 영수증 출력
         function renderDispatchResult(date) {
             const contentUl = document.getElementById('result-content');
             const activeReservations = allReservations.filter(r => (r.dates || []).includes(date));
@@ -1072,22 +1127,18 @@
                     let canceledBadgeStyle = d.isCanceled ? 'background-color: transparent; color: #adb5bd; border: 1px solid #adb5bd;' : '';
                     
                     let assignedNamesHTML = (d.assigned || []).map((name, idx) => {
-                        let isUnderline = (d.settlement && d.settlement[name] && d.settlement[name].isEarly) || false;
+                        let isUnderline = (idx === 0 && d.isEarly1) || (idx === 1 && d.isEarly2);
                         return (isUnderline && !d.isCanceled && name !== '미지정') ? `<span class="early-underline">${name}</span>` : name;
                     }).join(', ');
                     
                     if ((d.assigned || []).length === 0) assignedNamesHTML = '인원 부족';
 
-                    // 기사님들이 제출한 정산(보상시간, 일비) 정보를 영수증처럼 출력
+                    // 관리자 창 리스트에도 출근/퇴근/비용 데이터가 있으면 표기해 줍니다
                     let reportText = '';
-                    if (d.settlement && Object.keys(d.settlement).length > 0) {
-                        Object.keys(d.settlement).forEach(drv => {
-                            const s = d.settlement[drv];
-                            reportText += `<div style="margin-top:8px; font-size:0.85rem; color:#155724; background:#d4edda; padding:6px 10px; border-radius:4px; border: 1px solid #c3e6cb;">
-                                <b>[${drv}]</b> ${s.isEarly ? '🚀선운행 | ' : ''}⏰ 출근 ${s.clockIn || '-'} ~ 퇴근 ${s.clockOut || '-'} <br>
-                                ⏱️ <b>보상: ${s.overtime || 0}시간</b> | 💰 <b>일비: ${s.allowance ? s.allowance.toLocaleString() : 0}원</b>
-                            </div>`;
-                        });
+                    if (d.clockIn || d.clockOut || d.expense) {
+                        reportText = `<div style="margin-top:5px; font-size:0.85rem; color:#0056b3; background:#e8f0fe; padding:5px; border-radius:4px;">
+                            ⏰ 출근: ${d.clockIn || '-'} | 퇴근: ${d.clockOut || '-'} | 💳 비용: ${d.expense || '-'}
+                        </div>`;
                     }
 
                     html += `
