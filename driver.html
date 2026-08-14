@@ -14,9 +14,17 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; background-color: #f4f6f9; color: #333; letter-spacing: -0.3px; }
         
+        /* 🔥 로그인 화면 UI */
+        #login-container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #eef2f7; }
+        .login-card { background: #fff; padding: 40px 30px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); width: 340px; text-align: center; }
+        .login-card h2 { margin-bottom: 25px; color: #007bff; font-size: 1.5rem; letter-spacing: -1px; }
+        .login-input { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 6px; border: 1px solid #ced4da; font-size: 1rem; font-family: inherit; }
+        .btn-login { width: 100%; padding: 14px; background: #007bff; color: #fff; border: none; border-radius: 6px; font-weight: 700; font-size: 1.05rem; cursor: pointer; transition: 0.2s; }
+        .btn-login:hover { background: #0056b3; }
+
+        #app-container { display: none; }
+
         .dispatch-container { display: flex; max-width: 1500px; margin: 20px auto; gap: 20px; padding: 0 20px; }
-        
-        /* 🔥 너비 비율 완벽 통일 */
         .main-section { flex: 3.5; display: flex; flex-direction: column; gap: 20px; min-width: 0; }
         .sidebar-section { width: 320px; min-width: 250px; max-width: 800px; flex-shrink: 0; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); height: fit-content; max-height: 90vh; overflow: auto; }
         .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(140px, 1fr)); gap: 4px; overflow-x: auto; padding-bottom: 5px; }
@@ -94,79 +102,92 @@
 </head>
 <body>
 
-    <div id="loading-overlay">
-        <div id="loading-text">배차 데이터 동기화 중...</div>
-    </div>
-
-    <!-- 비밀번호 변경 모달 -->
-    <div id="pw-modal-overlay" class="modal-overlay-custom" onclick="closePwModal()">
-        <div class="modal-card" style="max-width: 320px;" onclick="event.stopPropagation()">
-            <h4 style="color: #007bff; margin-bottom:15px;">🔑 비밀번호 변경</h4>
-            <div class="form-group"><input type="password" id="current-pw" placeholder="현재 비밀번호"></div>
-            <div class="form-group"><input type="password" id="new-pw" placeholder="새 비밀번호 (4자리 이상)"></div>
-            <div class="form-group"><input type="password" id="new-pw-confirm" placeholder="새 비밀번호 확인"></div>
-            <div class="modal-btns" style="margin-top: 15px;">
-                <button style="background: #28a745; color:#fff;" onclick="changePassword()">변경 저장</button>
-                <button style="background: #ccc;" onclick="closePwModal()">취소</button>
-            </div>
+    <!-- 🔥 로그인 창 (명단 숨김, 직접 입력 방식) -->
+    <div id="login-container">
+        <div class="login-card">
+            <h2>배차 시스템 로그인</h2>
+            <input type="text" id="login-id" class="login-input" placeholder="이름 (또는 아이디) 입력">
+            <input type="password" id="login-pw" class="login-input" placeholder="비밀번호 입력">
+            <button id="btn-login" class="btn-login" onclick="handleLogin()">접속하기</button>
         </div>
     </div>
 
-    <!-- 🔥 배차 상세 팝업 (사진 포함, 출발지 삭제) -->
-    <div id="detail-modal-overlay" class="modal-overlay-custom" onclick="closeDetailModal()">
-        <div class="modal-card" style="max-width: 500px; width: 95%; max-height: 90vh; overflow-y: auto;" onclick="event.stopPropagation()">
-            <h4 id="detail-modal-title" style="color: #007bff; font-size: 1.3rem; margin-bottom: 15px;"></h4>
-            <div style="font-size: 1.05rem; line-height: 2; margin-bottom: 15px;">
-                <p style="margin:0;"><span style="color:#888; display:inline-block; width:65px;">👨‍✈️ 운전원</span> <b id="detail-modal-drivers" style="color:#333;"></b></p>
-                <p style="margin:0;"><span style="color:#888; display:inline-block; width:65px;">📝 내 용</span> <b id="detail-modal-dest" style="color:#d9534f;"></b></p>
-            </div>
-            <!-- 사진 표시 영역 -->
-            <div id="detail-modal-img-container" style="text-align: center; margin-bottom: 15px; display: none;"></div>
-            <div style="text-align: right;">
-                <button style="padding: 8px 20px; background: #6c757d; color: #fff; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;" onclick="closeDetailModal()">닫기</button>
+    <!-- 🔥 메인 앱 화면 -->
+    <div id="app-container">
+        <div id="loading-overlay">
+            <div id="loading-text">배차 데이터 동기화 중...</div>
+        </div>
+
+        <!-- 비밀번호 변경 모달 -->
+        <div id="pw-modal-overlay" class="modal-overlay-custom" onclick="closePwModal()">
+            <div class="modal-card" style="max-width: 320px;" onclick="event.stopPropagation()">
+                <h4 style="color: #007bff; margin-bottom:15px;">🔑 비밀번호 변경</h4>
+                <div class="form-group"><input type="password" id="current-pw" placeholder="현재 비밀번호"></div>
+                <div class="form-group"><input type="password" id="new-pw" placeholder="새 비밀번호 (4자리 이상)"></div>
+                <div class="form-group"><input type="password" id="new-pw-confirm" placeholder="새 비밀번호 확인"></div>
+                <div class="modal-btns" style="margin-top: 15px;">
+                    <button style="background: #28a745; color:#fff;" onclick="changePassword()">변경 저장</button>
+                    <button style="background: #ccc;" onclick="closePwModal()">취소</button>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- 상단 헤더: 종합창 가기 버튼 -->
-    <div style="max-width: 1500px; margin: 10px auto 0; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; gap: 10px;">
-        <h2 style="margin:0; color: #28a745;">🚐 배차 현황 (내 배차)</h2>
-        <div>
-            <span id="welcome-msg" style="font-weight: bold; color: #333; margin-right: 15px;"></span>
-            <button onclick="goToAdmin()" style="background: #007bff; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.85rem; margin-right: 5px;">👈 전체 종합창 가기</button>
-            <button onclick="openPwModal()" style="background: #6c757d; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.85rem; margin-right: 5px;">비밀번호 변경</button>
-            <button onclick="logout()" style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.85rem;">로그아웃</button>
+        <!-- 배차 상세 팝업 (사진 포함, 출발지 삭제) -->
+        <div id="detail-modal-overlay" class="modal-overlay-custom" onclick="closeDetailModal()">
+            <div class="modal-card" style="max-width: 500px; width: 95%; max-height: 90vh; overflow-y: auto;" onclick="event.stopPropagation()">
+                <h4 id="detail-modal-title" style="color: #007bff; font-size: 1.3rem; margin-bottom: 15px;"></h4>
+                <div style="font-size: 1.05rem; line-height: 2; margin-bottom: 15px;">
+                    <p style="margin:0;"><span style="color:#888; display:inline-block; width:65px;">👨‍✈️ 운전원</span> <b id="detail-modal-drivers" style="color:#333;"></b></p>
+                    <p style="margin:0;"><span style="color:#888; display:inline-block; width:65px;">📝 내 용</span> <b id="detail-modal-dest" style="color:#d9534f;"></b></p>
+                </div>
+                <!-- 사진 표시 영역 -->
+                <div id="detail-modal-img-container" style="text-align: center; margin-bottom: 15px; display: none;"></div>
+                <div style="text-align: right;">
+                    <button style="padding: 8px 20px; background: #6c757d; color: #fff; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;" onclick="closeDetailModal()">닫기</button>
+                </div>
+            </div>
         </div>
-    </div>
 
-    <div class="dispatch-container">
-        <!-- 메인 배차 달력 -->
-        <div class="main-section">
-            <div class="card">
-                <div class="calendar-header">
-                    <span id="month-display">📅 2026년 8월</span>
-                    <div>
-                        <button onclick="changeMonth(-1)">&lt;</button>
-                        <button onclick="changeMonth(1)">&gt;</button>
+        <!-- 상단 헤더: 종합창 가기 버튼 -->
+        <div style="max-width: 1500px; margin: 10px auto 0; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+            <h2 style="margin:0; color: #28a745;">🚐 배차 현황 (내 배차)</h2>
+            <div>
+                <span id="welcome-msg" style="font-weight: bold; color: #333; margin-right: 15px;"></span>
+                <button onclick="goToAdmin()" style="background: #007bff; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.85rem; margin-right: 5px;">👈 전체 종합창 가기</button>
+                <button onclick="openPwModal()" style="background: #6c757d; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.85rem; margin-right: 5px;">비밀번호 변경</button>
+                <button onclick="logout()" style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.85rem;">로그아웃</button>
+            </div>
+        </div>
+
+        <div class="dispatch-container">
+            <!-- 메인 배차 달력 -->
+            <div class="main-section">
+                <div class="card">
+                    <div class="calendar-header">
+                        <span id="month-display">📅 2026년 8월</span>
+                        <div>
+                            <button onclick="changeMonth(-1)">&lt;</button>
+                            <button onclick="changeMonth(1)">&gt;</button>
+                        </div>
+                    </div>
+                    <div class="calendar-grid" id="calendar-grid"></div>
+                </div>
+            </div>
+
+            <!-- 사이드바: 내 상태 관리 및 선택 날짜 상세 -->
+            <div class="sidebar-section">
+                <div class="my-status-box">
+                    <h4 id="status-date-title">상태 변경</h4>
+                    <div class="radio-group" id="my-status-radios">
+                        <!-- JS에서 라디오 버튼 그려짐 -->
                     </div>
                 </div>
-                <div class="calendar-grid" id="calendar-grid"></div>
-            </div>
-        </div>
 
-        <!-- 사이드바: 내 상태 관리 및 선택 날짜 상세 -->
-        <div class="sidebar-section">
-            <div class="my-status-box">
-                <h4 id="status-date-title">상태 변경</h4>
-                <div class="radio-group" id="my-status-radios">
-                    <!-- JS에서 라디오 버튼 그려짐 -->
-                </div>
+                <h3 style="margin-top: 25px; border-bottom: 2px solid #28a745; padding-bottom: 8px;">선택 날짜 내 배차 내역</h3>
+                <ul id="result-content" class="result-list">
+                    <li style="color:#666;">선택된 날짜의 예약 내역이 없습니다.</li>
+                </ul>
             </div>
-
-            <h3 style="margin-top: 25px; border-bottom: 2px solid #28a745; padding-bottom: 8px;">선택 날짜 내 배차 내역</h3>
-            <ul id="result-content" class="result-list">
-                <li style="color:#666;">선택된 날짜의 예약 내역이 없습니다.</li>
-            </ul>
         </div>
     </div>
 
@@ -183,6 +204,21 @@
         const db = firebase.firestore();
         const storage = firebase.storage(); 
 
+        const systemUsers = {
+            'admin1': { role: 'admin', pw: '123456' },
+            'admin2': { role: 'admin', pw: '123456' },
+            '박기준': { role: 'driver', pw: '123456' },
+            '변석현': { role: 'driver', pw: '123456' },
+            '이명순': { role: 'driver', pw: '123456' },
+            '김탁': { role: 'driver', pw: '123456' },
+            '한상훈': { role: 'driver', pw: '123456' },
+            '문인식': { role: 'driver', pw: '123456' },
+            '황덕일': { role: 'driver', pw: '123456' },
+            '강철규': { role: 'driver', pw: '123456' },
+            '이상헌': { role: 'driver', pw: '123456' },
+            '함동한': { role: 'driver', pw: '123456' }
+        };
+
         let currentUser = '';
         let userRole = '';
         let currentDate = '';
@@ -190,18 +226,54 @@
         let allReservations = [];
         let dailyDriverStatus = {};
 
+        async function handleLogin() {
+            const id = document.getElementById('login-id').value.trim();
+            const pw = document.getElementById('login-pw').value;
+            const btn = document.getElementById('btn-login');
+
+            if (!id) return alert('이름(또는 아이디)을 입력해주세요.');
+            if (!systemUsers[id]) return alert('등록되지 않은 사용자입니다.');
+            if (!pw) return alert('비밀번호를 입력해주세요.');
+
+            btn.innerText = '인증 확인 중...';
+            btn.disabled = true;
+
+            let realPw = systemUsers[id].pw; 
+            try {
+                const doc = await db.collection('user_auth').doc(id).get();
+                if (doc.exists && doc.data().pw) {
+                    realPw = doc.data().pw;
+                }
+            } catch (error) {
+                console.error("인증 통신 오류", error);
+            }
+
+            btn.innerText = '접속하기';
+            btn.disabled = false;
+
+            if (pw !== realPw) return alert('비밀번호가 틀렸습니다.');
+
+            localStorage.setItem('loggedInUser', id);
+            localStorage.setItem('userRole', systemUsers[id].role);
+            localStorage.setItem('loggedInPw', realPw); 
+            
+            checkAuth(); 
+        }
+
         function checkAuth() {
             currentUser = localStorage.getItem('loggedInUser');
             userRole = localStorage.getItem('userRole');
 
             if (!currentUser) {
-                alert('로그인이 필요합니다.');
-                window.location.href = 'index.html'; 
+                document.getElementById('login-container').style.display = 'flex';
+                document.getElementById('app-container').style.display = 'none';
                 return false;
+            } else {
+                document.getElementById('login-container').style.display = 'none';
+                document.getElementById('app-container').style.display = 'block';
+                document.getElementById('welcome-msg').innerText = `👨‍✈️ ${currentUser} 기사님`;
+                return true;
             }
-
-            document.getElementById('welcome-msg').innerText = `👨‍✈️ ${currentUser} 기사님`;
-            return true;
         }
 
         function showLoading(msg = '서버 처리 중...') {
@@ -249,7 +321,7 @@
             localStorage.removeItem('loggedInUser');
             localStorage.removeItem('userRole');
             localStorage.removeItem('loggedInPw');
-            window.location.href = 'index.html';
+            window.location.reload();
         }
 
         function goToAdmin() {
@@ -392,7 +464,7 @@
             }
         }
 
-        // 🔥 사진 보여주는 팝업창 (내 배차에서는 사진 보임)
+        // 사진 보여주는 팝업창 (내 배차에서는 사진 보임)
         function showDispatchDetail(event, id) {
             event.stopPropagation(); 
             const d = allReservations.find(r => r.id === id);
@@ -401,7 +473,7 @@
             let assigned = (d.assigned && d.assigned.length > 0) ? d.assigned.join(', ') : '미정';
             document.getElementById('detail-modal-title').innerText = `[${d.vehicle}] ${d.type}`;
             document.getElementById('detail-modal-drivers').innerText = assigned;
-            document.getElementById('detail-modal-dest').innerText = d.dest || '내용 없음'; // 🔥 출발지 삭제됨
+            document.getElementById('detail-modal-dest').innerText = d.dest || '내용 없음'; 
 
             const imgContainer = document.getElementById('detail-modal-img-container');
             if (d.photoUrl) {
@@ -449,7 +521,7 @@
             });
         }
 
-        // 🔥 우측 리스트 (출발지 삭제됨)
+        // 우측 리스트에 '내 배차'만 필터링해서 표시
         function renderDispatchResult(date) {
             const contentUl = document.getElementById('result-content');
             
