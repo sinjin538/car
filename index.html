@@ -24,9 +24,11 @@
 
         #app-container { display: none; }
 
-        .dispatch-container { display: flex; max-width: 1500px; margin: 20px auto; gap: 20px; padding: 0 20px; }
+        /* 🔥 전체 1600px로 확장 */
+        .dispatch-container { display: flex; max-width: 1600px; margin: 20px auto; gap: 20px; padding: 0 20px; }
         .main-section { flex: 3.5; display: flex; flex-direction: column; gap: 20px; min-width: 0; }
-        .sidebar-section { width: 320px; min-width: 250px; max-width: 800px; flex-shrink: 0; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); height: fit-content; max-height: 90vh; overflow: auto; }
+        /* 🔥 사이드바 너비 축소 (달력 더 넓게) */
+        .sidebar-section { width: 280px; min-width: 250px; max-width: 800px; flex-shrink: 0; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); height: fit-content; max-height: 90vh; overflow: auto; }
         .card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 
         .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 1.25rem; font-weight: 700; }
@@ -57,8 +59,7 @@
         .event-box.citytour { background-color: #f3e5f5; border: 1px solid #e1bee7; color: #333; } 
         .event-box.default { background-color: #f1f3f4; border: 1px solid #d8dbe0; color: #333; }
 
-        /* 🔥 뱃지 폰트 작게 */
-        .badge { padding: 2px 4px; border-radius: 4px; font-size: 0.6rem; font-weight: 800; text-align: center; }
+        .badge { padding: 2px 5px; border-radius: 4px; font-size: 0.65rem; font-weight: 800; min-width: 18px; text-align: center; }
         .badge.pub { background-color: #007bff; color: #fff; } 
         .badge.grave { background-color: #28a745; color: #fff; } 
         .badge.night1 { background-color: #ffc107; color: #000; } 
@@ -71,11 +72,7 @@
         .early-underline { text-decoration: underline; text-decoration-color: #dc3545; text-underline-offset: 3px; text-decoration-thickness: 2px; }
 
         .cal-status { font-size: 0.75rem; margin-top: 2px; letter-spacing: -0.3px; }
-        .cal-status.off .label { color: #007bff; font-weight: 700; }
-        .cal-status.off .names { color: #007bff; font-weight: 700; }
-        .cal-status.duty .label { color: #f29900; font-weight: 700; }
-        .cal-status.duty .names { color: #888; font-weight: 500; }
-
+        
         .status-header { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 20px; }
         .status-header h3 { margin: 0; font-size: 1.15rem; }
         .btn-edit-drivers { background: #6c757d; color: #fff; border: none; padding: 4px 10px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; font-family: inherit;}
@@ -173,8 +170,8 @@
             <div class="modal-card" style="max-width: 500px;" onclick="event.stopPropagation()">
                 <h4 id="detail-modal-title" style="color: #007bff; font-size: 1.3rem; margin-bottom: 15px;"></h4>
                 <div style="font-size: 1.05rem; line-height: 2; margin-bottom: 15px;">
-                    <p style="margin:0;"><span style="color:#888; display:inline-block; width:65px;">👨‍✈️ 운전원</span> <b id="detail-modal-drivers" style="color:#333;"></b></p>
-                    <p style="margin:0;"><span style="color:#888; display:inline-block; width:65px;">📝 내 용</span> <b id="detail-modal-dest" style="color:#d9534f;"></b></p>
+                    <p style="margin:0;"><span style="color:#888; display:inline-block; width:65px;">운전원</span> <b id="detail-modal-drivers" style="color:#333;"></b></p>
+                    <p style="margin:0;"><span style="color:#888; display:inline-block; width:65px;">내 용</span> <b id="detail-modal-dest" style="color:#d9534f;"></b></p>
                 </div>
                 
                 <div id="detail-modal-img-container" style="text-align: center; margin-bottom: 15px; display: none;"></div>
@@ -185,11 +182,12 @@
             </div>
         </div>
 
-        <div style="max-width: 1500px; margin: 10px auto 0; padding: 10px 20px; display: flex; justify-content: flex-end; align-items: center; gap: 10px;">
-            <span id="welcome-msg" style="font-weight: bold; color: #333; margin-right: 5px;"></span>
-            <button onclick="openPwModal()" style="background: #6c757d; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.75rem;">비밀번호 변경</button>
-            <button id="btn-go-driver" onclick="goToModule2()" style="background: #28a745; color: white; border: none; padding: 8px 16px; border-radius: 20px; font-weight: bold; cursor: pointer; font-size: 0.9rem;">👉 내 배차 이동</button>
-            <button onclick="logout()" style="background: #dc3545; color: white; border: none; padding: 8px 16px; border-radius: 20px; font-weight: bold; cursor: pointer; font-size: 0.9rem;">로그아웃</button>
+        <!-- 🔥 상단 헤더: 전체 폭 1600px, 이모지 제거, 버튼 다이어트 -->
+        <div style="max-width: 1600px; margin: 10px auto 0; padding: 10px 20px; display: flex; justify-content: flex-end; align-items: center; gap: 6px;">
+            <span id="welcome-msg" style="font-weight: bold; color: #333; margin-right: 10px; font-size: 1.1rem;"></span>
+            <button onclick="openPwModal()" style="background: #6c757d; color: white; border: none; padding: 4px 10px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 0.75rem;">비밀번호 변경</button>
+            <button id="btn-go-driver" onclick="goToModule2()" style="background: #28a745; color: white; border: none; padding: 4px 10px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 0.75rem;">내 배차</button>
+            <button onclick="logout()" style="background: #dc3545; color: white; border: none; padding: 4px 10px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 0.75rem;">로그아웃</button>
         </div>
 
         <div class="dispatch-container">
@@ -338,33 +336,72 @@
 
         let currentUser = ''; 
 
+        // 🔥 배지 변환 유지 (짧고 깔끔하게)
+        function getShortType(type) {
+            if (type.includes('공공')) return '공공';
+            if (type.includes('1박')) return '1박';
+            if (type.includes('2박')) return '2박';
+            if (type.includes('서울')) return '서울';
+            if (type.includes('시티')) return '시티';
+            if (type.includes('성묘')) return '성묘';
+            return '기타';
+        }
+
         async function handleLogin() {
             const id = document.getElementById('login-id').value.trim();
             const pw = document.getElementById('login-pw').value;
             const btn = document.getElementById('btn-login');
 
             if (!id) return alert('이름(또는 아이디)을 입력해주세요.');
-            if (!systemUsers[id]) { alert('등록되지 않은 사용자입니다.'); document.getElementById('login-id').value = ''; return; }
+            
+            if (!systemUsers[id]) {
+                alert('등록되지 않은 사용자입니다. 이름을 정확히 확인해 주세요.');
+                document.getElementById('login-id').value = ''; 
+                return;
+            }
+
             if (!pw) return alert('비밀번호를 입력해주세요.');
 
-            btn.innerText = '인증 확인 중...'; btn.disabled = true;
+            btn.innerText = '인증 확인 중...';
+            btn.disabled = true;
+
             let realPw = systemUsers[id].pw; 
             try {
                 const doc = await db.collection('user_auth').doc(id).get();
-                if (doc.exists && doc.data().pw) { realPw = doc.data().pw; }
-            } catch (error) {}
+                if (doc.exists && doc.data().pw) {
+                    realPw = doc.data().pw;
+                }
+            } catch (error) {
+                console.error("인증 통신 오류", error);
+            }
 
-            btn.innerText = '접속하기'; btn.disabled = false;
-            if (pw !== realPw) { alert('비밀번호가 틀렸습니다.'); document.getElementById('login-pw').value = ''; return; }
+            btn.innerText = '접속하기';
+            btn.disabled = false;
+
+            if (pw !== realPw) {
+                alert('비밀번호가 틀렸습니다.');
+                document.getElementById('login-pw').value = ''; 
+                return;
+            }
 
             localStorage.setItem('loggedInUser', id);
             localStorage.setItem('userRole', systemUsers[id].role);
             localStorage.setItem('loggedInPw', realPw); 
+            
             checkAuth(); 
         }
 
-        function openPwModal() { document.getElementById('current-pw').value = ''; document.getElementById('new-pw').value = ''; document.getElementById('new-pw-confirm').value = ''; document.getElementById('pw-modal-overlay').style.display = 'flex'; }
-        function closePwModal() { document.getElementById('pw-modal-overlay').style.display = 'none'; }
+        function openPwModal() {
+            document.getElementById('current-pw').value = '';
+            document.getElementById('new-pw').value = '';
+            document.getElementById('new-pw-confirm').value = '';
+            document.getElementById('pw-modal-overlay').style.display = 'flex';
+        }
+        
+        function closePwModal() {
+            document.getElementById('pw-modal-overlay').style.display = 'none';
+        }
+
         async function changePassword() {
             const curPw = document.getElementById('current-pw').value;
             const newPw = document.getElementById('new-pw').value;
@@ -378,18 +415,25 @@
             showLoading('비밀번호 변경 중...');
             try {
                 await db.collection('user_auth').doc(currentUser).set({ pw: newPw }, { merge: true });
-                localStorage.setItem('loggedInPw', newPw); alert('비밀번호가 성공적으로 변경되었습니다!'); closePwModal();
-            } catch(e) { alert('변경 실패. 다시 시도해주세요.'); }
+                localStorage.setItem('loggedInPw', newPw); 
+                alert('비밀번호가 성공적으로 변경되었습니다!');
+                closePwModal();
+            } catch(e) {
+                alert('변경 실패. 다시 시도해주세요.');
+            }
             hideLoading();
         }
 
         function logout() {
-            localStorage.removeItem('loggedInUser'); localStorage.removeItem('userRole'); localStorage.removeItem('loggedInPw');
-            const idInput = document.getElementById('login-id'); const pwInput = document.getElementById('login-pw');
-            if(idInput) idInput.value = ''; if(pwInput) pwInput.value = ''; window.location.reload();
+            localStorage.removeItem('loggedInUser');
+            localStorage.removeItem('userRole');
+            localStorage.removeItem('loggedInPw');
+            window.location.reload();
         }
 
-        function goToModule2() { window.location.href = 'driver.html'; }
+        function goToModule2() {
+            window.location.href = 'driver.html'; 
+        }
 
         function checkAuth() {
             currentUser = localStorage.getItem('loggedInUser');
@@ -402,16 +446,16 @@
                 document.getElementById('login-container').style.display = 'none';
                 document.getElementById('app-container').style.display = 'block';
                 
+                // 🔥 관리자 계정 시 이모지 빼고 표시
                 if (userRole === 'admin') {
-                    document.getElementById('welcome-msg').innerText = `[관리자] ${currentUser}님`;
+                    document.getElementById('welcome-msg').innerText = `${currentUser}님 배차 (관리자)`;
                     document.querySelector('.sidebar-section').style.display = 'block'; 
                     document.querySelector('.btn-edit-drivers').style.display = 'block'; 
                     document.querySelector('.status-header').style.display = 'flex'; 
                     document.getElementById('status-container').style.display = 'grid'; 
-                    // 🔥 관리자 계정은 내 배차 버튼 숨김
                     document.getElementById('btn-go-driver').style.display = 'none';
                 } else {
-                    document.getElementById('welcome-msg').innerText = `👨‍✈️ ${currentUser} (전체 보기)`;
+                    document.getElementById('welcome-msg').innerText = `${currentUser}님 배차 (전체 보기)`;
                     document.querySelector('.sidebar-section').style.display = 'none'; 
                     document.querySelector('.btn-edit-drivers').style.display = 'none'; 
                     document.querySelector('.status-header').style.display = 'none'; 
@@ -419,14 +463,19 @@
                     document.getElementById('btn-go-driver').style.display = 'inline-block';
                 }
                 
-                renderCalendar(); selectDate(currentDate); loadFromFirebase();
+                renderCalendar();
+                selectDate(currentDate);
+                loadFromFirebase();
             }
         }
 
         const koreaHolidays = {
-            "01-01": "신정", "03-01": "삼일절", "05-05": "어린이날", "06-06": "현충일", "08-15": "광복절", "10-03": "개천절", "10-09": "한글날", "12-25": "기독탄신일",
-            "2026-02-16": "설날연휴", "2026-02-17": "설날", "2026-02-18": "설날연휴", "2026-03-02": "대체공휴일", "2026-05-24": "부처님오신날", "2026-05-25": "대체공휴일",
-            "2026-06-03": "지방선거", "2026-08-17": "대체공휴일", "2026-09-24": "추석연휴", "2026-09-25": "추석", "2026-09-26": "추석연휴", "2026-10-05": "대체공휴일"
+            "01-01": "신정", "03-01": "삼일절", "05-05": "어린이날", "06-06": "현충일", 
+            "08-15": "광복절", "10-03": "개천절", "10-09": "한글날", "12-25": "기독탄신일",
+            "2026-02-16": "설날연휴", "2026-02-17": "설날", "2026-02-18": "설날연휴",
+            "2026-03-02": "대체공휴일", "2026-05-24": "부처님오신날", "2026-05-25": "대체공휴일",
+            "2026-06-03": "지방선거", "2026-08-17": "대체공휴일", "2026-09-24": "추석연휴", 
+            "2026-09-25": "추석", "2026-09-26": "추석연휴", "2026-10-05": "대체공휴일"
         };
         function getHolidayName(year, month, day) {
             const mmdd = `${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
@@ -443,13 +492,20 @@
         
         const dailyDriverStatus = {}; let allReservations = []; 
 
-        function showLoading(msg = '서버 처리 중...') { document.getElementById('loading-text').innerText = msg; document.getElementById('loading-overlay').style.display = 'flex'; }
-        function hideLoading() { document.getElementById('loading-overlay').style.display = 'none'; }
+        function showLoading(msg = '서버 처리 중...') {
+            document.getElementById('loading-text').innerText = msg;
+            document.getElementById('loading-overlay').style.display = 'flex';
+        }
+        function hideLoading() {
+            document.getElementById('loading-overlay').style.display = 'none';
+        }
 
         function getEffectiveDriverList(date) {
             const modDates = Object.keys(driverListModifiers).sort();
             let effectiveList = [...defaultDrivers];
-            for (const modDate of modDates) if (modDate <= date) effectiveList = [...driverListModifiers[modDate]];
+            for (const modDate of modDates) {
+                if (modDate <= date) effectiveList = [...driverListModifiers[modDate]];
+            }
             return effectiveList;
         }
 
@@ -459,18 +515,27 @@
             
             const allVehicles = ['1호차', '2호차', '3호차', '11호차', '12호차', '13호차', '14호차'];
             allVehicles.forEach(v => {
-                const d1 = document.getElementById(`driver1_${v}`); const d2 = document.getElementById(`driver2_${v}`); const np = document.getElementById(`next_pointer_${v}`);
+                const d1 = document.getElementById(`driver1_${v}`);
+                const d2 = document.getElementById(`driver2_${v}`);
+                const np = document.getElementById(`next_pointer_${v}`);
+                
                 if (d1) {
-                    const old1 = d1.value; d1.innerHTML = `<option value="">자동 배정</option><option value="미지정">미지정</option>` + optionsHtml;
-                    if (activeDrivers.includes(old1) || old1 === '미지정' || old1 === '') d1.value = old1; else d1.value = '';
+                    const old1 = d1.value;
+                    d1.innerHTML = `<option value="">자동 배정</option><option value="미지정">미지정</option>` + optionsHtml;
+                    if (activeDrivers.includes(old1) || old1 === '미지정' || old1 === '') d1.value = old1;
+                    else d1.value = '';
                 }
                 if (d2) {
-                    const old2 = d2.value; d2.innerHTML = `<option value="">자동 배정</option><option value="미지정">미지정</option>` + optionsHtml;
-                    if (activeDrivers.includes(old2) || old2 === '미지정' || old2 === '') d2.value = old2; else d2.value = '';
+                    const old2 = d2.value;
+                    d2.innerHTML = `<option value="">자동 배정</option><option value="미지정">미지정</option>` + optionsHtml;
+                    if (activeDrivers.includes(old2) || old2 === '미지정' || old2 === '') d2.value = old2;
+                    else d2.value = '';
                 }
                 if (np) {
-                    const oldNp = np.value; np.innerHTML = `<option value="">자동 유지 (지정 안함)</option>` + optionsHtml;
-                    if (activeDrivers.includes(oldNp) || oldNp === '') np.value = oldNp; else np.value = '';
+                    const oldNp = np.value;
+                    np.innerHTML = `<option value="">자동 유지 (지정 안함)</option>` + optionsHtml;
+                    if (activeDrivers.includes(oldNp) || oldNp === '') np.value = oldNp;
+                    else np.value = '';
                 }
             });
         }
@@ -499,88 +564,151 @@
 
                 const modSnapshot = await db.collection('driver_modifiers').get();
                 modSnapshot.forEach(doc => { driverListModifiers[doc.id] = doc.data().list; });
-            } catch (error) { console.warn("DB 읽기 실패."); } 
-            finally { recalculateAll(false); updateDropdownOptions(currentDate); hideLoading(); }
+            } catch (error) {
+                console.warn("DB 읽기 실패.");
+            } finally {
+                recalculateAll(false); 
+                updateDropdownOptions(currentDate); 
+                hideLoading();
+            }
         }
 
         let tempEditList = [];
         function openDriverEditModal() {
             tempEditList = [...getEffectiveDriverList(currentDate)];
             document.getElementById('modal-date-text').innerText = `※ 이 명단은 [${currentDate}] 이후의 배차부터 영구 적용되며, 이전 날짜의 기록은 절대 변경되지 않습니다.`;
-            renderDriverEditList(); document.getElementById('modal-overlay').style.display = 'flex';
+            renderDriverEditList();
+            document.getElementById('modal-overlay').style.display = 'flex';
         }
-        function closeDriverModal() { document.getElementById('modal-overlay').style.display = 'none'; document.getElementById('new-driver-name').value = ''; }
+        function closeDriverModal() {
+            document.getElementById('modal-overlay').style.display = 'none';
+            document.getElementById('new-driver-name').value = '';
+        }
         function renderDriverEditList() {
-            const ul = document.getElementById('edit-list-ul'); ul.innerHTML = '';
+            const ul = document.getElementById('edit-list-ul');
+            ul.innerHTML = '';
             tempEditList.forEach((d, idx) => {
-                ul.innerHTML += `<li><span>${idx + 1}. ${d}</span><div>
-                    <button class="btn-up" onclick="moveDriver(${idx}, -1)">▲</button>
-                    <button class="btn-up" onclick="moveDriver(${idx}, 1)">▼</button>
-                    <button class="btn-del" onclick="removeDriver(${idx})">삭제</button></div></li>`;
+                ul.innerHTML += `
+                    <li>
+                        <span>${idx + 1}. ${d}</span>
+                        <div>
+                            <button class="btn-up" onclick="moveDriver(${idx}, -1)">▲</button>
+                            <button class="btn-up" onclick="moveDriver(${idx}, 1)">▼</button>
+                            <button class="btn-del" onclick="removeDriver(${idx})">삭제</button>
+                        </div>
+                    </li>`;
             });
         }
-        function moveDriver(idx, dir) { if(idx + dir < 0 || idx + dir >= tempEditList.length) return; const temp = tempEditList[idx]; tempEditList[idx] = tempEditList[idx+dir]; tempEditList[idx+dir] = temp; renderDriverEditList(); }
+        function moveDriver(idx, dir) {
+            if(idx + dir < 0 || idx + dir >= tempEditList.length) return;
+            const temp = tempEditList[idx]; tempEditList[idx] = tempEditList[idx+dir]; tempEditList[idx+dir] = temp;
+            renderDriverEditList();
+        }
         function removeDriver(idx) { tempEditList.splice(idx, 1); renderDriverEditList(); }
-        function addDriverToList() { const name = document.getElementById('new-driver-name').value.trim(); if(name && !tempEditList.includes(name)) { tempEditList.push(name); document.getElementById('new-driver-name').value = ''; renderDriverEditList(); } }
+        function addDriverToList() {
+            const name = document.getElementById('new-driver-name').value.trim();
+            if(name && !tempEditList.includes(name)) { tempEditList.push(name); document.getElementById('new-driver-name').value = ''; renderDriverEditList(); }
+        }
         function saveDriverList() {
             if(tempEditList.length === 0) return alert("최소 1명의 운전원이 필요합니다.");
             driverListModifiers[currentDate] = [...tempEditList];
             db.collection('driver_modifiers').doc(currentDate).set({ list: driverListModifiers[currentDate] }).catch(e=>{});
-            closeDriverModal(); recalculateAll(true); updateDropdownOptions(currentDate); 
+            closeDriverModal(); 
+            recalculateAll(true); 
+            updateDropdownOptions(currentDate); 
         }
 
         function toggleManual(vehicleName, isBus) {
             const isManual = document.getElementById(`manual_${vehicleName}`).checked;
-            const d1 = document.getElementById(`driver1_${vehicleName}`); const d2 = document.getElementById(`driver2_${vehicleName}`);
-            d1.disabled = !isManual; if(d2) d2.disabled = !isManual;
-            if (isBus) document.getElementById(`single_box_${vehicleName}`).style.display = isManual ? 'none' : 'block';
+            const d1 = document.getElementById(`driver1_${vehicleName}`);
+            const d2 = document.getElementById(`driver2_${vehicleName}`);
+            
+            d1.disabled = !isManual;
+            if(d2) d2.disabled = !isManual;
+            
+            if (isBus) {
+                document.getElementById(`single_box_${vehicleName}`).style.display = isManual ? 'none' : 'block';
+            }
         }
 
         function toggleVehicleForm(vehicleName, checkbox, isBus) {
             document.getElementById(`form_${vehicleName}`).style.display = checkbox.checked ? "block" : "none";
             if (checkbox.checked) {
                 const existing = allReservations.find(r => r.vehicle === vehicleName && r.dates.includes(currentDate));
-                const d1 = document.getElementById(`driver1_${vehicleName}`); const d2 = document.getElementById(`driver2_${vehicleName}`);
-                const photoInput = document.getElementById(`photo_${vehicleName}`); const photoStatus = document.getElementById(`photo_status_${vehicleName}`);
+                const d1 = document.getElementById(`driver1_${vehicleName}`);
+                const d2 = document.getElementById(`driver2_${vehicleName}`);
+                const photoInput = document.getElementById(`photo_${vehicleName}`);
+                const photoStatus = document.getElementById(`photo_status_${vehicleName}`);
+                
                 if (photoInput) photoInput.value = ''; 
+                
                 if (existing) {
                     document.getElementById(`dest_${vehicleName}`).value = existing.dest || '';
                     document.getElementById(`type_${vehicleName}`).value = existing.type || '공공예약';
                     document.getElementById(`km_${vehicleName}`).value = existing.km || 0;
                     if(isBus) document.getElementById(`single_${vehicleName}`).checked = (existing.reqCount === 1);
+                    
                     document.getElementById(`manual_${vehicleName}`).checked = existing.isManual || false;
                     document.getElementById(`next_pointer_${vehicleName}`).value = existing.nextPointerDriver || '';
+                    
                     if (photoStatus) photoStatus.innerText = existing.photoUrl ? '✅ 첨부된 파일이 있습니다.' : '';
 
                     d1.value = existing.manualDrivers?.[0] || existing.assigned?.[0] || '';
                     if (isBus && d2) d2.value = existing.manualDrivers?.[1] || existing.assigned?.[1] || '';
+
                     if (existing.isManual) {
-                        d1.disabled = false; if(d2) d2.disabled = false;
+                        d1.disabled = false;
+                        if(d2) d2.disabled = false;
                         if(isBus) document.getElementById(`single_box_${vehicleName}`).style.display = 'none';
                     } else {
-                        d1.disabled = true; if(d2) d2.disabled = true;
-                        if(isBus) { document.getElementById(`single_box_${vehicleName}`).style.display = 'block'; document.getElementById(`single_${vehicleName}`).checked = (existing.reqCount === 1); }
+                        d1.disabled = true;
+                        if(d2) d2.disabled = true;
+                        if(isBus) {
+                            document.getElementById(`single_box_${vehicleName}`).style.display = 'block';
+                            document.getElementById(`single_${vehicleName}`).checked = (existing.reqCount === 1);
+                        }
                     }
                 } else {
-                    document.getElementById(`dest_${vehicleName}`).value = ''; document.getElementById(`type_${vehicleName}`).value = '공공예약'; document.getElementById(`km_${vehicleName}`).value = '0';
+                    document.getElementById(`dest_${vehicleName}`).value = '';
+                    document.getElementById(`type_${vehicleName}`).value = '공공예약';
+                    document.getElementById(`km_${vehicleName}`).value = '0';
                     if(isBus) document.getElementById(`single_${vehicleName}`).checked = false;
-                    document.getElementById(`manual_${vehicleName}`).checked = false; document.getElementById(`next_pointer_${vehicleName}`).value = '';
+                    
+                    document.getElementById(`manual_${vehicleName}`).checked = false;
+                    document.getElementById(`next_pointer_${vehicleName}`).value = '';
+                    
                     if (photoStatus) photoStatus.innerText = '';
-                    d1.value = ''; d1.disabled = true; if(isBus && d2) { d2.value = ''; d2.disabled = true; }
-                    if(isBus) { document.getElementById(`single_box_${vehicleName}`).style.display = 'block'; document.getElementById(`single_${vehicleName}`).checked = false; }
+
+                    d1.value = ''; d1.disabled = true;
+                    if(isBus && d2) { d2.value = ''; d2.disabled = true; }
+                    
+                    if(isBus) {
+                        document.getElementById(`single_box_${vehicleName}`).style.display = 'block';
+                        document.getElementById(`single_${vehicleName}`).checked = false;
+                    }
                 }
             }
         }
 
         function closeAllForms() {
             const allVehicles = ['1호차', '2호차', '3호차', '11호차', '12호차', '13호차', '14호차'];
-            allVehicles.forEach(v => { const chk = document.getElementById(`v_${v}`); const form = document.getElementById(`form_${v}`); if(chk) chk.checked = false; if(form) form.style.display = "none"; });
+            allVehicles.forEach(v => {
+                const chk = document.getElementById(`v_${v}`);
+                const form = document.getElementById(`form_${v}`);
+                if(chk) chk.checked = false;
+                if(form) form.style.display = "none";
+            });
         }
 
-        function getDriverStatus(date, driver) { if (!dailyDriverStatus[date]) return '출근'; return dailyDriverStatus[date][driver] || '출근'; }
+        function getDriverStatus(date, driver) {
+            if (!dailyDriverStatus[date]) return '출근'; 
+            return dailyDriverStatus[date][driver] || '출근';
+        }
 
         function handleStatusChange(driver, newStatus, oldStatus) {
-            if (newStatus === '휴무') { if (!confirm(`${driver} 운전원 휴무 사용하시겠습니까?`)) { renderStatusPanel(currentDate); return; } }
+            if (newStatus === '휴무') {
+                if (!confirm(`${driver} 운전원 휴무 사용하시겠습니까?`)) { renderStatusPanel(currentDate); return; }
+            }
             if (!dailyDriverStatus[currentDate]) dailyDriverStatus[currentDate] = {};
             dailyDriverStatus[currentDate][driver] = newStatus;
             recalculateAll(false); renderStatusPanel(currentDate);
@@ -589,23 +717,33 @@
 
         function recalculateAll(shouldSaveToDB = true) {
             const originalStateString = JSON.stringify(allReservations);
+
             allReservations.forEach(r => r.assigned = []);
             allReservations.sort((a, b) => {
                 if (a.startDate !== b.startDate) return new Date(a.startDate) - new Date(b.startDate);
-                const isBusA = ['1호차', '2호차', '3호차'].includes(a.vehicle); const isBusB = ['1호차', '2호차', '3호차'].includes(b.vehicle);
+                
+                const isBusA = ['1호차', '2호차', '3호차'].includes(a.vehicle);
+                const isBusB = ['1호차', '2호차', '3호차'].includes(b.vehicle);
                 if (isBusA !== isBusB) return isBusA ? -1 : 1; 
+
                 const getTypeWeight = (t, isBus) => {
                     if (isBus) {
-                        if (t.includes('공공') || t.includes('서울')) return 1; if (t.includes('1박')) return 2; if (t.includes('2박')) return 3;
-                        if (t.includes('성묘')) return 4; if (t.includes('나들이')) return 5; if (t.includes('시티')) return 6; return 99;
+                        if (t.includes('공공') || t.includes('서울')) return 1; 
+                        if (t.includes('1박')) return 2; if (t.includes('2박')) return 3;
+                        if (t.includes('성묘')) return 4; if (t.includes('나들이')) return 5;
+                        if (t.includes('시티')) return 6; return 99;
                     } else { 
-                        if (t.includes('공공') || t.includes('서울') || t.includes('성묘')) return 1; if (t.includes('1박')) return 2; if (t.includes('2박')) return 3;
+                        if (t.includes('공공') || t.includes('서울') || t.includes('성묘')) return 1; 
+                        if (t.includes('1박')) return 2; if (t.includes('2박')) return 3;
                         if (t.includes('나들이')) return 4; if (t.includes('시티')) return 5; return 99;
                     }
                 };
-                const wA = getTypeWeight(a.type, isBusA); const wB = getTypeWeight(b.type, isBusB);
+                const wA = getTypeWeight(a.type, isBusA);
+                const wB = getTypeWeight(b.type, isBusB);
                 if (wA !== wB) return wA - wB; 
+
                 if (a.km !== b.km) return a.km - b.km;
+
                 const vehWeight = (v) => {
                     if (v === '3호차') return 1; if (v === '1호차') return 2; if (v === '2호차') return 3;
                     if (v === '11호차') return 4; if (v === '12호차') return 5; if (v === '13호차') return 6; if (v === '14호차') return 7; return 99;
@@ -621,6 +759,7 @@
                     currentList = getEffectiveDriverList(res.startDate);
                     if (currentList.length > 0) pointer = pointer % currentList.length; 
                 }
+
                 if (res.isManual && res.manualDrivers && res.manualDrivers.length > 0) {
                     res.assigned = [...res.manualDrivers];
                 } else {
@@ -628,27 +767,39 @@
                     while (res.assigned.length < res.reqCount && loopGuard < 50 && currentList.length > 0) {
                         const candidate = currentList[pointer];
                         let isWorkingAllDays = true;
-                        for (let d of res.dates) if (getDriverStatus(d, candidate) === '휴무') { isWorkingAllDays = false; break; }
+                        
+                        for (let d of res.dates) {
+                            if (getDriverStatus(d, candidate) === '휴무') { isWorkingAllDays = false; break; }
+                        }
+
                         let isOverlapping = false;
                         for (let other of allReservations) {
                             if (other.id !== res.id && other.assigned.includes(candidate)) {
                                 if (res.dates.some(d => other.dates.includes(d))) { isOverlapping = true; break; }
                             }
                         }
+
                         if (isWorkingAllDays && !isOverlapping) res.assigned.push(candidate);
-                        pointer = (pointer + 1) % currentList.length; loopGuard++;
+                        pointer = (pointer + 1) % currentList.length;
+                        loopGuard++;
                     }
                 }
-                if (res.nextPointerDriver && currentList.includes(res.nextPointerDriver)) pointer = currentList.indexOf(res.nextPointerDriver);
+
+                if (res.nextPointerDriver && currentList.includes(res.nextPointerDriver)) {
+                    pointer = currentList.indexOf(res.nextPointerDriver);
+                }
             });
 
             if (shouldSaveToDB) {
                 const oldReservations = JSON.parse(originalStateString);
                 allReservations.forEach(res => {
                     const oldRes = oldReservations.find(o => o.id === res.id);
-                    if (!oldRes || JSON.stringify(oldRes) !== JSON.stringify(res)) db.collection('reservations').doc(res.id).set(res).catch(e=>{});
+                    if (!oldRes || JSON.stringify(oldRes) !== JSON.stringify(res)) {
+                        db.collection('reservations').doc(res.id).set(res).catch(e=>{});
+                    }
                 });
             }
+
             renderCalendar(); renderStatusPanel(currentDate); renderDispatchResult(currentDate);
         }
 
@@ -656,7 +807,8 @@
             let days = 1; if (type.includes('1박')) days = 2; if (type.includes('2박')) days = 3;
             const dates = []; let cur = new Date(startDate);
             for(let i = 0; i < days; i++) {
-                dates.push(`${cur.getFullYear()}-${String(cur.getMonth() + 1).padStart(2, '0')}-${String(cur.getDate()).padStart(2, '0')}`); cur.setDate(cur.getDate() + 1);
+                dates.push(`${cur.getFullYear()}-${String(cur.getMonth() + 1).padStart(2, '0')}-${String(cur.getDate()).padStart(2, '0')}`);
+                cur.setDate(cur.getDate() + 1);
             }
             return dates;
         }
@@ -664,20 +816,36 @@
         function processFile(file) {
             return new Promise((resolve, reject) => {
                 if (file.type.startsWith('image/')) {
-                    const reader = new FileReader(); reader.readAsDataURL(file);
+                    const reader = new FileReader();
+                    reader.readAsDataURL(file);
                     reader.onload = (event) => {
-                        const img = new Image(); img.src = event.target.result;
+                        const img = new Image();
+                        img.src = event.target.result;
                         img.onload = () => {
-                            const canvas = document.createElement('canvas'); const MAX_WIDTH = 1200; 
-                            let width = img.width; let height = img.height;
-                            if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
-                            canvas.width = width; canvas.height = height;
-                            const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height);
-                            canvas.toBlob((blob) => { if (blob) resolve(blob); else reject(new Error('이미지 압축 실패')); }, 'image/jpeg', 0.7);
+                            const canvas = document.createElement('canvas');
+                            const MAX_WIDTH = 1200; 
+                            let width = img.width;
+                            let height = img.height;
+
+                            if (width > MAX_WIDTH) {
+                                height *= MAX_WIDTH / width;
+                                width = MAX_WIDTH;
+                            }
+                            canvas.width = width;
+                            canvas.height = height;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0, width, height);
+
+                            canvas.toBlob((blob) => {
+                                if (blob) resolve(blob);
+                                else reject(new Error('이미지 압축 실패'));
+                            }, 'image/jpeg', 0.7);
                         };
                         img.onerror = () => reject(new Error('손상된 이미지입니다.'));
                     };
-                } else { resolve(file); }
+                } else {
+                    resolve(file);
+                }
             });
         }
 
@@ -686,10 +854,16 @@
             const dates = getDatesForTrip(currentDate, type);
             let isManual = document.getElementById(`manual_${vehicleName}`).checked;
 
-            let manualDrivers = []; let reqCount = 1;
+            let manualDrivers = [];
+            let reqCount = 1;
+
             if (isManual) {
-                let d1 = document.getElementById(`driver1_${vehicleName}`).value; if (d1) manualDrivers.push(d1);
-                if (isBus && document.getElementById(`driver2_${vehicleName}`)) { let d2 = document.getElementById(`driver2_${vehicleName}`).value; if (d2) manualDrivers.push(d2); }
+                let d1 = document.getElementById(`driver1_${vehicleName}`).value;
+                if (d1) manualDrivers.push(d1);
+                if (isBus && document.getElementById(`driver2_${vehicleName}`)) {
+                    let d2 = document.getElementById(`driver2_${vehicleName}`).value;
+                    if (d2) manualDrivers.push(d2);
+                }
                 reqCount = manualDrivers.length || 1;
             } else {
                 reqCount = isBus ? (document.getElementById(`single_${vehicleName}`).checked ? 1 : 2) : 1; 
@@ -698,55 +872,93 @@
             let nextPointerDriver = document.getElementById(`next_pointer_${vehicleName}`).value;
 
             const existingIndex = allReservations.findIndex(r => r.vehicle === vehicleName && r.dates.includes(currentDate));
-            let docId = Date.now().toString(); let photoUrl = null; let settlement = {}; 
+            let docId = Date.now().toString(); 
+            let photoUrl = null;
+            let settlement = {}; 
 
             if (existingIndex !== -1) {
-                let existing = allReservations[existingIndex]; docId = existing.id; photoUrl = existing.photoUrl || null; 
-                settlement = existing.settlement || {}; allReservations.splice(existingIndex, 1);
+                let existing = allReservations[existingIndex];
+                docId = existing.id; 
+                photoUrl = existing.photoUrl || null; 
+                settlement = existing.settlement || {};
+                allReservations.splice(existingIndex, 1);
             }
 
             const photoInput = document.getElementById(`photo_${vehicleName}`);
             if (photoInput && photoInput.files.length > 0) {
                 showLoading('파일 업로드 중...');
                 try {
-                    const file = photoInput.files[0]; const processedBlob = await processFile(file);
+                    const file = photoInput.files[0];
+                    const processedBlob = await processFile(file);
+                    
                     const storageRef = storage.ref(`reservation_files/${docId}_${file.name}`);
                     const uploadTask = storageRef.put(processedBlob);
                     const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('업로드 시간 초과')), 20000));
+                    
                     await Promise.race([uploadTask, timeout]);
                     photoUrl = await storageRef.getDownloadURL();
-                } catch (error) { alert("⚠️ 파일 업로드 실패: " + error.message); hideLoading(); return; }
-            } else { showLoading('예약 등록 중...'); }
+                    
+                } catch (error) {
+                    alert("⚠️ 파일 업로드 실패: " + error.message);
+                    hideLoading(); 
+                    return; 
+                }
+            } else {
+                showLoading('예약 등록 중...');
+            }
 
             allReservations.push({
                 id: docId, startDate: currentDate, dates: dates, vehicle: vehicleName,
-                start: '', dest: document.getElementById(`dest_${vehicleName}`).value || '내용 없음',
+                start: '', 
+                dest: document.getElementById(`dest_${vehicleName}`).value || '내용 없음',
                 type: type, km: parseInt(document.getElementById(`km_${vehicleName}`).value) || 0,
-                reqCount: reqCount, assigned: [], isCanceled: false, isManual: isManual,
-                manualDrivers: manualDrivers, nextPointerDriver: nextPointerDriver, photoUrl: photoUrl, settlement: settlement
+                reqCount: reqCount, assigned: [],
+                isCanceled: false,
+                isManual: isManual,
+                manualDrivers: manualDrivers,
+                nextPointerDriver: nextPointerDriver,
+                photoUrl: photoUrl,
+                settlement: settlement
             });
 
-            document.getElementById(`v_${vehicleName}`).checked = false; document.getElementById(`form_${vehicleName}`).style.display = "none";
-            recalculateAll(true); hideLoading();
+            document.getElementById(`v_${vehicleName}`).checked = false;
+            document.getElementById(`form_${vehicleName}`).style.display = "none";
+            recalculateAll(true); 
+            hideLoading();
         }
 
         function cancelReservation(vehicleName) {
             const index = allReservations.findIndex(r => r.vehicle === vehicleName && r.dates.includes(currentDate));
-            if (index !== -1) { db.collection('reservations').doc(allReservations[index].id).delete().catch(e => {}); allReservations.splice(index, 1); recalculateAll(true); alert(`[${vehicleName}] 배차가 취소(삭제) 처리되었습니다.`); } 
-            else { alert("등록된 내역이 없습니다."); }
-            document.getElementById(`v_${vehicleName}`).checked = false; document.getElementById(`form_${vehicleName}`).style.display = "none";
+            if (index !== -1) {
+                db.collection('reservations').doc(allReservations[index].id).delete().catch(e => {});
+                allReservations.splice(index, 1);
+                recalculateAll(true); 
+                alert(`[${vehicleName}] 배차가 완전 취소(삭제) 처리되었습니다.`);
+            } else {
+                alert("이 날짜에 등록된 배차 내역이 없습니다.");
+            }
+            document.getElementById(`v_${vehicleName}`).checked = false;
+            document.getElementById(`form_${vehicleName}`).style.display = "none";
         }
 
         function cancelBefore4Days(vehicleName) {
             const index = allReservations.findIndex(r => r.vehicle === vehicleName && r.dates.includes(currentDate));
-            if (index !== -1) { allReservations[index].isCanceled = true; db.collection('reservations').doc(allReservations[index].id).set(allReservations[index]).catch(e=>{}); recalculateAll(true); alert(`[${vehicleName}] 4일 전 취소 처리되었습니다.`); } 
-            else { alert("등록된 내역이 없습니다."); }
-            document.getElementById(`v_${vehicleName}`).checked = false; document.getElementById(`form_${vehicleName}`).style.display = "none";
+            if (index !== -1) {
+                allReservations[index].isCanceled = true;
+                db.collection('reservations').doc(allReservations[index].id).set(allReservations[index]).catch(e=>{});
+                recalculateAll(true); 
+                alert(`[${vehicleName}] 4일 전 취소 처리되었습니다.`);
+            } else {
+                alert("이 날짜에 등록된 배차 내역이 없습니다.");
+            }
+            document.getElementById(`v_${vehicleName}`).checked = false;
+            document.getElementById(`form_${vehicleName}`).style.display = "none";
         }
 
         function changeMonth(offset) {
             currentMonth += offset;
-            if (currentMonth < 0) { currentMonth = 11; currentYear--; } else if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+            if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+            else if (currentMonth > 11) { currentMonth = 0; currentYear++; }
             renderCalendar();
         }
 
@@ -782,23 +994,13 @@
             for (let d = 1; d <= lastDate; d++) updateCalendarCellUI(`${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`);
         }
 
-        // 🔥 배지 2글자 복구
-        function getShortType(type) {
-            if (type.includes('공공')) return '공공';
-            if (type.includes('1박')) return '1박';
-            if (type.includes('2박')) return '2박';
-            if (type.includes('서울')) return '서울';
-            if (type.includes('시티')) return '시티';
-            if (type.includes('성묘')) return '성묘';
-            return '기타';
-        }
-
         function updateCalendarCellUI(date) {
             const tagsContainer = document.getElementById(`tags_${date}`);
             const statusContainer = document.getElementById(`cell_status_${date}`);
             if (!tagsContainer || !statusContainer) return;
 
             const activeReservations = allReservations.filter(r => (r.dates || []).includes(date));
+            
             let tagsHTML = '';
 
             activeReservations.forEach(d => {
@@ -841,10 +1043,10 @@
             let statusHTML = '';
             if (dutyDrivers.length > 0) statusHTML += `<div class="cal-status duty"><span class="label">당직:</span> <span class="names">${dutyDrivers.join(', ')}</span></div>`;
             
-            // 🔥 휴무 파란색으로, 이름만 표시 (성 빼기)
+            // 🔥 휴무: 빨간색, 파란색 구분 및 성 빼기 적용
             if (offDrivers.length > 0) {
                 let offNames = offDrivers.map(n => n.length >= 3 ? n.substring(1) : n).join(', ');
-                statusHTML += `<div class="cal-status off"><span class="names" style="color:#007bff; font-weight:700;">휴무: ${offNames}</span></div>`;
+                statusHTML += `<div class="cal-status off"><span style="color:#d9534f; font-weight:700;">휴무: </span><span class="names" style="color:#007bff; font-weight:700;">${offNames}</span></div>`;
             }
             
             if (statusHTML !== '') {
@@ -931,7 +1133,6 @@
                     
                     if ((d.assigned || []).length === 0) assignedNamesHTML = '인원 부족';
 
-                    // 🔥 이모지(그림) 싹 제거
                     let reportText = '';
                     if (d.settlement && Object.keys(d.settlement).length > 0) {
                         Object.keys(d.settlement).forEach(drv => {
@@ -969,10 +1170,9 @@
                 if (dutyDrivers.length > 0) {
                     html += `<div style="margin-bottom: ${offDrivers.length > 0 ? '8px' : '0'};"><span class="duty-badge" style="padding: 3px 6px; font-size: 0.8rem; background:#f29900; color:#fff; border-radius:4px;">당직</span> <b style="color:#333;">${dutyDrivers.join(', ')}</b></div>`;
                 }
-                // 🔥 휴무자 파란색, 성 빼기
                 if (offDrivers.length > 0) {
                     let offNames = offDrivers.map(n => n.length >= 3 ? n.substring(1) : n).join(', ');
-                    html += `<div><span style="color:#007bff; font-weight:bold;">휴무: ${offNames}</span></div>`;
+                    html += `<div><span style="color:#d9534f; font-weight:bold;">휴무: </span><span style="color:#007bff; font-weight:bold;">${offNames}</span></div>`;
                 }
                 html += `</li>`;
             }
