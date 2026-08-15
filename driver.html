@@ -731,63 +731,61 @@
 
         // 🔥 월간 요약 한 줄 정렬(nowrap), 뱃지 삭제, 소수점 2자리 적용 완료
         function renderMonthlySummary() {
-            const container = document.getElementById('monthly-summary-container');
-            
-            let totalOvertime = 0;
-            let totalAllowance = 0;
-            let hasData = false;
-            let monthData = [];
+    const container = document.getElementById('monthly-summary-container');
+    
+    let totalOvertime = 0;
+    let totalAllowance = 0;
+    let hasData = false;
+    let monthData = [];
 
-            allReservations.forEach(r => {
-                if (r.settlement && r.settlement[currentUser]) {
-                    Object.keys(r.settlement[currentUser]).forEach(dateStr => {
-                        let [y, m, d] = dateStr.split('-');
-                        if (parseInt(y) === currentYear && parseInt(m) - 1 === currentMonth) {
-                            let s = r.settlement[currentUser][dateStr];
-                            monthData.push({
-                                date: dateStr, day: parseInt(d),
-                                overtime: s.overtime || 0, allowance: s.allowance || 0,
-                                type: r.type, vehicle: r.vehicle
-                            });
-                        }
+    allReservations.forEach(r => {
+        if (r.settlement && r.settlement[currentUser]) {
+            Object.keys(r.settlement[currentUser]).forEach(dateStr => {
+                let [y, m, d] = dateStr.split('-');
+                if (parseInt(y) === currentYear && parseInt(m) - 1 === currentMonth) {
+                    let s = r.settlement[currentUser][dateStr];
+                    monthData.push({
+                        date: dateStr, day: parseInt(d),
+                        overtime: s.overtime || 0, allowance: s.allowance || 0,
+                        type: r.type, vehicle: r.vehicle
                     });
                 }
             });
-
-            monthData.sort((a, b) => a.day - b.day);
-
-            let listHtml = '';
-            monthData.forEach(item => {
-                hasData = true;
-                
-                // 🔥 뱃지 이름 삭제, nowrap 처리로 절대 줄바꿈 되지 않음
-                listHtml += `<li style="padding: 8px 10px; font-size: 0.8rem; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; white-space: nowrap;">
-                                <span style="color:#333; font-weight:bold; width: 35px;">${currentMonth + 1}/${item.day}</span>
-                                <span style="color:#555; flex: 1; text-align: right;">
-                                    보상: <b style="color:#333;">${Number(item.overtime || 0).toFixed(2)}</b>시간 
-                                    <span style="color:#ccc; margin:0 4px;">|</span> 
-                                    일비: <b style="color:#333;">${Number(item.allowance || 0).toLocaleString()}</b>원
-                                </span>
-                             </li>`;
-                totalOvertime += (item.overtime || 0);
-                totalAllowance += (item.allowance || 0);
-            });
-
-            if (!hasData) { listHtml += `<li style="color:#666; padding:10px; font-size: 0.8rem; text-align:center;">이번 달 정산 내역이 없습니다.</li>`; }
-
-            let html = `<h3 style="margin-top: 25px; border-bottom: 2px solid #007bff; padding-bottom: 8px; font-size: 1.1rem;">${currentMonth + 1}월 내 배차 정산 요약</h3>`;
-            
-            // 🔥 총합계 소수점 2자리 강제 적용 및 일직선(nowrap)
-            html += `<div style="background:#e8f0fe; padding:12px 10px; border-radius:6px; margin:10px 0; border:1px solid #c6dafc; text-align:center; font-size:0.9rem; white-space: nowrap;">`;
-            html += `<b style="color:#333;">총합계 <span style="color:#ccc; margin:0 4px;">|</span> 보상: <span style="color:#007bff;">${Number(totalOvertime || 0).toFixed(2)}</span>시간 <span style="color:#ccc; margin:0 4px;">|</span> 일비: <span style="color:#007bff;">${Number(totalAllowance || 0).toLocaleString()}</span>원</b>`;
-            html += `</div>`;
-            
-            html += `<ul class="result-list" style="padding:0; margin-top:0;">`; 
-            html += listHtml;
-            html += `</ul>`;
-
-            container.innerHTML = html;
         }
+    });
+
+    monthData.sort((a, b) => a.day - b.day);
+
+    let listHtml = '';
+    monthData.forEach(item => {
+        hasData = true;
+        let sType = item.type.replace('예약','').replace('지원','').replace('운행','').replace('투어','').replace('동행','');
+        
+        // 🔥 개별 리스트도 좁은 화면에 맞게 두 줄로 깔끔하게 배치 (위: 날짜/차량, 아래: 금액)
+        listHtml += `<li style="padding: 10px; font-size: 0.8rem; border-bottom: 1px solid #eee; display: flex; flex-direction: column; gap: 5px;">
+                        <span style="color:#333; font-weight:bold;">${currentMonth + 1}/${item.day} [${item.vehicle}] ${sType}</span>
+                        <span style="color:#555; text-align: right;">보상: <b style="color:#333;">${Number(item.overtime || 0).toFixed(2)}</b>시간 <span style="color:#ccc; margin:0 4px;">|</span> 일비: <b style="color:#333;">${Number(item.allowance || 0).toLocaleString()}</b>원</span>
+                     </li>`;
+        totalOvertime += (item.overtime || 0);
+        totalAllowance += (item.allowance || 0);
+    });
+
+    if (!hasData) { listHtml += `<li style="color:#666; padding:10px; font-size: 0.8rem; text-align:center;">이번 달 정산 내역이 없습니다.</li>`; }
+
+    let html = `<h3 style="margin-top: 25px; border-bottom: 2px solid #007bff; padding-bottom: 8px; font-size: 1.05rem;">${currentMonth + 1}월 내 배차 정산 요약</h3>`;
+    
+    // 🔥 총합계 박스를 말씀하신 대로 '보상' 밑에 '일비'가 오도록 두 줄로 변경
+    html += `<div style="background:#e8f0fe; padding:12px; border-radius:6px; margin:10px 0; border:1px solid #c6dafc; text-align:center;">`;
+    html += `<div style="margin-bottom: 5px; font-size:0.9rem;"><b style="color:#333;">총합계 보상: <span style="color:#007bff; font-size:1.05rem;">${Number(totalOvertime || 0).toFixed(2)}</span> 시간</b></div>`;
+    html += `<div style="font-size:0.9rem;"><b style="color:#333;">총합계 일비: <span style="color:#007bff; font-size:1.05rem;">${Number(totalAllowance || 0).toLocaleString()}</span> 원</b></div>`;
+    html += `</div>`;
+    
+    html += `<ul class="result-list" style="padding:0; margin-top:0;">`; 
+    html += listHtml;
+    html += `</ul>`;
+
+    container.innerHTML = html;
+}
 
         function selectDate(dateStr) {
             currentDate = dateStr;
