@@ -37,7 +37,6 @@
         .calendar-day-header.sun { color: #d9534f; }
         .calendar-day-header.sat { color: #0275d8; }
 
-        /* 🔥 스크롤 제거 */
         .calendar-cell { min-height: 220px; background: #fff; border: 1px solid #e1e4e8; border-radius: 4px; padding: 4px; font-size: 0.85rem; cursor: pointer; display: flex; flex-direction: column; position: relative; }
         .calendar-cell:hover { background: #fafbfc; }
         .calendar-cell.selected { border: 2px solid #28a745; background: #f0fdf4; }
@@ -58,7 +57,6 @@
         .event-box.citytour { background-color: #f3e5f5; border: 1px solid #e1bee7; color: #333; } 
         .event-box.default { background-color: #f1f3f4; border: 1px solid #d8dbe0; color: #333; }
 
-        /* 🔥 뱃지 폰트 작게 */
         .badge { padding: 2px 4px; border-radius: 4px; font-size: 0.6rem; font-weight: 800; text-align: center; }
         .badge.pub { background-color: #007bff; color: #fff; } 
         .badge.grave { background-color: #28a745; color: #fff; } 
@@ -166,7 +164,6 @@
             </div>
         </div>
 
-        <!-- 🔥 헤더: 1600px, 타이틀 심플, 버튼 초소형 -->
         <div style="max-width: 1600px; margin: 10px auto 0; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; gap: 6px;">
             <span id="welcome-msg" style="font-weight: bold; color: #333; font-size: 1.15rem;"></span>
             <div style="display: flex; gap: 6px; align-items: center;">
@@ -196,7 +193,6 @@
                     <div class="radio-group" id="my-status-radios"></div>
                 </div>
 
-                <!-- 🔥 월간 정산 합계 상단 고정 -->
                 <div id="monthly-summary-container"></div>
 
                 <h3 style="margin-top: 25px; border-bottom: 2px solid #28a745; padding-bottom: 8px;">선택 날짜 내 배차 내역</h3>
@@ -242,7 +238,6 @@
         let allReservations = [];
         let dailyDriverStatus = {};
 
-        // 🔥 배지 2글자 반환 (깔끔하게)
         function getShortType(type) {
             if (type.includes('공공')) return '공공';
             if (type.includes('1박')) return '1박';
@@ -253,7 +248,6 @@
             return '기타';
         }
 
-        // 🔥 이름에서 성 빼기 (김탁 -> 탁, 박기준 -> 기준)
         function getDispName(name) {
             if (!name) return '';
             if (name.includes('admin')) return name;
@@ -299,7 +293,6 @@
             checkAuth(); 
         }
 
-        // 🔥 관리자 무한 튕김 방지 (driver.html 로 접속 시 index.html 로 강제 전송)
         function checkAuth() {
             currentUser = localStorage.getItem('loggedInUser');
             userRole = localStorage.getItem('userRole');
@@ -315,7 +308,6 @@
                 }
                 document.getElementById('login-container').style.display = 'none';
                 document.getElementById('app-container').style.display = 'block';
-                // 🔥 "기준님 메인창" 타이틀 적용
                 document.getElementById('welcome-msg').innerText = `${getDispName(currentUser)}님 배차`;
                 return true;
             }
@@ -454,15 +446,15 @@
                 let canceledBadgeStyle = d.isCanceled ? 'background-color: transparent; color: #adb5bd; border: 1px solid #adb5bd;' : '';
                 
                 let assignedNamesHTML = (d.assigned || []).map((name, idx) => {
-                let isUnderline = (d.settlement && d.settlement[name] && d.settlement[name][date] && d.settlement[name][date].isEarly) || false;
-                
-                // 🔥 getDispName(name)을 빼고, name으로 원상 복구하여 성씨가 다 나오게 수정!
-                let displayName = name; 
-                if (name === currentUser && !d.isCanceled) {
-                    displayName = `<span style="color:#0056b3; font-weight:900;">${displayName}</span>`; 
-                }
-                return (isUnderline && !d.isCanceled && name !== '미지정') ? `<span class="early-underline">${displayName}</span>` : displayName;
-            }).join(', ');
+                    let isUnderline = (d.settlement && d.settlement[name] && d.settlement[name][date] && d.settlement[name][date].isEarly) || false;
+                    
+                    let displayName = name; // 🔥 성씨 모두 나오게 (변경 안함)
+                    if (name === currentUser && !d.isCanceled) {
+                        displayName = `<span style="color:#0056b3; font-weight:900;">${displayName}</span>`; 
+                    }
+                    return (isUnderline && !d.isCanceled && name !== '미지정') ? `<span class="early-underline">${displayName}</span>` : displayName;
+                }).join(', ');
+
                 let attachIcon = d.photoUrl ? ' <span style="font-size:0.8rem;">📎</span>' : '';
 
                 tagsHTML += `
@@ -481,7 +473,6 @@
             let statusHTML = '';
             if (dutyDrivers.length > 0) statusHTML += `<div class="cal-status duty"><span class="label">당직:</span> <span class="names">${dutyDrivers.join(', ')}</span></div>`;
             
-            // 🔥 휴무자 글자는 빨강, 이름은 파랑 (성 빼기)
             if (offDrivers.length > 0) {
                 let offNames = offDrivers.map(n => getDispName(n)).join(', ');
                 statusHTML += `<div class="cal-status off"><span style="color:#d9534f; font-weight:700;">휴무: </span><span class="names" style="color:#007bff; font-weight:700;">${offNames}</span></div>`;
@@ -496,7 +487,6 @@
             }
         }
 
-        // 🔥 문서 파일 버그 픽스 완료 
         function showDispatchDetail(event, id, clickedDate) {
             event.stopPropagation(); 
             const d = allReservations.find(r => r.id === id);
@@ -522,7 +512,7 @@
                 imgContainer.innerHTML = `<p style="color:#d9534f; font-size:0.9rem; font-weight:bold; background:#fff3cd; padding:10px; border-radius:6px;">🛡️ 보안 및 용량 관리를 위해 자동 파기된 문서입니다.</p>`;
                 imgContainer.style.display = 'block';
             } else if (d.photoUrl) {
-                const isImg = d.photoUrl.match(/\.(jpeg|jpg|png|gif|webp)(?:\?|$)/i);
+                const isImg = d.photoUrl.match(/\.(jpeg|jpg|png|gif|webp)/i);
                 if (isImg) {
                     imgContainer.innerHTML = `<img src="${d.photoUrl}" style="width: 100%; border-radius: 8px; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">`;
                 } else {
@@ -541,53 +531,52 @@
             document.getElementById('detail-modal-overlay').style.display = 'none';
         }
 
-        // 🔥 자동 계산 엔진! (기타 12500원 포함, 공공/성묘 동일)
-       function calculateSettlement(dateStr, clockInStr, clockOutStr, type) {
-    if (!clockInStr || !clockOutStr) return { overtime: 0, allowance: 0 };
-    
-    let inT = parseFloat(clockInStr);
-    let outT = parseFloat(clockOutStr);
-    if (isNaN(inT) || isNaN(outT) || inT >= outT) return { overtime: 0, allowance: 0 };
+        // 🔥 소수점 두 자리 반올림 처리
+        function calculateSettlement(dateStr, clockInStr, clockOutStr, type) {
+            if (!clockInStr || !clockOutStr) return { overtime: 0, allowance: 0 };
+            
+            let inT = parseFloat(clockInStr);
+            let outT = parseFloat(clockOutStr);
+            if (isNaN(inT) || isNaN(outT) || inT >= outT) return { overtime: 0, allowance: 0 };
 
-    let dObj = new Date(dateStr);
-    let dayOfWeek = dObj.getDay(); 
-    let y = dObj.getFullYear(), m = dObj.getMonth() + 1, d = dObj.getDate();
-    let isHolidayStr = getHolidayName(y, m, d) !== null;
-    let isRestDay = (dayOfWeek === 0 || dayOfWeek === 6 || isHolidayStr); 
+            let dObj = new Date(dateStr);
+            let dayOfWeek = dObj.getDay(); 
+            let y = dObj.getFullYear(), m = dObj.getMonth() + 1, d = dObj.getDate();
+            let isHolidayStr = getHolidayName(y, m, d) !== null;
+            let isRestDay = (dayOfWeek === 0 || dayOfWeek === 6 || isHolidayStr); 
 
-    let insideStart = Math.max(inT, 9);
-    let insideEnd = Math.min(outT, 18);
-    let inside = Math.max(0, insideEnd - insideStart); 
+            let insideStart = Math.max(inT, 9);
+            let insideEnd = Math.min(outT, 18);
+            let inside = Math.max(0, insideEnd - insideStart); 
 
-    if (insideStart <= 12 && insideEnd >= 13) {
-        inside = Math.max(0, inside - 1);
-    }
+            if (insideStart <= 12 && insideEnd >= 13) {
+                inside = Math.max(0, inside - 1);
+            }
 
-    let early = Math.max(0, 9 - inT);
-    let late = Math.max(0, outT - 18);
-    let outside = early + late; 
+            let early = Math.max(0, 9 - inT);
+            let late = Math.max(0, outT - 18);
+            let outside = early + late; 
 
-    let overtime = 0;
-    if (isRestDay) {
-        overtime = (inside * 1.5) + (outside * 2.0);
-    } else {
-        overtime = (outside * 1.5);
-    }
+            let overtime = 0;
+            if (isRestDay) {
+                overtime = (inside * 1.5) + (outside * 2.0);
+            } else {
+                overtime = (outside * 1.5);
+            }
 
-    // 🔥 보상 시간을 소수점 두 자리까지만 정확하게 반올림 계산!
-    overtime = Math.round(overtime * 100) / 100;
+            overtime = Math.round(overtime * 100) / 100; // 🔥 소수점 둘째 자리
 
-    let allowance = 0;
-    if (type.includes('1박') || type.includes('2박')) {
-        allowance = 37500;
-    } else if (type.includes('공공') || type.includes('성묘') || type.includes('기타')) {
-        allowance = 12500;
-    } else if (type.includes('서울') || type.includes('시티')) {
-        allowance = 0;
-    }
+            let allowance = 0;
+            if (type.includes('1박') || type.includes('2박')) {
+                allowance = 37500;
+            } else if (type.includes('공공') || type.includes('성묘') || type.includes('기타')) {
+                allowance = 12500;
+            } else if (type.includes('서울') || type.includes('시티')) {
+                allowance = 0;
+            }
 
-    return { overtime: overtime, allowance: allowance };
-}
+            return { overtime: overtime, allowance: allowance };
+        }
 
         function saveSettlement() {
             const resId = document.getElementById('settle-res-id').value;
@@ -617,7 +606,7 @@
 
             db.collection('reservations').doc(resId).set({ settlement: d.settlement }, { merge: true })
             .then(() => {
-                alert(`입력 완료!\n보상: ${calc.overtime}시간 | 일비: ${calc.allowance.toLocaleString()}원`);
+                alert(`입력 완료!\n보상: ${calc.overtime.toFixed(2)}시간 | 일비: ${calc.allowance.toLocaleString()}원`);
                 renderDispatchResult(currentDate); 
                 updateCalendarCellUI(currentDate); 
                 renderMonthlySummary(); 
@@ -686,7 +675,7 @@
                     
                     let assignedNamesHTML = (d.assigned || []).map((name, idx) => {
                         let isUnderline = (d.settlement && d.settlement[name] && d.settlement[name][date] && d.settlement[name][date].isEarly) || false;
-                        let dispName = getDispName(name);
+                        let dispName = name; // 🔥 성씨 나오도록
                         if (name === currentUser && !d.isCanceled) {
                             dispName = `<span style="color:#0056b3; font-weight:900;">${dispName}</span>`; 
                         }
@@ -695,13 +684,13 @@
                     
                     if ((d.assigned || []).length === 0) assignedNamesHTML = '인원 부족';
 
-                    // 🔥 이모지 지우고 텍스트로만 심플하게
                     let reportText = '';
                     const mySettle = (d.settlement && d.settlement[currentUser] && d.settlement[currentUser][date]) ? d.settlement[currentUser][date] : null;
                     if (mySettle) {
+                        // 🔥 소수점 두 자리 적용
                         reportText = `<div style="margin-top:8px; font-size:0.85rem; color:#155724; background:#d4edda; padding:6px 10px; border-radius:4px; border: 1px solid #c3e6cb;">
                             ${mySettle.isEarly ? '[선운행] ' : ''}근무: ${mySettle.clockIn || '-'} ~ ${mySettle.clockOut || '-'} <br>
-                            보상: <b>${mySettle.overtime || 0}</b>시간 | 일비: <b>${mySettle.allowance ? mySettle.allowance.toLocaleString() : 0}</b>원
+                            보상: <b>${Number(mySettle.overtime || 0).toFixed(2)}</b>시간 | 일비: <b>${Number(mySettle.allowance || 0).toLocaleString()}</b>원
                         </div>`;
                     }
 
@@ -740,66 +729,66 @@
             contentUl.innerHTML = html;
         }
 
-        // 🔥 월간 정산 합계 상단 고정, 배지 삭제 & 한 줄 텍스트 출력
-       function renderMonthlySummary() {
-    const container = document.getElementById('monthly-summary-container');
-    
-    let totalOvertime = 0;
-    let totalAllowance = 0;
-    let hasData = false;
-    let monthData = [];
+        // 🔥 월간 요약 한 줄 정렬(nowrap), 뱃지 삭제, 소수점 2자리 적용 완료
+        function renderMonthlySummary() {
+            const container = document.getElementById('monthly-summary-container');
+            
+            let totalOvertime = 0;
+            let totalAllowance = 0;
+            let hasData = false;
+            let monthData = [];
 
-    allReservations.forEach(r => {
-        if (r.settlement && r.settlement[currentUser]) {
-            Object.keys(r.settlement[currentUser]).forEach(dateStr => {
-                let [y, m, d] = dateStr.split('-');
-                if (parseInt(y) === currentYear && parseInt(m) - 1 === currentMonth) {
-                    let s = r.settlement[currentUser][dateStr];
-                    monthData.push({
-                        date: dateStr, day: parseInt(d),
-                        overtime: s.overtime || 0, allowance: s.allowance || 0
+            allReservations.forEach(r => {
+                if (r.settlement && r.settlement[currentUser]) {
+                    Object.keys(r.settlement[currentUser]).forEach(dateStr => {
+                        let [y, m, d] = dateStr.split('-');
+                        if (parseInt(y) === currentYear && parseInt(m) - 1 === currentMonth) {
+                            let s = r.settlement[currentUser][dateStr];
+                            monthData.push({
+                                date: dateStr, day: parseInt(d),
+                                overtime: s.overtime || 0, allowance: s.allowance || 0,
+                                type: r.type, vehicle: r.vehicle
+                            });
+                        }
                     });
                 }
             });
+
+            monthData.sort((a, b) => a.day - b.day);
+
+            let listHtml = '';
+            monthData.forEach(item => {
+                hasData = true;
+                
+                // 🔥 뱃지 이름 삭제, nowrap 처리로 절대 줄바꿈 되지 않음
+                listHtml += `<li style="padding: 8px 10px; font-size: 0.8rem; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; white-space: nowrap;">
+                                <span style="color:#333; font-weight:bold; width: 35px;">${currentMonth + 1}/${item.day}</span>
+                                <span style="color:#555; flex: 1; text-align: right;">
+                                    보상: <b style="color:#333;">${Number(item.overtime || 0).toFixed(2)}</b>시간 
+                                    <span style="color:#ccc; margin:0 4px;">|</span> 
+                                    일비: <b style="color:#333;">${Number(item.allowance || 0).toLocaleString()}</b>원
+                                </span>
+                             </li>`;
+                totalOvertime += (item.overtime || 0);
+                totalAllowance += (item.allowance || 0);
+            });
+
+            if (!hasData) { listHtml += `<li style="color:#666; padding:10px; font-size: 0.8rem; text-align:center;">이번 달 정산 내역이 없습니다.</li>`; }
+
+            let html = `<h3 style="margin-top: 25px; border-bottom: 2px solid #007bff; padding-bottom: 8px; font-size: 1.1rem;">${currentMonth + 1}월 내 배차 정산 요약</h3>`;
+            
+            // 🔥 총합계 소수점 2자리 강제 적용 및 일직선(nowrap)
+            html += `<div style="background:#e8f0fe; padding:12px 10px; border-radius:6px; margin:10px 0; border:1px solid #c6dafc; text-align:center; font-size:0.9rem; white-space: nowrap;">`;
+            html += `<b style="color:#333;">총합계 <span style="color:#ccc; margin:0 4px;">|</span> 보상: <span style="color:#007bff;">${Number(totalOvertime || 0).toFixed(2)}</span>시간 <span style="color:#ccc; margin:0 4px;">|</span> 일비: <span style="color:#007bff;">${Number(totalAllowance || 0).toLocaleString()}</span>원</b>`;
+            html += `</div>`;
+            
+            html += `<ul class="result-list" style="padding:0; margin-top:0;">`; 
+            html += listHtml;
+            html += `</ul>`;
+
+            container.innerHTML = html;
         }
-    });
 
-    monthData.sort((a, b) => a.day - b.day);
-
-    let listHtml = '';
-    monthData.forEach(item => {
-        hasData = true;
-        
-        // 🔥 차 번호, 공공/2박 뱃지 싹 지우고 보상/일비 칸 크기를 고정해서 일직선으로 딱 떨어지게 정렬!
-        listHtml += `<li style="padding: 8px 10px; font-size: 0.85rem; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
-                        <span style="color:#333; width: 45px;"><b>${currentMonth + 1}/${item.day}</b></span>
-                        <span style="color:#555; flex: 1; text-align: right;">
-                            보상: <b style="color:#333; display:inline-block; width:45px; text-align:right;">${item.overtime}</b>시간 
-                            <span style="color:#ccc; margin:0 8px;">|</span> 
-                            일비: <b style="color:#333; display:inline-block; width:65px; text-align:right;">${item.allowance.toLocaleString()}</b>원
-                        </span>
-                     </li>`;
-        totalOvertime += item.overtime;
-        totalAllowance += item.allowance;
-    });
-
-    // 🔥 총 합계도 소수점 두 자리로 딱 떨어지게 처리
-    totalOvertime = Math.round(totalOvertime * 100) / 100;
-
-    if (!hasData) { listHtml += `<li style="color:#666; padding:10px; font-size: 0.8rem; text-align:center;">이번 달 정산 내역이 없습니다.</li>`; }
-
-    let html = `<h3 style="margin-top: 25px; border-bottom: 2px solid #007bff; padding-bottom: 8px; font-size: 1.1rem;">${currentMonth + 1}월 내 배차 정산 요약</h3>`;
-    
-    html += `<div style="background:#e8f0fe; padding:12px; border-radius:6px; margin:10px 0; border:1px solid #c6dafc; text-align:center; font-size:0.95rem;">`;
-    html += `<b style="color:#333;">총 합계 <span style="color:#ccc; margin:0 5px;">|</span> 보상: <span style="color:#007bff;">${totalOvertime}</span>시간 <span style="color:#ccc; margin:0 5px;">|</span> 일비: <span style="color:#007bff;">${totalAllowance.toLocaleString()}</span>원</b>`;
-    html += `</div>`;
-    
-    html += `<ul class="result-list" style="padding:0; margin-top:0;">`; 
-    html += listHtml;
-    html += `</ul>`;
-
-    container.innerHTML = html;
-}
         function selectDate(dateStr) {
             currentDate = dateStr;
             renderCalendar(); 
