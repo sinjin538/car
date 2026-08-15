@@ -37,7 +37,7 @@
         .calendar-day-header.sun { color: #d9534f; }
         .calendar-day-header.sat { color: #0275d8; }
 
-        .calendar-cell { min-height: 220px; background: #fff; border: 1px solid #e1e4e8; border-radius: 4px; padding: 4px; font-size: 0.85rem; cursor: pointer; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+        .calendar-cell { min-height: 220px; max-height: 220px; background: #fff; border: 1px solid #e1e4e8; border-radius: 4px; padding: 4px; font-size: 0.85rem; cursor: pointer; display: flex; flex-direction: column; overflow: hidden; position: relative; }
         .calendar-cell:hover { background: #fafbfc; }
         .calendar-cell.selected { border: 2px solid #007bff; background: #f0f7ff; }
         .calendar-cell.sun .date-num { color: #d9534f; font-weight: 700; }
@@ -46,8 +46,7 @@
 
         .holiday-name { font-size: 0.65rem; color: #d9534f; font-weight: 700; letter-spacing: -0.5px; text-align: right; word-break: keep-all; margin-left: 4px; }
 
-        .tag-container { display: flex; flex-direction: column; gap: 3px; margin-top: 4px; overflow-x: auto; scrollbar-width: none; flex: 1; width: 100%; }
-        .tag-container::-webkit-scrollbar { display: none; }
+        .tag-container { display: flex; flex-direction: column; gap: 3px; margin-top: 4px; overflow-y: auto; max-height: 140px; scrollbar-width: thin; flex: 1; width: 100%; }
         
         .event-box { display: inline-flex; align-items: center; gap: 4px; width: max-content; padding: 3px 5px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; white-space: nowrap; transition: all 0.2s; }
         .event-box.pub { background-color: #e8f0fe; border: 1px solid #c6dafc; color: #333; } 
@@ -58,7 +57,8 @@
         .event-box.citytour { background-color: #f3e5f5; border: 1px solid #e1bee7; color: #333; } 
         .event-box.default { background-color: #f1f3f4; border: 1px solid #d8dbe0; color: #333; }
 
-        .badge { padding: 2px 6px; border-radius: 12px; font-size: 0.65rem; font-weight: 700; }
+        /* 🔥 뱃지 모양 (한 글자에 맞춤) */
+        .badge { padding: 2px 5px; border-radius: 4px; font-size: 0.7rem; font-weight: 800; min-width: 18px; text-align: center; }
         .badge.pub { background-color: #007bff; color: #fff; } 
         .badge.grave { background-color: #28a745; color: #fff; } 
         .badge.night1 { background-color: #ffc107; color: #000; } 
@@ -128,7 +128,6 @@
 </head>
 <body>
 
-    <!-- 🔥 보안 로그인 창 -->
     <div id="login-container">
         <div class="login-card">
             <h2>배차 시스템 로그인</h2>
@@ -139,9 +138,7 @@
     </div>
 
     <div id="app-container">
-        <div id="loading-overlay">
-            <div id="loading-text">서버 연결 중...</div>
-        </div>
+        <div id="loading-overlay"><div id="loading-text">서버 연결 중...</div></div>
 
         <!-- 운전원 편집 모달 -->
         <div id="modal-overlay" class="modal-overlay-custom">
@@ -191,12 +188,14 @@
             </div>
         </div>
 
-        <!-- 상단 헤더 -->
+        <!-- 🔥 상단 헤더 (버튼 디자인 반영) -->
         <div style="max-width: 1500px; margin: 10px auto 0; padding: 10px 20px; display: flex; justify-content: flex-end; align-items: center; gap: 10px;">
-            <span id="welcome-msg" style="font-weight: bold; color: #333;"></span>
-            <button onclick="openPwModal()" style="background: #6c757d; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.85rem;">비밀번호 변경</button>
-            <button onclick="goToModule2()" style="background: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.85rem;">👉 내 배차 이동</button>
-            <button onclick="logout()" style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.85rem;">로그아웃</button>
+            <span id="welcome-msg" style="font-weight: bold; color: #333; margin-right: 5px;"></span>
+            <!-- 비밀번호 변경 버튼 작게 -->
+            <button onclick="openPwModal()" style="background: #6c757d; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.75rem;">비밀번호 변경</button>
+            <!-- 둥근 버튼 -->
+            <button onclick="goToModule2()" style="background: #28a745; color: white; border: none; padding: 8px 16px; border-radius: 20px; font-weight: bold; cursor: pointer; font-size: 0.9rem;">👉 내 배차 이동</button>
+            <button onclick="logout()" style="background: #dc3545; color: white; border: none; padding: 8px 16px; border-radius: 20px; font-weight: bold; cursor: pointer; font-size: 0.9rem;">로그아웃</button>
         </div>
 
         <div class="dispatch-container">
@@ -258,8 +257,8 @@
                                 <div class="form-group"><label>운행 거리 (km)</label><input type="number" id="km_${v}" value="0"></div>
                                 
                                 <div class="form-group" style="background: #f8f9fa; padding: 10px; border-radius: 4px; border: 1px solid #ccc; margin-top:15px;">
-                                    <label style="color: #007bff; font-weight:700; cursor:pointer;">📸 신청서 사진 첨부 (선택)</label>
-                                    <input type="file" id="photo_${v}" accept="image/*" style="background: #fff; padding: 5px; font-size: 0.8rem;">
+                                    <label style="color: #007bff; font-weight:700; cursor:pointer;">📎 사진 또는 문서 첨부 (선택)</label>
+                                    <input type="file" id="photo_${v}" style="background: #fff; padding: 5px; font-size: 0.8rem;">
                                     <small id="photo_status_${v}" style="display:block; color:#28a745; margin-top:5px; font-weight:bold;"></small>
                                 </div>
 
@@ -344,6 +343,17 @@
         };
 
         let currentUser = ''; 
+
+        // 🔥 뱃지 1글자 변환 함수
+        function getBadgeChar(type) {
+            if (type.includes('공공')) return '공';
+            if (type.includes('시티')) return '씨';
+            if (type.includes('1박')) return '1';
+            if (type.includes('2박')) return '2';
+            if (type.includes('서울')) return '서';
+            if (type.includes('성묘')) return '성';
+            return '기'; // 기타
+        }
 
         async function handleLogin() {
             const id = document.getElementById('login-id').value.trim();
@@ -541,6 +551,17 @@
             });
         }
 
+        // 🔥 과거 파일 자동 파기 (닌자 청소부)
+        async function cleanUpOldFiles(reservations) {
+            const todayStr = `${_now.getFullYear()}-${String(_now.getMonth() + 1).padStart(2, '0')}-${String(_now.getDate()).padStart(2, '0')}`;
+            for (let r of reservations) {
+                if (r.startDate < todayStr && r.photoUrl) {
+                    r.photoUrl = null; 
+                    db.collection('reservations').doc(r.id).set(r, { merge: true }).catch(e => {});
+                }
+            }
+        }
+
         async function loadFromFirebase() {
             showLoading('데이터 불러오는 중...');
             try {
@@ -548,13 +569,15 @@
                 allReservations = [];
                 resSnapshot.forEach(doc => allReservations.push(doc.data()));
 
+                await cleanUpOldFiles(allReservations);
+
                 const statusSnapshot = await db.collection('daily_status').get();
                 statusSnapshot.forEach(doc => { dailyDriverStatus[doc.id] = doc.data(); });
 
                 const modSnapshot = await db.collection('driver_modifiers').get();
                 modSnapshot.forEach(doc => { driverListModifiers[doc.id] = doc.data().list; });
             } catch (error) {
-                console.warn("DB 읽기 실패. 로컬로 실행합니다.");
+                console.warn("DB 읽기 실패");
             } finally {
                 recalculateAll(false); 
                 updateDropdownOptions(currentDate); 
@@ -640,7 +663,7 @@
                     document.getElementById(`manual_${vehicleName}`).checked = existing.isManual || false;
                     document.getElementById(`next_pointer_${vehicleName}`).value = existing.nextPointerDriver || '';
                     
-                    if (photoStatus) photoStatus.innerText = existing.photoUrl ? '✅ 첨부된 원본 사진이 있습니다.' : '';
+                    if (photoStatus) photoStatus.innerText = existing.photoUrl ? '✅ 첨부된 파일이 있습니다.' : '';
 
                     d1.value = existing.manualDrivers?.[0] || existing.assigned?.[0] || '';
                     if (isBus && d2) d2.value = existing.manualDrivers?.[1] || existing.assigned?.[1] || '';
@@ -679,7 +702,6 @@
             }
         }
 
-        // 🔥 관리자 창 무한 로딩의 주범이었던 닫기 함수 완벽 복구!
         function closeAllForms() {
             const allVehicles = ['1호차', '2호차', '3호차', '11호차', '12호차', '13호차', '14호차'];
             allVehicles.forEach(v => {
@@ -803,40 +825,40 @@
             return dates;
         }
 
-        function compressImage(file) {
+        // 🔥 사진이면 압축, 문서면 원본 통과 (만능 파일 업로드)
+        function processFile(file) {
             return new Promise((resolve, reject) => {
-                if (!file.type.startsWith('image/')) {
-                    reject(new Error('이미지(사진) 파일만 업로드 가능합니다.'));
-                    return;
-                }
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = (event) => {
-                    const img = new Image();
-                    img.src = event.target.result;
-                    img.onload = () => {
-                        const canvas = document.createElement('canvas');
-                        const MAX_WIDTH = 1200; 
-                        let width = img.width;
-                        let height = img.height;
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(file);
+                    reader.onload = (event) => {
+                        const img = new Image();
+                        img.src = event.target.result;
+                        img.onload = () => {
+                            const canvas = document.createElement('canvas');
+                            const MAX_WIDTH = 1200; 
+                            let width = img.width;
+                            let height = img.height;
 
-                        if (width > MAX_WIDTH) {
-                            height *= MAX_WIDTH / width;
-                            width = MAX_WIDTH;
-                        }
-                        canvas.width = width;
-                        canvas.height = height;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, width, height);
+                            if (width > MAX_WIDTH) {
+                                height *= MAX_WIDTH / width;
+                                width = MAX_WIDTH;
+                            }
+                            canvas.width = width;
+                            canvas.height = height;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0, width, height);
 
-                        canvas.toBlob((blob) => {
-                            if (blob) resolve(blob);
-                            else reject(new Error('이미지 압축에 실패했습니다.'));
-                        }, 'image/jpeg', 0.7);
+                            canvas.toBlob((blob) => {
+                                if (blob) resolve(blob);
+                                else reject(new Error('이미지 압축 실패'));
+                            }, 'image/jpeg', 0.7);
+                        };
+                        img.onerror = () => reject(new Error('손상된 이미지입니다.'));
                     };
-                    img.onerror = () => reject(new Error('손상된 이미지 파일입니다.'));
-                };
-                reader.onerror = () => reject(new Error('파일을 읽을 수 없습니다.'));
+                } else {
+                    resolve(file);
+                }
             });
         }
 
@@ -865,7 +887,7 @@
             const existingIndex = allReservations.findIndex(r => r.vehicle === vehicleName && r.dates.includes(currentDate));
             let docId = Date.now().toString(); 
             let photoUrl = null;
-            let settlement = {}; // 기사님이 올린 개별 정산 데이터 보존
+            let settlement = {}; // 데이터 보존
 
             if (existingIndex !== -1) {
                 let existing = allReservations[existingIndex];
@@ -877,20 +899,20 @@
 
             const photoInput = document.getElementById(`photo_${vehicleName}`);
             if (photoInput && photoInput.files.length > 0) {
-                showLoading('사진 업로드 중... (10초 이상 걸리면 실패)');
+                showLoading('파일 업로드 중...');
                 try {
                     const file = photoInput.files[0];
-                    const compressedBlob = await compressImage(file);
+                    const processedBlob = await processFile(file);
                     
-                    const storageRef = storage.ref(`reservation_photos/${docId}_${Date.now()}.jpg`);
-                    const uploadTask = storageRef.put(compressedBlob);
-                    const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('서버 응답 시간 초과 (저장소 설정을 확인하세요)')), 15000));
+                    const storageRef = storage.ref(`reservation_files/${docId}_${file.name}`);
+                    const uploadTask = storageRef.put(processedBlob);
+                    const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('업로드 시간 초과')), 20000));
                     
                     await Promise.race([uploadTask, timeout]);
                     photoUrl = await storageRef.getDownloadURL();
                     
                 } catch (error) {
-                    alert("⚠️ 사진 업로드 실패!\n원인: " + error.message + "\n\n※ 파이어베이스 Storage 설정을 다시 한 번 확인해 주세요.");
+                    alert("⚠️ 파일 업로드 실패: " + error.message);
                     hideLoading(); 
                     return; 
                 }
@@ -924,7 +946,7 @@
                 db.collection('reservations').doc(allReservations[index].id).delete().catch(e => {});
                 allReservations.splice(index, 1);
                 recalculateAll(true); 
-                alert(`[${vehicleName}] 배차가 완전 취소(삭제) 처리되었습니다. (다음 순번이 당겨집니다)`);
+                alert(`[${vehicleName}] 배차가 완전 취소(삭제) 처리되었습니다.`);
             } else {
                 alert("이 날짜에 등록된 배차 내역이 없습니다.");
             }
@@ -938,7 +960,7 @@
                 allReservations[index].isCanceled = true;
                 db.collection('reservations').doc(allReservations[index].id).set(allReservations[index]).catch(e=>{});
                 recalculateAll(true); 
-                alert(`[${vehicleName}] 4일 전 취소 처리되었습니다. (운전원 순번은 소모된 것으로 유지됩니다)`);
+                alert(`[${vehicleName}] 4일 전 취소 처리되었습니다.`);
             } else {
                 alert("이 날짜에 등록된 배차 내역이 없습니다.");
             }
@@ -985,6 +1007,7 @@
             for (let d = 1; d <= lastDate; d++) updateCalendarCellUI(`${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`);
         }
 
+        // 🔥 달력에 표시 (1글자 뱃지, 날짜별 빨간줄)
         function updateCalendarCellUI(date) {
             const tagsContainer = document.getElementById(`tags_${date}`);
             const statusContainer = document.getElementById(`cell_status_${date}`);
@@ -1011,14 +1034,16 @@
                 let canceledBoxStyle = d.isCanceled ? 'background-color: transparent; border: 1px dashed #adb5bd; color: #adb5bd; text-decoration: line-through;' : '';
                 let canceledBadgeStyle = d.isCanceled ? 'background-color: transparent; color: #adb5bd; border: 1px solid #adb5bd;' : '';
                 
+                // 🔥 날짜별 선운행 밑줄 확인
                 let assignedNamesHTML = (d.assigned || []).map((name, idx) => {
-                    let isUnderline = (d.settlement && d.settlement[name] && d.settlement[name].isEarly) || false;
+                    let isUnderline = (d.settlement && d.settlement[name] && d.settlement[name][date] && d.settlement[name][date].isEarly) || false;
                     return (isUnderline && !d.isCanceled && name !== '미지정') ? `<span class="early-underline">${name}</span>` : name;
                 }).join(', ');
 
+                // 뱃지 1글자로 변환하여 표시
                 tagsHTML += `
-                    <div class="event-box ${boxClass}" style="${canceledBoxStyle}; cursor:pointer;" onclick="showDispatchDetail(event, '${d.id}')">
-                        <span class="badge ${badgeClass}" style="${canceledBadgeStyle}">${shortType}</span> 
+                    <div class="event-box ${boxClass}" style="${canceledBoxStyle}; cursor:pointer;" onclick="showDispatchDetail(event, '${d.id}', '${date}')">
+                        <span class="badge ${badgeClass}" style="${canceledBadgeStyle}">${getBadgeChar(shortType)}</span> 
                         ${d.vehicle}: ${assignedNamesHTML}
                     </div>`;
             });
@@ -1031,7 +1056,8 @@
 
             let statusHTML = '';
             if (dutyDrivers.length > 0) statusHTML += `<div class="cal-status duty"><span class="label">당직:</span> <span class="names">${dutyDrivers.join(', ')}</span></div>`;
-            if (offDrivers.length > 0) statusHTML += `<div class="cal-status off"><span class="label">휴무:</span> <span class="names">${offDrivers.join(', ')}</span></div>`;
+            // 🔥 휴무는 이름만 빨간색으로 나오게! (휴무 글자 제거)
+            if (offDrivers.length > 0) statusHTML += `<div class="cal-status off"><span class="names" style="color:#d9534f; font-weight:700;">${offDrivers.join(', ')}</span></div>`;
             
             if (statusHTML !== '') {
                 statusContainer.style.display = 'flex';
@@ -1042,31 +1068,34 @@
             }
         }
 
-        function showDispatchDetail(event, id) {
+        // 🔥 관리자용 팝업 (문서 확인 가능)
+        function showDispatchDetail(event, id, clickedDate) {
             event.stopPropagation(); 
             const d = allReservations.find(r => r.id === id);
             if (!d) return;
 
-            const currentUserRole = localStorage.getItem('userRole'); 
-
             let assigned = (d.assigned && d.assigned.length > 0) ? d.assigned.join(', ') : '미정';
-            document.getElementById('detail-modal-title').innerText = `[${d.vehicle}] ${d.type}`;
+            document.getElementById('detail-modal-title').innerText = `[${d.vehicle}] ${d.type} (${clickedDate})`;
             document.getElementById('detail-modal-drivers').innerText = assigned;
             document.getElementById('detail-modal-dest').innerText = d.dest || '내용 없음'; 
 
             const imgContainer = document.getElementById('detail-modal-img-container');
             
-            if (currentUserRole === 'driver') {
-                imgContainer.style.display = 'none';
-            } 
-            else {
-                if (d.photoUrl) {
+            const todayStr = `${_now.getFullYear()}-${String(_now.getMonth() + 1).padStart(2, '0')}-${String(_now.getDate()).padStart(2, '0')}`;
+            if (d.startDate < todayStr && !d.photoUrl) {
+                imgContainer.innerHTML = `<p style="color:#d9534f; font-size:0.9rem; font-weight:bold; background:#fff3cd; padding:10px; border-radius:6px;">🛡️ 보안 및 용량 관리를 위해 자동 파기된 문서입니다.</p>`;
+                imgContainer.style.display = 'block';
+            } else if (d.photoUrl) {
+                const isImg = d.photoUrl.match(/\.(jpeg|jpg|png|gif|webp)/i) || d.photoUrl.includes('image') || d.photoUrl.includes('token=');
+                if (isImg) {
                     imgContainer.innerHTML = `<img src="${d.photoUrl}" style="width: 100%; border-radius: 8px; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">`;
-                    imgContainer.style.display = 'block';
                 } else {
-                    imgContainer.innerHTML = '<p style="color:#888; font-size:0.9rem;">첨부된 사진이 없습니다.</p>';
-                    imgContainer.style.display = 'block';
+                    imgContainer.innerHTML = `<a href="${d.photoUrl}" target="_blank" style="display:inline-block; padding:12px 20px; background:#007bff; color:#fff; border-radius:6px; font-weight:bold; text-decoration:none;">📄 첨부된 문서 열기 / 다운로드</a>`;
                 }
+                imgContainer.style.display = 'block';
+            } else {
+                imgContainer.innerHTML = '<p style="color:#888; font-size:0.9rem;">첨부된 파일이 없습니다.</p>';
+                imgContainer.style.display = 'block';
             }
 
             document.getElementById('detail-modal-overlay').style.display = 'flex';
@@ -1076,6 +1105,7 @@
             document.getElementById('detail-modal-overlay').style.display = 'none';
         }
 
+        // 🔥 해당 날짜에 입력된 개별 정산 데이터 보기
         function renderDispatchResult(date) {
             const contentUl = document.getElementById('result-content');
             const activeReservations = allReservations.filter(r => (r.dates || []).includes(date));
@@ -1103,7 +1133,7 @@
                     let canceledBadgeStyle = d.isCanceled ? 'background-color: transparent; color: #adb5bd; border: 1px solid #adb5bd;' : '';
                     
                     let assignedNamesHTML = (d.assigned || []).map((name, idx) => {
-                        let isUnderline = (d.settlement && d.settlement[name] && d.settlement[name].isEarly) || false;
+                        let isUnderline = (d.settlement && d.settlement[name] && d.settlement[name][date] && d.settlement[name][date].isEarly) || false;
                         return (isUnderline && !d.isCanceled && name !== '미지정') ? `<span class="early-underline">${name}</span>` : name;
                     }).join(', ');
                     
@@ -1112,18 +1142,20 @@
                     let reportText = '';
                     if (d.settlement && Object.keys(d.settlement).length > 0) {
                         Object.keys(d.settlement).forEach(drv => {
-                            const s = d.settlement[drv];
-                            reportText += `<div style="margin-top:8px; font-size:0.85rem; color:#155724; background:#d4edda; padding:6px 10px; border-radius:4px; border: 1px solid #c3e6cb;">
-                                <b>[${drv}]</b> ${s.isEarly ? '🚀선운행 | ' : ''}⏰ 출근 ${s.clockIn || '-'} ~ 퇴근 ${s.clockOut || '-'} <br>
-                                ⏱️ <b>보상: ${s.overtime || 0}시간</b> | 💰 <b>일비: ${s.allowance ? s.allowance.toLocaleString() : 0}원</b>
-                            </div>`;
+                            if (d.settlement[drv][date]) { // 🔥 해당 날짜(date)의 데이터만 출력!
+                                const s = d.settlement[drv][date];
+                                reportText += `<div style="margin-top:8px; font-size:0.85rem; color:#155724; background:#d4edda; padding:6px 10px; border-radius:4px; border: 1px solid #c3e6cb;">
+                                    <b>[${drv}]</b> ${s.isEarly ? '🚀선운행 | ' : ''}⏰ 출근 ${s.clockIn || '-'} ~ 퇴근 ${s.clockOut || '-'} <br>
+                                    ⏱️ <b>보상: ${s.overtime || 0}시간</b> | 💰 <b>일비: ${s.allowance ? s.allowance.toLocaleString() : 0}원</b>
+                                </div>`;
+                            }
                         });
                     }
 
                     html += `
                         <li style="${canceledLiStyle}">
                             <b>[${d.vehicle}]</b> 
-                            <span class="badge ${badgeClass}" style="${canceledBadgeStyle}">${shortType}</span> 
+                            <span class="badge ${badgeClass}" style="${canceledBadgeStyle}">${getBadgeChar(shortType)}</span> 
                             <span class="badge default" style="margin-right:0; ${canceledBadgeStyle}">${d.km}km</span>
                             ${d.isCanceled ? '<span style="color:#d9534f; font-weight:bold; margin-left:5px; text-decoration:none;">[취소됨]</span>' : ''}<br>
                             📝 내용: ${d.dest} <br>
@@ -1143,7 +1175,7 @@
                     html += `<div style="margin-bottom: ${offDrivers.length > 0 ? '8px' : '0'};"><span class="duty-badge" style="padding: 3px 6px; font-size: 0.8rem;">당직</span> <b style="color:#333;">${dutyDrivers.join(', ')}</b></div>`;
                 }
                 if (offDrivers.length > 0) {
-                    html += `<div><span style="background:#d9534f; color:#fff; padding: 3px 6px; border-radius:4px; font-size: 0.8rem; font-weight:bold; margin-right:5px;">휴무</span> <span style="color:#666;">${offDrivers.join(', ')}</span></div>`;
+                    html += `<div><span class="names" style="color:#d9534f; font-weight:700; font-size:0.9rem;">${offDrivers.join(', ')}</span></div>`;
                 }
                 html += `</li>`;
             }
