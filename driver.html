@@ -50,7 +50,7 @@
         /* 🔥 태그 컨테이너도 스크롤 제거 */
         .tag-container { display: flex; flex-direction: column; gap: 3px; margin-top: 4px; flex: 1; width: 100%; }
         
-        .event-box { display: inline-flex; align-items: center; gap: 4px; width: max-content; padding: 3px 5px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; white-space: nowrap; transition: all 0.2s; }
+        .event-box { display: inline-flex; align-items: center; gap: 4px; width: max-content; padding: 3px 5px; border-radius: 4px; font-size: 0.8rem; font-weight: 600; white-space: nowrap; transition: all 0.2s; }
         .event-box.pub { background-color: #e8f0fe; border: 1px solid #c6dafc; color: #333; } 
         .event-box.grave { background-color: #e8f5e9; border: 1px solid #c8e6c9; color: #333; } 
         .event-box.night1 { background-color: #fff8e1; border: 1px solid #ffecb3; color: #333; } 
@@ -59,7 +59,8 @@
         .event-box.citytour { background-color: #f3e5f5; border: 1px solid #e1bee7; color: #333; } 
         .event-box.default { background-color: #f1f3f4; border: 1px solid #d8dbe0; color: #333; }
 
-        .badge { padding: 2px 5px; border-radius: 4px; font-size: 0.7rem; font-weight: 800; min-width: 18px; text-align: center; }
+        /* 🔥 뱃지 폰트 작게 */
+        .badge { padding: 2px 4px; border-radius: 4px; font-size: 0.6rem; font-weight: 800; text-align: center; }
         .badge.pub { background-color: #007bff; color: #fff; } 
         .badge.grave { background-color: #28a745; color: #fff; } 
         .badge.night1 { background-color: #ffc107; color: #000; } 
@@ -71,9 +72,9 @@
 
         .early-underline { text-decoration: underline; text-decoration-color: #dc3545; text-underline-offset: 3px; text-decoration-thickness: 2px; }
 
-        .cal-status { font-size: 0.7rem; margin-top: 2px; letter-spacing: -0.3px; }
-        .cal-status.off .label { color: #d9534f; font-weight: 700; }
-        .cal-status.off .names { color: #888; font-weight: 500; }
+        .cal-status { font-size: 0.75rem; margin-top: 2px; letter-spacing: -0.3px; }
+        .cal-status.off .label { color: #007bff; font-weight: 700; }
+        .cal-status.off .names { color: #007bff; font-weight: 700; }
         .cal-status.duty .label { color: #f29900; font-weight: 700; }
         .cal-status.duty .names { color: #888; font-weight: 500; }
 
@@ -137,7 +138,7 @@
                 </div>
 
                 <div id="settlement-container" style="background:#f0fdf4; border:2px solid #28a745; border-radius:6px; padding:15px; margin-bottom:15px;">
-                    <h5 style="margin-bottom:10px; color:#155724; font-size:1.05rem;">💰 운행 시간 입력</h5>
+                    <h5 style="margin-bottom:10px; color:#155724; font-size:1.05rem;">운행 시간 입력</h5>
                     
                     <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
                         <label style="font-weight:bold; cursor:pointer; color:#d9534f;">
@@ -200,12 +201,13 @@
                     <div class="radio-group" id="my-status-radios"></div>
                 </div>
 
+                <!-- 🔥 월간 정산 합계를 리스트 바로 위에 고정! -->
+                <div id="monthly-summary-container"></div>
+
                 <h3 style="margin-top: 25px; border-bottom: 2px solid #28a745; padding-bottom: 8px;">선택 날짜 내 배차 내역</h3>
                 <ul id="result-content" class="result-list">
                     <li style="color:#666;">선택된 날짜의 예약 내역이 없습니다.</li>
                 </ul>
-
-                <div id="monthly-summary-container"></div>
             </div>
         </div>
     </div>
@@ -245,14 +247,15 @@
         let allReservations = [];
         let dailyDriverStatus = {};
 
-        function getBadgeChar(type) {
-            if (type.includes('공공')) return '공';
-            if (type.includes('시티')) return '씨';
-            if (type.includes('1박')) return '1';
-            if (type.includes('2박')) return '2';
-            if (type.includes('서울')) return '서';
-            if (type.includes('성묘')) return '성';
-            return '기';
+        // 🔥 배지 2글자 반환
+        function getShortType(type) {
+            if (type.includes('공공')) return '공공';
+            if (type.includes('1박')) return '1박';
+            if (type.includes('2박')) return '2박';
+            if (type.includes('서울')) return '서울';
+            if (type.includes('시티')) return '시티';
+            if (type.includes('성묘')) return '성묘';
+            return '기타';
         }
 
         async function handleLogin() {
@@ -425,16 +428,16 @@
             let tagsHTML = '';
 
             activeReservations.forEach(d => {
-                let shortType = (d.type || '').replace('예약', '').replace('지원', '').replace('투어', '').replace('동행', '').replace('운행', '');
+                let shortTypeStr = getShortType(d.type);
                 let boxClass = 'default'; let badgeClass = 'default';
 
-                if (shortType === '공공') { boxClass = 'pub'; badgeClass = 'pub'; }
-                else if (shortType === '성묘') { boxClass = 'grave'; badgeClass = 'grave'; }
-                else if (shortType === '1박') { boxClass = 'night1'; badgeClass = 'night1'; }
-                else if (shortType === '2박') { boxClass = 'night2'; badgeClass = 'night2'; }
-                else if (shortType === '서울') { boxClass = 'seoul'; badgeClass = 'seoul'; }
-                else if (shortType === '시티') { boxClass = 'citytour'; badgeClass = 'citytour'; }
-                else if (shortType === '기타') { boxClass = 'default'; badgeClass = 'default'; }
+                if (shortTypeStr === '공공') { boxClass = 'pub'; badgeClass = 'pub'; }
+                else if (shortTypeStr === '성묘') { boxClass = 'grave'; badgeClass = 'grave'; }
+                else if (shortTypeStr === '1박') { boxClass = 'night1'; badgeClass = 'night1'; }
+                else if (shortTypeStr === '2박') { boxClass = 'night2'; badgeClass = 'night2'; }
+                else if (shortTypeStr === '서울') { boxClass = 'seoul'; badgeClass = 'seoul'; }
+                else if (shortTypeStr === '시티') { boxClass = 'citytour'; badgeClass = 'citytour'; }
+                else if (shortTypeStr === '기타') { boxClass = 'default'; badgeClass = 'default'; }
 
                 if (d.isManual) badgeClass = 'manual-badge';
 
@@ -455,7 +458,7 @@
 
                 tagsHTML += `
                     <div class="event-box ${boxClass}" style="${canceledBoxStyle}; cursor:pointer;" onclick="showDispatchDetail(event, '${d.id}', '${date}')">
-                        <span class="badge ${badgeClass}" style="${canceledBadgeStyle}">${getBadgeChar(shortType)}</span> 
+                        <span class="badge ${badgeClass}" style="${canceledBadgeStyle}">${shortTypeStr}</span> 
                         ${d.vehicle}${attachIcon}: ${assignedNamesHTML}
                     </div>`;
             });
@@ -469,10 +472,10 @@
             let statusHTML = '';
             if (dutyDrivers.length > 0) statusHTML += `<div class="cal-status duty"><span class="label">당직:</span> <span class="names">${dutyDrivers.join(', ')}</span></div>`;
             
-            // 🔥 휴무자 이름 성 빼고 출력
+            // 🔥 휴무자 이름 파란색, 성 빼기
             if (offDrivers.length > 0) {
                 let offNames = offDrivers.map(n => n.length >= 3 ? n.substring(1) : n).join(', ');
-                statusHTML += `<div class="cal-status off"><span class="names" style="color:#d9534f; font-weight:700;">휴무: ${offNames}</span></div>`;
+                statusHTML += `<div class="cal-status off"><span class="names" style="color:#007bff; font-weight:700;">휴무: ${offNames}</span></div>`;
             }
             
             if (statusHTML !== '') {
@@ -528,7 +531,7 @@
             document.getElementById('detail-modal-overlay').style.display = 'none';
         }
 
-        // 🔥 자동 계산 엔진! (기타 12500, 1/2박 37500 반영)
+        // 🔥 자동 계산 엔진! (기타 12500원 포함)
         function calculateSettlement(dateStr, clockInStr, clockOutStr, type) {
             if (!clockInStr || !clockOutStr) return { overtime: 0, allowance: 0 };
             
@@ -652,16 +655,16 @@
                 html += `<li style="color:#666; border:none; background:transparent; padding:0 0 10px 0;">이 날짜에 배정된 <b>내 배차 내역</b>이 없습니다.</li>`;
             } else {
                 activeReservations.forEach(d => {
-                    let shortType = (d.type || '').replace('예약', '').replace('지원', '').replace('투어', '').replace('동행', '').replace('운행', '');
+                    let shortTypeStr = getShortType(d.type);
                     let badgeClass = 'default';
 
-                    if (shortType === '공공') badgeClass = 'pub';
-                    else if (shortType === '성묘') badgeClass = 'grave';
-                    else if (shortType === '1박') badgeClass = 'night1';
-                    else if (shortType === '2박') badgeClass = 'night2';
-                    else if (shortType === '서울') badgeClass = 'seoul';
-                    else if (shortType === '시티') badgeClass = 'citytour';
-                    else if (shortType === '기타') badgeClass = 'default';
+                    if (shortTypeStr === '공공') badgeClass = 'pub';
+                    else if (shortTypeStr === '성묘') badgeClass = 'grave';
+                    else if (shortTypeStr === '1박') badgeClass = 'night1';
+                    else if (shortTypeStr === '2박') badgeClass = 'night2';
+                    else if (shortTypeStr === '서울') badgeClass = 'seoul';
+                    else if (shortTypeStr === '시티') badgeClass = 'citytour';
+                    else if (shortTypeStr === '기타') badgeClass = 'default';
 
                     if (d.isManual) badgeClass = 'manual-badge';
 
@@ -679,11 +682,12 @@
                     
                     if ((d.assigned || []).length === 0) assignedNamesHTML = '인원 부족';
 
+                    // 🔥 이모지 싹 제거
                     let reportText = '';
                     const mySettle = (d.settlement && d.settlement[currentUser] && d.settlement[currentUser][date]) ? d.settlement[currentUser][date] : null;
                     if (mySettle) {
                         reportText = `<div style="margin-top:8px; font-size:0.85rem; color:#155724; background:#d4edda; padding:6px 10px; border-radius:4px; border: 1px solid #c3e6cb;">
-                            ${mySettle.isEarly ? '🚀 <b>[선운행]</b> ' : ''}⏰ 근무: ${mySettle.clockIn || '-'} ~ ${mySettle.clockOut || '-'} <br>
+                            ${mySettle.isEarly ? '[선운행] ' : ''}근무: ${mySettle.clockIn || '-'} ~ ${mySettle.clockOut || '-'} <br>
                             보상: <b>${mySettle.overtime || 0}</b>시간 | 일비: <b>${mySettle.allowance ? mySettle.allowance.toLocaleString() : 0}</b>원
                         </div>`;
                     }
@@ -694,11 +698,11 @@
                     html += `
                         <li style="${liStyle}">
                             <b>[${d.vehicle}]</b>${attachIcon} 
-                            <span class="badge ${badgeClass}" style="${canceledBadgeStyle}">${getBadgeChar(shortType)}</span> 
+                            <span class="badge ${badgeClass}" style="${canceledBadgeStyle}">${shortTypeStr}</span> 
                             <span class="badge default" style="margin-right:0; ${canceledBadgeStyle}">${d.km}km</span>
                             ${d.isCanceled ? '<span style="color:#d9534f; font-weight:bold; margin-left:5px; text-decoration:none;">[취소됨]</span>' : ''}<br>
-                            📝 내용: ${d.dest} <br>
-                            👉 <b style="${d.isCanceled ? 'color:#adb5bd;' : 'color:#28a745;'}">운전원: ${assignedNamesHTML}</b>
+                            내용: ${d.dest} <br>
+                            운전원: <b style="${d.isCanceled ? 'color:#adb5bd;' : 'color:#28a745;'}">${assignedNamesHTML}</b>
                             ${reportText}
                         </li>`;
                 });
@@ -713,10 +717,9 @@
                 if (dutyDrivers.length > 0) {
                     html += `<div style="margin-bottom: ${offDrivers.length > 0 ? '8px' : '0'};"><span class="badge" style="background:#f29900; color:#fff;">당직</span> <b style="color:#333;">${dutyDrivers.join(', ')}</b></div>`;
                 }
-                // 🔥 휴무자 이름 성 빼고 출력
                 if (offDrivers.length > 0) {
                     let offNames = offDrivers.map(n => n.length >= 3 ? n.substring(1) : n).join(', ');
-                    html += `<div><span style="color:#d9534f; font-weight:bold;">휴무: ${offNames}</span></div>`;
+                    html += `<div><span style="color:#007bff; font-weight:bold;">휴무: ${offNames}</span></div>`;
                 }
                 html += `</li>`;
             }
@@ -724,11 +727,9 @@
             contentUl.innerHTML = html;
         }
 
-        // 🔥 월간 요약 한 줄로 깔끔하게 (스크롤 제거, 이모지 제거)
+        // 🔥 월간 정산 합계 상단 고정, 한 줄 텍스트 출력
         function renderMonthlySummary() {
             const container = document.getElementById('monthly-summary-container');
-            let html = `<h3 style="margin-top: 25px; border-bottom: 2px solid #007bff; padding-bottom: 8px;">${currentMonth + 1}월 내 배차 정산 요약</h3>`;
-            html += `<ul class="result-list" style="padding:0; margin-top:10px;">`; 
             
             let totalOvertime = 0;
             let totalAllowance = 0;
@@ -753,28 +754,32 @@
 
             monthData.sort((a, b) => a.day - b.day);
 
+            let listHtml = '';
             monthData.forEach(item => {
                 hasData = true;
                 let sType = item.type.replace('예약','').replace('지원','').replace('운행','').replace('투어','').replace('동행','');
                 
-                // 깔끔한 한 줄 렌더링
-                html += `<li style="padding: 10px; margin-bottom: 6px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px;">
-                            <b>${currentMonth + 1}/${item.day}</b> [${item.vehicle}] <span class="badge default" style="background:#6c757d; color:#fff;">${getBadgeChar(sType)}</span> 
-                            <span style="color:#e0e0e0;">|</span> 
-                            <span>보상: <b>${item.overtime}</b>시간</span> 
-                            <span style="color:#e0e0e0;">|</span> 
-                            <span>일비: <b>${item.allowance.toLocaleString()}</b>원</span>
-                         </li>`;
+                // 🔥 한 줄에 들어가게 텍스트, 여백 조정
+                listHtml += `<li style="padding: 8px 10px; margin-bottom: 4px; font-size: 0.8rem; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
+                                <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><b>${currentMonth + 1}/${item.day}</b> [${item.vehicle}] ${sType}</span>
+                                <span style="white-space: nowrap; color:#555;">보상: <b style="color:#333;">${item.overtime}</b>시간 <span style="color:#ccc; margin:0 4px;">|</span> 일비: <b style="color:#333;">${item.allowance.toLocaleString()}</b>원</span>
+                             </li>`;
                 totalOvertime += item.overtime;
                 totalAllowance += item.allowance;
             });
 
-            if (!hasData) { html += `<li style="color:#666;">이번 달 정산 내역이 없습니다.</li>`; }
+            if (!hasData) { listHtml += `<li style="color:#666; padding:10px;">이번 달 정산 내역이 없습니다.</li>`; }
 
-            html += `</ul>`;
-            html += `<div style="background:#e8f0fe; padding:15px; border-radius:6px; margin-top:10px; border:2px solid #007bff; text-align:center;">`;
-            html += `<b style="font-size:1.1rem; color:#333;">${currentMonth + 1}월 합계 <span style="margin: 0 10px;">👉</span> 보상: <span style="color:#d9534f;">${totalOvertime}</span>시간 <span style="color:#e0e0e0; margin:0 5px;">|</span> 일비: <span style="color:#d9534f;">${totalAllowance.toLocaleString()}</span>원</b>`;
+            // 🔥 제목 -> 합계 -> 리스트 순서로 조립
+            let html = `<h3 style="margin-top: 25px; border-bottom: 2px solid #007bff; padding-bottom: 8px;">${currentMonth + 1}월 내 배차 정산 요약</h3>`;
+            
+            html += `<div style="background:#e8f0fe; padding:12px; border-radius:6px; margin:10px 0; border:1px solid #c6dafc; text-align:center; font-size:0.95rem;">`;
+            html += `<b style="color:#333;">총 합계 👉 보상: <span style="color:#007bff;">${totalOvertime}</span>시간 <span style="color:#ccc; margin:0 5px;">|</span> 일비: <span style="color:#007bff;">${totalAllowance.toLocaleString()}</span>원</b>`;
             html += `</div>`;
+            
+            html += `<ul class="result-list" style="padding:0; margin-top:0; max-height: 250px; overflow-y: auto;">`; 
+            html += listHtml;
+            html += `</ul>`;
 
             container.innerHTML = html;
         }
