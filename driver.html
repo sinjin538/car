@@ -542,49 +542,52 @@
         }
 
         // 🔥 자동 계산 엔진! (기타 12500원 포함, 공공/성묘 동일)
-        function calculateSettlement(dateStr, clockInStr, clockOutStr, type) {
-            if (!clockInStr || !clockOutStr) return { overtime: 0, allowance: 0 };
-            
-            let inT = parseFloat(clockInStr);
-            let outT = parseFloat(clockOutStr);
-            if (isNaN(inT) || isNaN(outT) || inT >= outT) return { overtime: 0, allowance: 0 };
+       function calculateSettlement(dateStr, clockInStr, clockOutStr, type) {
+    if (!clockInStr || !clockOutStr) return { overtime: 0, allowance: 0 };
+    
+    let inT = parseFloat(clockInStr);
+    let outT = parseFloat(clockOutStr);
+    if (isNaN(inT) || isNaN(outT) || inT >= outT) return { overtime: 0, allowance: 0 };
 
-            let dObj = new Date(dateStr);
-            let dayOfWeek = dObj.getDay(); 
-            let y = dObj.getFullYear(), m = dObj.getMonth() + 1, d = dObj.getDate();
-            let isHolidayStr = getHolidayName(y, m, d) !== null;
-            let isRestDay = (dayOfWeek === 0 || dayOfWeek === 6 || isHolidayStr); 
+    let dObj = new Date(dateStr);
+    let dayOfWeek = dObj.getDay(); 
+    let y = dObj.getFullYear(), m = dObj.getMonth() + 1, d = dObj.getDate();
+    let isHolidayStr = getHolidayName(y, m, d) !== null;
+    let isRestDay = (dayOfWeek === 0 || dayOfWeek === 6 || isHolidayStr); 
 
-            let insideStart = Math.max(inT, 9);
-            let insideEnd = Math.min(outT, 18);
-            let inside = Math.max(0, insideEnd - insideStart); 
+    let insideStart = Math.max(inT, 9);
+    let insideEnd = Math.min(outT, 18);
+    let inside = Math.max(0, insideEnd - insideStart); 
 
-            if (insideStart <= 12 && insideEnd >= 13) {
-                inside = Math.max(0, inside - 1);
-            }
+    if (insideStart <= 12 && insideEnd >= 13) {
+        inside = Math.max(0, inside - 1);
+    }
 
-            let early = Math.max(0, 9 - inT);
-            let late = Math.max(0, outT - 18);
-            let outside = early + late; 
+    let early = Math.max(0, 9 - inT);
+    let late = Math.max(0, outT - 18);
+    let outside = early + late; 
 
-            let overtime = 0;
-            if (isRestDay) {
-                overtime = (inside * 1.5) + (outside * 2.0);
-            } else {
-                overtime = (outside * 1.5);
-            }
+    let overtime = 0;
+    if (isRestDay) {
+        overtime = (inside * 1.5) + (outside * 2.0);
+    } else {
+        overtime = (outside * 1.5);
+    }
 
-            let allowance = 0;
-            if (type.includes('1박') || type.includes('2박')) {
-                allowance = 37500;
-            } else if (type.includes('공공') || type.includes('성묘') || type.includes('기타')) {
-                allowance = 12500;
-            } else if (type.includes('서울') || type.includes('시티')) {
-                allowance = 0;
-            }
+    // 🔥 보상 시간을 소수점 두 자리까지만 정확하게 반올림 계산!
+    overtime = Math.round(overtime * 100) / 100;
 
-            return { overtime: overtime, allowance: allowance };
-        }
+    let allowance = 0;
+    if (type.includes('1박') || type.includes('2박')) {
+        allowance = 37500;
+    } else if (type.includes('공공') || type.includes('성묘') || type.includes('기타')) {
+        allowance = 12500;
+    } else if (type.includes('서울') || type.includes('시티')) {
+        allowance = 0;
+    }
+
+    return { overtime: overtime, allowance: allowance };
+}
 
         function saveSettlement() {
             const resId = document.getElementById('settle-res-id').value;
@@ -738,62 +741,65 @@
         }
 
         // 🔥 월간 정산 합계 상단 고정, 배지 삭제 & 한 줄 텍스트 출력
-        function renderMonthlySummary() {
-            const container = document.getElementById('monthly-summary-container');
-            
-            let totalOvertime = 0;
-            let totalAllowance = 0;
-            let hasData = false;
-            let monthData = [];
+       function renderMonthlySummary() {
+    const container = document.getElementById('monthly-summary-container');
+    
+    let totalOvertime = 0;
+    let totalAllowance = 0;
+    let hasData = false;
+    let monthData = [];
 
-            allReservations.forEach(r => {
-                if (r.settlement && r.settlement[currentUser]) {
-                    Object.keys(r.settlement[currentUser]).forEach(dateStr => {
-                        let [y, m, d] = dateStr.split('-');
-                        if (parseInt(y) === currentYear && parseInt(m) - 1 === currentMonth) {
-                            let s = r.settlement[currentUser][dateStr];
-                            monthData.push({
-                                date: dateStr, day: parseInt(d),
-                                overtime: s.overtime || 0, allowance: s.allowance || 0,
-                                type: r.type, vehicle: r.vehicle
-                            });
-                        }
+    allReservations.forEach(r => {
+        if (r.settlement && r.settlement[currentUser]) {
+            Object.keys(r.settlement[currentUser]).forEach(dateStr => {
+                let [y, m, d] = dateStr.split('-');
+                if (parseInt(y) === currentYear && parseInt(m) - 1 === currentMonth) {
+                    let s = r.settlement[currentUser][dateStr];
+                    monthData.push({
+                        date: dateStr, day: parseInt(d),
+                        overtime: s.overtime || 0, allowance: s.allowance || 0
                     });
                 }
             });
-
-            monthData.sort((a, b) => a.day - b.day);
-
-            let listHtml = '';
-            monthData.forEach(item => {
-                hasData = true;
-                let sType = item.type.replace('예약','').replace('지원','').replace('운행','').replace('투어','').replace('동행','');
-                
-                // 🔥 뱃지, 그림 제거. 한 줄에 들어가는 초소형 사이즈
-                listHtml += `<li style="padding: 6px 4px; font-size: 0.75rem; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
-                                <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color:#333;"><b>${currentMonth + 1}/${item.day}</b> [${item.vehicle}] ${sType}</span>
-                                <span style="white-space: nowrap; color:#555;">보상: <b style="color:#333;">${item.overtime}</b>시간 <span style="color:#ccc; margin:0 3px;">|</span> 일비: <b style="color:#333;">${item.allowance.toLocaleString()}</b>원</span>
-                             </li>`;
-                totalOvertime += item.overtime;
-                totalAllowance += item.allowance;
-            });
-
-            if (!hasData) { listHtml += `<li style="color:#666; padding:10px; font-size: 0.8rem;">이번 달 정산 내역이 없습니다.</li>`; }
-
-            // 🔥 제목 -> 합계 -> 리스트 순서로 조립 (스크롤 제한 제거)
-            let html = `<h3 style="margin-top: 25px; border-bottom: 2px solid #007bff; padding-bottom: 8px; font-size: 1.1rem;">${currentMonth + 1}월 내 배차 정산 요약</h3>`;
-            
-            html += `<div style="background:#e8f0fe; padding:10px; border-radius:6px; margin:10px 0; border:1px solid #c6dafc; text-align:center; font-size:0.85rem;">`;
-            html += `<b style="color:#333;">총 합계 <span style="color:#ccc; margin:0 5px;">|</span> 보상: <span style="color:#007bff;">${totalOvertime}</span>시간 <span style="color:#ccc; margin:0 5px;">|</span> 일비: <span style="color:#007bff;">${totalAllowance.toLocaleString()}</span>원</b>`;
-            html += `</div>`;
-            
-            html += `<ul class="result-list" style="padding:0; margin-top:0;">`; 
-            html += listHtml;
-            html += `</ul>`;
-
-            container.innerHTML = html;
         }
+    });
 
+    monthData.sort((a, b) => a.day - b.day);
+
+    let listHtml = '';
+    monthData.forEach(item => {
+        hasData = true;
+        
+        // 🔥 차 번호, 공공/2박 뱃지 싹 지우고 보상/일비 칸 크기를 고정해서 일직선으로 딱 떨어지게 정렬!
+        listHtml += `<li style="padding: 8px 10px; font-size: 0.85rem; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="color:#333; width: 45px;"><b>${currentMonth + 1}/${item.day}</b></span>
+                        <span style="color:#555; flex: 1; text-align: right;">
+                            보상: <b style="color:#333; display:inline-block; width:45px; text-align:right;">${item.overtime}</b>시간 
+                            <span style="color:#ccc; margin:0 8px;">|</span> 
+                            일비: <b style="color:#333; display:inline-block; width:65px; text-align:right;">${item.allowance.toLocaleString()}</b>원
+                        </span>
+                     </li>`;
+        totalOvertime += item.overtime;
+        totalAllowance += item.allowance;
+    });
+
+    // 🔥 총 합계도 소수점 두 자리로 딱 떨어지게 처리
+    totalOvertime = Math.round(totalOvertime * 100) / 100;
+
+    if (!hasData) { listHtml += `<li style="color:#666; padding:10px; font-size: 0.8rem; text-align:center;">이번 달 정산 내역이 없습니다.</li>`; }
+
+    let html = `<h3 style="margin-top: 25px; border-bottom: 2px solid #007bff; padding-bottom: 8px; font-size: 1.1rem;">${currentMonth + 1}월 내 배차 정산 요약</h3>`;
+    
+    html += `<div style="background:#e8f0fe; padding:12px; border-radius:6px; margin:10px 0; border:1px solid #c6dafc; text-align:center; font-size:0.95rem;">`;
+    html += `<b style="color:#333;">총 합계 <span style="color:#ccc; margin:0 5px;">|</span> 보상: <span style="color:#007bff;">${totalOvertime}</span>시간 <span style="color:#ccc; margin:0 5px;">|</span> 일비: <span style="color:#007bff;">${totalAllowance.toLocaleString()}</span>원</b>`;
+    html += `</div>`;
+    
+    html += `<ul class="result-list" style="padding:0; margin-top:0;">`; 
+    html += listHtml;
+    html += `</ul>`;
+
+    container.innerHTML = html;
+}
         function selectDate(dateStr) {
             currentDate = dateStr;
             renderCalendar(); 
