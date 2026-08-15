@@ -24,10 +24,8 @@
 
         #app-container { display: none; }
 
-        /* 🔥 전체 1600px로 확장 */
         .dispatch-container { display: flex; max-width: 1600px; margin: 20px auto; gap: 20px; padding: 0 20px; }
         .main-section { flex: 3.5; display: flex; flex-direction: column; gap: 20px; min-width: 0; }
-        /* 🔥 사이드바 너비 축소 (달력 더 넓게) */
         .sidebar-section { width: 280px; min-width: 250px; max-width: 800px; flex-shrink: 0; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); height: fit-content; max-height: 90vh; overflow: auto; }
         .card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 
@@ -39,6 +37,7 @@
         .calendar-day-header.sun { color: #d9534f; }
         .calendar-day-header.sat { color: #0275d8; }
 
+        /* 🔥 달력 스크롤 완전 제거 */
         .calendar-cell { min-height: 220px; background: #fff; border: 1px solid #e1e4e8; border-radius: 4px; padding: 4px; font-size: 0.85rem; cursor: pointer; display: flex; flex-direction: column; position: relative; }
         .calendar-cell:hover { background: #fafbfc; }
         .calendar-cell.selected { border: 2px solid #007bff; background: #f0f7ff; }
@@ -59,7 +58,8 @@
         .event-box.citytour { background-color: #f3e5f5; border: 1px solid #e1bee7; color: #333; } 
         .event-box.default { background-color: #f1f3f4; border: 1px solid #d8dbe0; color: #333; }
 
-        .badge { padding: 2px 5px; border-radius: 4px; font-size: 0.65rem; font-weight: 800; min-width: 18px; text-align: center; }
+        /* 🔥 뱃지 폰트 크기 축소 */
+        .badge { padding: 2px 4px; border-radius: 4px; font-size: 0.6rem; font-weight: 800; text-align: center; }
         .badge.pub { background-color: #007bff; color: #fff; } 
         .badge.grave { background-color: #28a745; color: #fff; } 
         .badge.night1 { background-color: #ffc107; color: #000; } 
@@ -72,7 +72,7 @@
         .early-underline { text-decoration: underline; text-decoration-color: #dc3545; text-underline-offset: 3px; text-decoration-thickness: 2px; }
 
         .cal-status { font-size: 0.75rem; margin-top: 2px; letter-spacing: -0.3px; }
-        
+
         .status-header { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 20px; }
         .status-header h3 { margin: 0; font-size: 1.15rem; }
         .btn-edit-drivers { background: #6c757d; color: #fff; border: none; padding: 4px 10px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; font-family: inherit;}
@@ -155,7 +155,7 @@
 
         <div id="pw-modal-overlay" class="modal-overlay-custom" onclick="closePwModal()">
             <div class="modal-card" style="max-width: 320px;" onclick="event.stopPropagation()">
-                <h4 style="color: #007bff; margin-bottom:15px;">🔑 비밀번호 변경</h4>
+                <h4 style="color: #007bff; margin-bottom:15px;">비밀번호 변경</h4>
                 <div class="form-group"><input type="password" id="current-pw" placeholder="현재 비밀번호"></div>
                 <div class="form-group"><input type="password" id="new-pw" placeholder="새 비밀번호 (4자리 이상)"></div>
                 <div class="form-group"><input type="password" id="new-pw-confirm" placeholder="새 비밀번호 확인"></div>
@@ -182,12 +182,14 @@
             </div>
         </div>
 
-        <!-- 🔥 상단 헤더: 전체 폭 1600px, 이모지 제거, 버튼 다이어트 -->
-        <div style="max-width: 1600px; margin: 10px auto 0; padding: 10px 20px; display: flex; justify-content: flex-end; align-items: center; gap: 6px;">
-            <span id="welcome-msg" style="font-weight: bold; color: #333; margin-right: 10px; font-size: 1.1rem;"></span>
-            <button onclick="openPwModal()" style="background: #6c757d; color: white; border: none; padding: 4px 10px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 0.75rem;">비밀번호 변경</button>
-            <button id="btn-go-driver" onclick="goToModule2()" style="background: #28a745; color: white; border: none; padding: 4px 10px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 0.75rem;">내 배차</button>
-            <button onclick="logout()" style="background: #dc3545; color: white; border: none; padding: 4px 10px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 0.75rem;">로그아웃</button>
+        <!-- 🔥 헤더부: 이모지 완전 제거, 버튼 초소형 다이어트 -->
+        <div style="max-width: 1600px; margin: 10px auto 0; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; gap: 6px;">
+            <span id="welcome-msg" style="font-weight: bold; color: #333; font-size: 1.15rem;"></span>
+            <div style="display: flex; gap: 6px; align-items: center;">
+                <button onclick="openPwModal()" style="background: #6c757d; color: white; border: none; padding: 4px 10px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 0.75rem;">비밀번호 변경</button>
+                <button id="btn-go-driver" onclick="goToModule2()" style="background: #28a745; color: white; border: none; padding: 4px 10px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 0.75rem;">내 배차</button>
+                <button onclick="logout()" style="background: #dc3545; color: white; border: none; padding: 4px 10px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 0.75rem;">로그아웃</button>
+            </div>
         </div>
 
         <div class="dispatch-container">
@@ -336,7 +338,7 @@
 
         let currentUser = ''; 
 
-        // 🔥 배지 변환 유지 (짧고 깔끔하게)
+        // 🔥 배지 2글자 반환 (깔끔하게)
         function getShortType(type) {
             if (type.includes('공공')) return '공공';
             if (type.includes('1박')) return '1박';
@@ -345,6 +347,14 @@
             if (type.includes('시티')) return '시티';
             if (type.includes('성묘')) return '성묘';
             return '기타';
+        }
+
+        // 🔥 이름에서 성 빼기 (김탁 -> 탁, 박기준 -> 기준)
+        function getDispName(name) {
+            if (!name) return '';
+            if (name.includes('admin')) return name;
+            if (name.length >= 2) return name.substring(1);
+            return name;
         }
 
         async function handleLogin() {
@@ -446,16 +456,16 @@
                 document.getElementById('login-container').style.display = 'none';
                 document.getElementById('app-container').style.display = 'block';
                 
-                // 🔥 관리자 계정 시 이모지 빼고 표시
+                // 🔥 메인창 타이틀 다이어트 적용
+                document.getElementById('welcome-msg').innerText = `${getDispName(currentUser)}님 메인창`;
+
                 if (userRole === 'admin') {
-                    document.getElementById('welcome-msg').innerText = `${currentUser}님 배차 (관리자)`;
                     document.querySelector('.sidebar-section').style.display = 'block'; 
                     document.querySelector('.btn-edit-drivers').style.display = 'block'; 
                     document.querySelector('.status-header').style.display = 'flex'; 
                     document.getElementById('status-container').style.display = 'grid'; 
-                    document.getElementById('btn-go-driver').style.display = 'none';
+                    document.getElementById('btn-go-driver').style.display = 'none'; // 관리자는 내배차 버튼 숨김
                 } else {
-                    document.getElementById('welcome-msg').innerText = `${currentUser}님 배차 (전체 보기)`;
                     document.querySelector('.sidebar-section').style.display = 'none'; 
                     document.querySelector('.btn-edit-drivers').style.display = 'none'; 
                     document.querySelector('.status-header').style.display = 'none'; 
@@ -813,6 +823,7 @@
             return dates;
         }
 
+        // 🔥 문서 파일 버그 픽스 완료 (token= 삭제)
         function processFile(file) {
             return new Promise((resolve, reject) => {
                 if (file.type.startsWith('image/')) {
@@ -1043,9 +1054,9 @@
             let statusHTML = '';
             if (dutyDrivers.length > 0) statusHTML += `<div class="cal-status duty"><span class="label">당직:</span> <span class="names">${dutyDrivers.join(', ')}</span></div>`;
             
-            // 🔥 휴무: 빨간색, 파란색 구분 및 성 빼기 적용
+            // 🔥 휴무자 글자는 빨강, 이름은 파랑!
             if (offDrivers.length > 0) {
-                let offNames = offDrivers.map(n => n.length >= 3 ? n.substring(1) : n).join(', ');
+                let offNames = offDrivers.map(n => getDispName(n)).join(', ');
                 statusHTML += `<div class="cal-status off"><span style="color:#d9534f; font-weight:700;">휴무: </span><span class="names" style="color:#007bff; font-weight:700;">${offNames}</span></div>`;
             }
             
@@ -1058,6 +1069,7 @@
             }
         }
 
+        // 🔥 문서 파일 버그 픽스 완료 (확장자 정규식 체크)
         function showDispatchDetail(event, id, clickedDate) {
             event.stopPropagation(); 
             const d = allReservations.find(r => r.id === id);
@@ -1080,7 +1092,8 @@
                     imgContainer.innerHTML = `<p style="color:#d9534f; font-size:0.9rem; font-weight:bold; background:#fff3cd; padding:10px; border-radius:6px;">🛡️ 보안 및 용량 관리를 위해 자동 파기된 문서입니다.</p>`;
                     imgContainer.style.display = 'block';
                 } else if (d.photoUrl) {
-                    const isImg = d.photoUrl.match(/\.(jpeg|jpg|png|gif|webp)/i) || d.photoUrl.includes('image') || d.photoUrl.includes('token=');
+                    // 🔥 문서 백지 오류 해결 (token= 제외, 순수 확장자로만 구별)
+                    const isImg = d.photoUrl.match(/\.(jpeg|jpg|png|gif|webp)(?:\?|$)/i);
                     if (isImg) {
                         imgContainer.innerHTML = `<img src="${d.photoUrl}" style="width: 100%; border-radius: 8px; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">`;
                     } else {
@@ -1170,8 +1183,9 @@
                 if (dutyDrivers.length > 0) {
                     html += `<div style="margin-bottom: ${offDrivers.length > 0 ? '8px' : '0'};"><span class="duty-badge" style="padding: 3px 6px; font-size: 0.8rem; background:#f29900; color:#fff; border-radius:4px;">당직</span> <b style="color:#333;">${dutyDrivers.join(', ')}</b></div>`;
                 }
+                // 🔥 우측 리스트에서도 휴무 글자 빨강, 이름 파랑
                 if (offDrivers.length > 0) {
-                    let offNames = offDrivers.map(n => n.length >= 3 ? n.substring(1) : n).join(', ');
+                    let offNames = offDrivers.map(n => getDispName(n)).join(', ');
                     html += `<div><span style="color:#d9534f; font-weight:bold;">휴무: </span><span style="color:#007bff; font-weight:bold;">${offNames}</span></div>`;
                 }
                 html += `</li>`;
