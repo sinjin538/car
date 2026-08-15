@@ -316,7 +316,7 @@
                 document.getElementById('login-container').style.display = 'none';
                 document.getElementById('app-container').style.display = 'block';
                 // 🔥 "기준님 메인창" 타이틀 적용
-                document.getElementById('welcome-msg').innerText = `${getDispName(currentUser)}님 메인창`;
+                document.getElementById('welcome-msg').innerText = `${getDispName(currentUser)}님 배차`;
                 return true;
             }
         }
@@ -454,15 +454,15 @@
                 let canceledBadgeStyle = d.isCanceled ? 'background-color: transparent; color: #adb5bd; border: 1px solid #adb5bd;' : '';
                 
                 let assignedNamesHTML = (d.assigned || []).map((name, idx) => {
-                    let isUnderline = (d.settlement && d.settlement[name] && d.settlement[name][date] && d.settlement[name][date].isEarly) || false;
-                    
-                    let displayName = getDispName(name);
-                    if (name === currentUser && !d.isCanceled) {
-                        displayName = `<span style="color:#0056b3; font-weight:900;">${displayName}</span>`; 
-                    }
-                    return (isUnderline && !d.isCanceled && name !== '미지정') ? `<span class="early-underline">${displayName}</span>` : displayName;
-                }).join(', ');
-
+                let isUnderline = (d.settlement && d.settlement[name] && d.settlement[name][date] && d.settlement[name][date].isEarly) || false;
+                
+                // 🔥 getDispName(name)을 빼고, name으로 원상 복구하여 성씨가 다 나오게 수정!
+                let displayName = name; 
+                if (name === currentUser && !d.isCanceled) {
+                    displayName = `<span style="color:#0056b3; font-weight:900;">${displayName}</span>`; 
+                }
+                return (isUnderline && !d.isCanceled && name !== '미지정') ? `<span class="early-underline">${displayName}</span>` : displayName;
+            }).join(', ');
                 let attachIcon = d.photoUrl ? ' <span style="font-size:0.8rem;">📎</span>' : '';
 
                 tagsHTML += `
