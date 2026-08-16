@@ -636,14 +636,23 @@
             const currentStatus = (dailyDriverStatus[date] && dailyDriverStatus[date][currentUser]) ? dailyDriverStatus[date][currentUser] : '출근';
             
             const radioContainer = document.getElementById('my-status-radios');
+            // 🔥 updateMyStatus에 기존 상태(currentStatus)도 같이 전달하게 수정
             radioContainer.innerHTML = `
-                <label style="color:#333;"><input type="radio" name="my_st" value="출근" ${currentStatus === '출근' ? 'checked' : ''} onchange="updateMyStatus('${date}', '출근')"> 출근</label>
-                <label style="color:#f29900;"><input type="radio" name="my_st" value="당직" ${currentStatus === '당직' ? 'checked' : ''} onchange="updateMyStatus('${date}', '당직')"> 당직</label>
-                <label style="color:#d9534f;"><input type="radio" name="my_st" value="휴무" ${currentStatus === '휴무' ? 'checked' : ''} onchange="updateMyStatus('${date}', '휴무')"> 휴무</label>
+                <label style="color:#333;"><input type="radio" name="my_st" value="출근" ${currentStatus === '출근' ? 'checked' : ''} onchange="updateMyStatus('${date}', '출근', '${currentStatus}')"> 출근</label>
+                <label style="color:#f29900;"><input type="radio" name="my_st" value="당직" ${currentStatus === '당직' ? 'checked' : ''} onchange="updateMyStatus('${date}', '당직', '${currentStatus}')"> 당직</label>
+                <label style="color:#d9534f;"><input type="radio" name="my_st" value="휴무" ${currentStatus === '휴무' ? 'checked' : ''} onchange="updateMyStatus('${date}', '휴무', '${currentStatus}')"> 휴무</label>
             `;
         }
 
-        function updateMyStatus(date, newStatus) {
+        function updateMyStatus(date, newStatus, oldStatus) {
+            // 🔥 휴무 클릭 시 알림창 띄우고, 취소하면 기존 상태로 되돌리기!
+            if (newStatus === '휴무') {
+                if (!confirm(`정말 휴무로 변경하시겠습니까?`)) { 
+                    renderMyStatusPanel(date); 
+                    return; 
+                }
+            }
+
             if (!dailyDriverStatus[date]) dailyDriverStatus[date] = {};
             dailyDriverStatus[date][currentUser] = newStatus;
             
