@@ -907,16 +907,19 @@
             let monthData = [];
 
             allReservations.forEach(r => {
-                if (r.settlement && r.settlement[currentUser]) {
+                // 🔥 마법의 1줄 추가: 현재 내가 '배정'되어 있고 '취소'되지 않은 배차의 정산 기록만 불러옵니다! (남한테 넘어가면 자동 투명화)
+                if (r.settlement && r.settlement[currentUser] && (r.assigned || []).includes(currentUser) && !r.isCanceled) {
                     Object.keys(r.settlement[currentUser]).forEach(dateStr => {
                         let [y, m, d] = dateStr.split('-');
                         if (parseInt(y) === currentYear && parseInt(m) - 1 === currentMonth) {
-                            let s = r.settlement[currentUser][dateStr];
-                            monthData.push({
-                                date: dateStr, day: parseInt(d),
-                                overtime: s.overtime || 0, allowance: s.allowance || 0,
-                                type: r.type, vehicle: r.vehicle
-                            });
+                            if ((r.dates || []).includes(dateStr)) {
+                                let s = r.settlement[currentUser][dateStr];
+                                monthData.push({
+                                    date: dateStr, day: parseInt(d),
+                                    overtime: s.overtime || 0, allowance: s.allowance || 0,
+                                    type: r.type, vehicle: r.vehicle
+                                });
+                            }
                         }
                     });
                 }
@@ -952,7 +955,6 @@
 
             container.innerHTML = html;
         }
-
         function selectDate(dateStr) {
             currentDate = dateStr;
             renderCalendar(); 
