@@ -394,9 +394,9 @@
             localStorage.setItem('userRole', systemUsers[id].role);
             localStorage.setItem('loggedInPw', realPw); 
             
-            checkAuth(); 
+            // 🔥 해결 완료: 어설프게 화면만 넘기지 말고, 새로고침으로 깔끔하게 정상 부팅 유도!
+            window.location.reload(); 
         }
-
         function openPwModal() {
             document.getElementById('current-pw').value = '';
             document.getElementById('new-pw').value = '';
