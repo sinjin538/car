@@ -151,8 +151,10 @@
                     </div>
                     <p style="font-size:0.75rem; color:#888; margin-top:5px;">※ 휴게 차감, 주말/평일 초과배율 및 일비가 자동 계산됩니다.</p>
                     
-                    <button onclick="saveSettlement()" style="width:100%; padding:12px; background:#28a745; color:#fff; border:none; border-radius:4px; font-weight:bold; margin-top:15px; cursor:pointer; font-size:1rem;">입 력</button>
-                    <input type="hidden" id="settle-res-id">
+                    <div style="display: flex; gap: 8px; margin-top: 15px;">
+                        <button onclick="saveSettlement()" style="flex: 1; padding:12px; background:#28a745; color:#fff; border:none; border-radius:4px; font-weight:bold; cursor:pointer; font-size:1rem;">입 력 (저장)</button>
+                        <button onclick="deleteSettlement()" style="padding:12px 15px; background:#dc3545; color:#fff; border:none; border-radius:4px; font-weight:bold; cursor:pointer; font-size:0.9rem; white-space: nowrap;">🗑️ 삭제</button>
+                    </div>
                     <input type="hidden" id="settle-date">
                 </div>
 
@@ -740,7 +742,41 @@
                 hideLoading();
             });
         }
+// 🔥 정산 내역 깔끔하게 지워주는 삭제 기능
+        function deleteSettlement() {
+            const resId = document.getElementById('settle-res-id').value;
+            const clickedDate = document.getElementById('settle-date').value;
 
+            if (!resId || !clickedDate) return;
+            const d = allReservations.find(r => r.id === resId);
+            
+            // 삭제할 내역이 애초에 없으면 튕겨내기
+            if (!d || !d.settlement || !d.settlement[currentUser] || !d.settlement[currentUser][clickedDate]) {
+                alert("삭제할 정산 내역이 없습니다.");
+                return;
+            }
+
+            if (!confirm("이 정산 내역을 완전히 삭제하시겠습니까?")) return;
+
+            showLoading('삭제 중...');
+            
+            // 내 정산 내역만 쏙 골라서 삭제
+            delete d.settlement[currentUser][clickedDate];
+            
+            db.collection('reservations').doc(resId).set({ settlement: d.settlement }, { merge: true })
+            .then(() => {
+                alert('깔끔하게 삭제되었습니다!');
+                renderDispatchResult(currentDate); 
+                updateCalendarCellUI(currentDate); 
+                renderMonthlySummary(); 
+                closeDetailModal();
+                hideLoading();
+            })
+            .catch(error => {
+                alert('오류가 발생했습니다.');
+                hideLoading();
+            });
+        }
         function renderMyStatusPanel(date) {
             const dObj = new Date(date);
             document.getElementById('status-date-title').innerText = `${dObj.getMonth() + 1}월 ${dObj.getDate()}일 나의 상태`;
