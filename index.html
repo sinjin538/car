@@ -225,79 +225,80 @@
                     const _baseDrivers = ['박기준', '변석현', '이명순', '김탁', '한상훈', '문인식', '황덕일', '강철규', '이상헌', '함동한'];
                     
                     const formTemplate = (v, isBus) => `
-                        <div class="vehicle-item">
-                            <div class="vehicle-header">
-                                <input type="checkbox" id="v_${v}" onclick="toggleVehicleForm('${v}', this, ${isBus})">
-                                <label for="v_${v}" style="cursor: pointer; flex: 1;">${v} (${isBus ? '버스' : '쏠라티'})</label>
-                            </div>
-                            <div class="vehicle-body" id="form_${v}">
-                                <div class="form-group"><label>내용</label><input type="text" id="dest_${v}"></div>
-                                <div class="form-group">
-                                    <label>운행 형태</label>
-                                    <select id="type_${v}">
-                                        <option value="공공예약" selected>공공예약</option>
-                                        <option value="1박">1박</option>
-                                        <option value="2박">2박</option>
-                                        <option value="성묘지원">성묘지원</option>
-                                        <option value="나들이동행">나들이동행</option>
-                                        <option value="시티투어">시티투어</option>
-                                        <option value="서울운행">서울운행</option>
-                                        <option value="기타">기타</option>
-                                    </select>
-                                </div>
-                                <div class="form-group"><label>운행 거리 (km)</label><input type="number" id="km_${v}" value="0"></div>
-                                
-                                <div class="form-group" style="background: #f8f9fa; padding: 10px; border-radius: 4px; border: 1px solid #ccc; margin-top:15px;">
-                                    <label style="color: #007bff; font-weight:700; cursor:pointer;">📎 사진/문서 첨부 (선택)</label>
-                                    <input type="file" id="photo_${v}" style="background: #fff; padding: 5px; font-size: 0.8rem;">
-                                    <small id="photo_status_${v}" style="display:block; color:#28a745; margin-top:5px; font-weight:bold;"></small>
-                                </div>
+    <div class="vehicle-item">
+        <div class="vehicle-header">
+            <input type="checkbox" id="v_${v}" onclick="toggleVehicleForm('${v}', this, ${isBus})">
+            <label for="v_${v}" style="cursor: pointer; flex: 1;">${v} (${isBus ? '버스' : '쏠라티'})</label>
+        </div>
+        <div class="vehicle-body" id="form_${v}">
+            <!-- 🔥 버튼 그룹이 제일 위로 올라왔고 크기도 다이어트 됨 -->
+            <div style="display: flex; gap: 4px; margin-bottom: 15px; border-bottom: 1px dashed #ccc; padding-bottom: 12px;">
+                <button style="flex: 1.2; background: #007bff; color: white; border: none; padding: 6px 2px; border-radius: 4px; font-weight: 700; cursor: pointer; font-size: 0.8rem;" onclick="makeReservation('${v}', ${isBus})">예약 등록</button>
+                <button style="flex: 1; background: #dc3545; color: white; border: none; padding: 6px 2px; border-radius: 4px; font-weight: 700; cursor: pointer; font-size: 0.8rem;" onclick="cancelReservation('${v}')">취소</button>
+                <button style="flex: 1.2; background: #6c757d; color: white; border: none; padding: 6px 2px; border-radius: 4px; font-weight: 700; cursor: pointer; font-size: 0.7rem; letter-spacing: -0.5px;" onclick="cancelBefore4Days('${v}')">4일전 취소</button>
+            </div>
 
-                                <div style="border-top: 1px dashed #ccc; margin-top: 15px; padding-top: 10px;">
-                                    <div style="display:flex; flex-wrap:wrap; gap:15px; align-items:center; margin-bottom:12px; background:#e8f0fe; padding:6px 10px; border-radius:4px;">
-                                        ${isBus ? `<div class="form-group chk-group" id="single_box_${v}" style="margin-bottom:0;"><label><input type="checkbox" id="single_${v}"> 1인 배차</label></div>` : ''}
-                                        <div class="form-group chk-group" style="margin-bottom:0; color:#007bff;">
-                                            <label><input type="checkbox" id="manual_${v}" onchange="toggleManual('${v}', ${isBus})"> 수동 배차</label>
-                                        </div>
-                                    </div>
-                                    
-                                    <div style="display:flex; gap:10px; align-items:flex-end; margin-bottom:12px;">
-                                        <div class="form-group" style="flex:1; margin-bottom:0;">
-                                            <label>배정 운전원 1</label>
-                                            <select id="driver1_${v}" disabled>
-                                                <option value="">자동 배정</option>
-                                                <option value="미지정">미지정</option>
-                                            </select>
-                                        </div>
-                                    </div>
+            <div class="form-group"><label>내용</label><input type="text" id="dest_${v}"></div>
+            <div class="form-group">
+                <label>운행 형태</label>
+                <select id="type_${v}">
+                    <option value="공공예약" selected>공공예약</option>
+                    <option value="1박">1박</option>
+                    <option value="2박">2박</option>
+                    <option value="성묘지원">성묘지원</option>
+                    <option value="나들이동행">나들이동행</option>
+                    <option value="시티투어">시티투어</option>
+                    <option value="서울운행">서울운행</option>
+                    <option value="기타">기타</option>
+                </select>
+            </div>
+            <div class="form-group"><label>운행 거리 (km)</label><input type="number" id="km_${v}" value="0"></div>
+            
+            <div class="form-group" style="background: #f8f9fa; padding: 10px; border-radius: 4px; border: 1px solid #ccc; margin-top:15px;">
+                <label style="color: #007bff; font-weight:700; cursor:pointer;">📎 사진/문서 첨부 (선택)</label>
+                <input type="file" id="photo_${v}" style="background: #fff; padding: 5px; font-size: 0.8rem;">
+                <small id="photo_status_${v}" style="display:block; color:#28a745; margin-top:5px; font-weight:bold;"></small>
+            </div>
 
-                                    ${isBus ? `
-                                    <div style="display:flex; gap:10px; align-items:flex-end; margin-bottom:12px;">
-                                        <div class="form-group" style="flex:1; margin-bottom:0;">
-                                            <label>배정 운전원 2</label>
-                                            <select id="driver2_${v}" disabled>
-                                                <option value="">자동 배정</option>
-                                                <option value="미지정">미지정</option>
-                                            </select>
-                                        </div>
-                                    </div>` : ''}
-                                    
-                                    <div class="form-group" style="margin-top:10px; border-top: 1px dashed #eee; padding-top:10px;">
-                                        <label style="color:#d9534f;">이 배차 직후, 다음 순번 지정 (선택)</label>
-                                        <select id="next_pointer_${v}">
-                                            <option value="">자동 유지 (지정 안함)</option>
-                                        </select>
-                                    </div>
-                                </div>
+            <div style="border-top: 1px dashed #ccc; margin-top: 15px; padding-top: 10px;">
+                <div style="display:flex; flex-wrap:wrap; gap:15px; align-items:center; margin-bottom:12px; background:#e8f0fe; padding:6px 10px; border-radius:4px;">
+                    ${isBus ? `<div class="form-group chk-group" id="single_box_${v}" style="margin-bottom:0;"><label><input type="checkbox" id="single_${v}"> 1인 배차</label></div>` : ''}
+                    <div class="form-group chk-group" style="margin-bottom:0; color:#007bff;">
+                        <label><input type="checkbox" id="manual_${v}" onchange="toggleManual('${v}', ${isBus})"> 수동 배차</label>
+                    </div>
+                </div>
+                
+                <div style="display:flex; gap:10px; align-items:flex-end; margin-bottom:12px;">
+                    <div class="form-group" style="flex:1; margin-bottom:0;">
+                        <label>배정 운전원 1</label>
+                        <select id="driver1_${v}" disabled>
+                            <option value="">자동 배정</option>
+                            <option value="미지정">미지정</option>
+                        </select>
+                    </div>
+                </div>
 
-                                <div class="btn-group">
-                                    <button class="btn-reserve" onclick="makeReservation('${v}', ${isBus})">예약 등록</button>
-                                    <button class="btn-cancel" onclick="cancelReservation('${v}')">배차 취소</button>
-                                    <button class="btn-delete-early" onclick="cancelBefore4Days('${v}')">직전 취소</button>
-                                </div>
-                            </div>
-                        </div>
-                    `;
+                ${isBus ? `
+                <div style="display:flex; gap:10px; align-items:flex-end; margin-bottom:12px;">
+                    <div class="form-group" style="flex:1; margin-bottom:0;">
+                        <label>배정 운전원 2</label>
+                        <select id="driver2_${v}" disabled>
+                            <option value="">자동 배정</option>
+                            <option value="미지정">미지정</option>
+                        </select>
+                    </div>
+                </div>` : ''}
+                
+                <div class="form-group" style="margin-top:10px; border-top: 1px dashed #eee; padding-top:10px;">
+                    <label style="color:#d9534f;">이 배차 직후, 다음 순번 지정 (선택)</label>
+                    <select id="next_pointer_${v}">
+                        <option value="">자동 유지 (지정 안함)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+`;
                     busList.forEach(v => document.write(formTemplate(v, true)));
                     solatiList.forEach(v => document.write(formTemplate(v, false)));
                 </script>
