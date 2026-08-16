@@ -263,11 +263,13 @@
             const btn = document.getElementById('btn-login');
 
             if (!id) return alert('이름(또는 아이디)을 입력해주세요.');
+            
             if (!systemUsers[id]) {
                 alert('등록되지 않은 사용자입니다. 이름을 정확히 확인해 주세요.');
                 document.getElementById('login-id').value = ''; 
                 return;
             }
+
             if (!pw) return alert('비밀번호를 입력해주세요.');
 
             btn.innerText = '인증 확인 중...';
@@ -276,8 +278,12 @@
             let realPw = systemUsers[id].pw; 
             try {
                 const doc = await db.collection('user_auth').doc(id).get();
-                if (doc.exists && doc.data().pw) { realPw = doc.data().pw; }
-            } catch (error) {}
+                if (doc.exists && doc.data().pw) {
+                    realPw = doc.data().pw;
+                }
+            } catch (error) {
+                console.error("인증 통신 오류", error);
+            }
 
             btn.innerText = '접속하기';
             btn.disabled = false;
@@ -292,7 +298,8 @@
             localStorage.setItem('userRole', systemUsers[id].role);
             localStorage.setItem('loggedInPw', realPw); 
             
-            checkAuth(); 
+            // 🔥 해결 완료: 어설프게 화면만 넘기지 말고, 새로고침으로 깔끔하게 정상 부팅 유도!
+            window.location.reload(); 
         }
 
         function checkAuth() {
