@@ -24,7 +24,6 @@
 
         #app-container { display: none; }
 
-        /* 🔥 1600px 넓이 반영, 사이드바 280px */
         .dispatch-container { display: flex; max-width: 1600px; margin: 20px auto; gap: 20px; padding: 0 20px; }
         .main-section { flex: 3.5; display: flex; flex-direction: column; gap: 20px; min-width: 0; }
         .sidebar-section { width: 280px; min-width: 250px; max-width: 800px; flex-shrink: 0; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); height: fit-content; max-height: 90vh; overflow: auto; }
@@ -169,7 +168,7 @@
             <span id="welcome-msg" style="font-weight: bold; color: #333; font-size: 1.15rem;"></span>
             <div style="display: flex; gap: 6px; align-items: center;">
                 <button onclick="openPwModal()" style="background: #6c757d; color: white; border: none; padding: 4px 10px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 0.75rem;">비밀번호 변경</button>
-                <button id="btn-go-driver" onclick="goToAdmin()" style="background: #007bff; color: white; border: none; padding: 4px 10px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 0.75rem;">메인창</button>
+                <button onclick="goToAdmin()" style="background: #007bff; color: white; border: none; padding: 4px 10px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 0.75rem;">메인창</button>
                 <button onclick="logout()" style="background: #dc3545; color: white; border: none; padding: 4px 10px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 0.75rem;">로그아웃</button>
             </div>
         </div>
@@ -194,7 +193,6 @@
                     <div class="radio-group" id="my-status-radios"></div>
                 </div>
 
-                <!-- 🔥 월간 정산 요약 고정 -->
                 <div id="monthly-summary-container"></div>
 
                 <h3 style="margin-top: 25px; border-bottom: 2px solid #28a745; padding-bottom: 8px;">선택 날짜 내 배차 내역</h3>
@@ -263,13 +261,11 @@
             const btn = document.getElementById('btn-login');
 
             if (!id) return alert('이름(또는 아이디)을 입력해주세요.');
-            
             if (!systemUsers[id]) {
                 alert('등록되지 않은 사용자입니다. 이름을 정확히 확인해 주세요.');
                 document.getElementById('login-id').value = ''; 
                 return;
             }
-
             if (!pw) return alert('비밀번호를 입력해주세요.');
 
             btn.innerText = '인증 확인 중...';
@@ -278,12 +274,8 @@
             let realPw = systemUsers[id].pw; 
             try {
                 const doc = await db.collection('user_auth').doc(id).get();
-                if (doc.exists && doc.data().pw) {
-                    realPw = doc.data().pw;
-                }
-            } catch (error) {
-                console.error("인증 통신 오류", error);
-            }
+                if (doc.exists && doc.data().pw) { realPw = doc.data().pw; }
+            } catch (error) {}
 
             btn.innerText = '접속하기';
             btn.disabled = false;
@@ -298,7 +290,7 @@
             localStorage.setItem('userRole', systemUsers[id].role);
             localStorage.setItem('loggedInPw', realPw); 
             
-            // 🔥 해결 완료: 어설프게 화면만 넘기지 말고, 새로고침으로 깔끔하게 정상 부팅 유도!
+            // 🔥 접속 무한로딩 해결 완료
             window.location.reload(); 
         }
 
@@ -317,8 +309,7 @@
                 }
                 document.getElementById('login-container').style.display = 'none';
                 document.getElementById('app-container').style.display = 'block';
-                // 🔥 "박기준님 배차" (이름 다 표시, 깔끔하게)
-                document.getElementById('welcome-msg').innerText = `${currentUser}님 배차`;
+                document.getElementById('welcome-msg').innerText = `${getDispName(currentUser)}님 배차`;
                 return true;
             }
         }
@@ -358,9 +349,12 @@
         function goToAdmin() { window.location.href = 'index.html'; }
 
         const koreaHolidays = {
-            "01-01": "신정", "03-01": "삼일절", "05-05": "어린이날", "06-06": "현충일", "08-15": "광복절", "10-03": "개천절", "10-09": "한글날", "12-25": "기독탄신일",
-            "2026-02-16": "설날연휴", "2026-02-17": "설날", "2026-02-18": "설날연휴", "2026-03-02": "대체공휴일", "2026-05-24": "부처님오신날", "2026-05-25": "대체공휴일",
-            "2026-06-03": "지방선거", "2026-08-17": "대체공휴일", "2026-09-24": "추석연휴", "2026-09-25": "추석", "2026-09-26": "추석연휴", "2026-10-05": "대체공휴일"
+            "01-01": "신정", "03-01": "삼일절", "05-05": "어린이날", "06-06": "현충일", 
+            "08-15": "광복절", "10-03": "개천절", "10-09": "한글날", "12-25": "기독탄신일",
+            "2026-02-16": "설날연휴", "2026-02-17": "설날", "2026-02-18": "설날연휴",
+            "2026-03-02": "대체공휴일", "2026-05-24": "부처님오신날", "2026-05-25": "대체공휴일",
+            "2026-06-03": "지방선거", "2026-08-17": "대체공휴일", "2026-09-24": "추석연휴", 
+            "2026-09-25": "추석", "2026-09-26": "추석연휴", "2026-10-05": "대체공휴일"
         };
         function getHolidayName(year, month, day) {
             const mmdd = `${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
@@ -455,7 +449,7 @@
                 let assignedNamesHTML = (d.assigned || []).map((name, idx) => {
                     let isUnderline = (d.settlement && d.settlement[name] && d.settlement[name][date] && d.settlement[name][date].isEarly) || false;
                     
-                    let displayName = name; // 🔥 성씨 모두 나오도록
+                    let displayName = name; // 🔥 성씨 복구 완료
                     if (name === currentUser && !d.isCanceled) {
                         displayName = `<span style="color:#0056b3; font-weight:900;">${displayName}</span>`; 
                     }
@@ -478,7 +472,7 @@
             const dutyDrivers = Object.keys(statusData).filter(d => statusData[d] === '당직');
 
             let statusHTML = '';
-            // 🔥 당직 전체 글자를 노란색(#f29900)으로 표시
+            // 🔥 당직 전체 글자색 노란색 적용
             if (dutyDrivers.length > 0) {
                 statusHTML += `<div class="cal-status duty"><span style="color:#f29900; font-weight:700;">당직: ${dutyDrivers.join(', ')}</span></div>`;
             }
@@ -498,14 +492,34 @@
             }
         }
 
+        // 🔥 사진 터치 시 확대(새 탭 열기) 기능 적용
         function showDispatchDetail(event, id, clickedDate) {
+            event.stopPropagation(); 
+            const d = allReservations.find(r => r.id === id);
+            if (!d) return;
+
+            let assigned = (d.assigned && d.assigned.length > 0) ? d.assigned.join(', ') : '미정';
+            document.getElementById('detail-modal-title').innerText = `[${d.vehicle}] ${d.type} (${clickedDate})`;
+            document.getElementById('detail-modal-drivers').innerText = assigned;
+            document.getElementById('detail-modal-dest').innerText = d.dest || '내용 없음'; 
+
+            document.getElementById('settle-res-id').value = id;
+            document.getElementById('settle-date').value = clickedDate; 
+
+            const mySettle = (d.settlement && d.settlement[currentUser] && d.settlement[currentUser][clickedDate]) ? d.settlement[currentUser][clickedDate] : {};
+            document.getElementById('settle-early').checked = mySettle.isEarly || false;
+            document.getElementById('settle-in').value = mySettle.clockIn || '';
+            document.getElementById('settle-out').value = mySettle.clockOut || '';
+
+            const imgContainer = document.getElementById('detail-modal-img-container');
+            const todayStr = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}-${String(new Date().getDate()).padStart(2, '0')}`;
+            
             if (d.startDate < todayStr && !d.photoUrl) {
                 imgContainer.innerHTML = `<p style="color:#d9534f; font-size:0.9rem; font-weight:bold; background:#fff3cd; padding:10px; border-radius:6px;">🛡️ 보안 및 용량 관리를 위해 자동 파기된 문서입니다.</p>`;
                 imgContainer.style.display = 'block';
             } else if (d.photoUrl) {
                 const isImg = d.photoUrl.match(/\.(jpeg|jpg|png|gif|webp)(?:\?|$)/i);
                 if (isImg) {
-                    // 🔥 1번 방식 적용: 사진을 a 태그로 감싸서 누르면 새 탭에서 열리도록 수정!
                     imgContainer.innerHTML = `
                         <a href="${d.photoUrl}" target="_blank" style="display:block; text-decoration:none;">
                             <img src="${d.photoUrl}" style="width: 100%; border-radius: 8px; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
@@ -520,11 +534,14 @@
                 imgContainer.innerHTML = '<p style="color:#888; font-size:0.9rem;">첨부된 파일이 없습니다.</p>';
                 imgContainer.style.display = 'block';
             }
+
+            document.getElementById('detail-modal-overlay').style.display = 'flex';
+        }
+
         function closeDetailModal() {
             document.getElementById('detail-modal-overlay').style.display = 'none';
         }
 
-        // 🔥 소수점 2자리 반올림 계산 적용
         function calculateSettlement(dateStr, clockInStr, clockOutStr, type) {
             if (!clockInStr || !clockOutStr) return { overtime: 0, allowance: 0 };
             
@@ -557,7 +574,6 @@
                 overtime = (outside * 1.5);
             }
 
-            // 소수점 2자리 반올림
             overtime = Math.round(overtime * 100) / 100;
 
             let allowance = 0;
@@ -669,7 +685,7 @@
                     
                     let assignedNamesHTML = (d.assigned || []).map((name, idx) => {
                         let isUnderline = (d.settlement && d.settlement[name] && d.settlement[name][date] && d.settlement[name][date].isEarly) || false;
-                        let dispName = name; // 🔥 성씨 다 나오게 복구
+                        let dispName = name; 
                         if (name === currentUser && !d.isCanceled) {
                             dispName = `<span style="color:#0056b3; font-weight:900;">${dispName}</span>`; 
                         }
@@ -681,7 +697,6 @@
                     let reportText = '';
                     const mySettle = (d.settlement && d.settlement[currentUser] && d.settlement[currentUser][date]) ? d.settlement[currentUser][date] : null;
                     if (mySettle) {
-                        // 🔥 소수점 두 자리로 통일
                         reportText = `<div style="margin-top:8px; font-size:0.85rem; color:#155724; background:#d4edda; padding:6px 10px; border-radius:4px; border: 1px solid #c3e6cb;">
                             ${mySettle.isEarly ? '[선운행] ' : ''}근무: ${mySettle.clockIn || '-'} ~ ${mySettle.clockOut || '-'} <br>
                             보상: <b>${Number(mySettle.overtime || 0).toFixed(2)}</b>시간 | 일비: <b>${Number(mySettle.allowance || 0).toLocaleString()}</b>원
@@ -723,7 +738,7 @@
             contentUl.innerHTML = html;
         }
 
-        // 🔥 월간 정산: 날짜 / 보상 및 일비 2줄로 심플하게 나눔
+        // 🔥 월간 정산 요약: 날짜 밑에 보상/일비 배치, 소수점 2자리 적용 완료
         function renderMonthlySummary() {
             const container = document.getElementById('monthly-summary-container');
             
@@ -755,7 +770,6 @@
                 hasData = true;
                 let sType = item.type.replace('예약','').replace('지원','').replace('운행','').replace('투어','').replace('동행','');
                 
-                // 🔥 리스트 아이템 2줄 배치 (날짜/차량 밑에 보상/일비)
                 listHtml += `<li style="padding: 10px; border-bottom: 1px solid #eee; display: flex; flex-direction: column; gap: 4px;">
                                 <span style="color:#333; font-weight:bold; font-size:0.95rem;">${currentMonth + 1}/${item.day} [${item.vehicle}] ${sType}</span>
                                 <span style="color:#555; font-size:0.85rem;">보상: <b style="color:#007bff;">${Number(item.overtime || 0).toFixed(2)}</b>시간 <span style="color:#ccc; margin:0 4px;">|</span> 일비: <b style="color:#007bff;">${Number(item.allowance || 0).toLocaleString()}</b>원</span>
@@ -768,7 +782,6 @@
 
             let html = `<h3 style="margin-top: 25px; border-bottom: 2px solid #007bff; padding-bottom: 8px; font-size: 1.1rem;">${currentMonth + 1}월 내 배차 정산 요약</h3>`;
             
-            // 🔥 총합계 박스도 위아래 두 줄로 배치
             html += `<div style="background:#e8f0fe; padding:12px; border-radius:6px; margin:10px 0; border:1px solid #c6dafc; text-align:center;">`;
             html += `<div style="margin-bottom: 5px; font-size:0.95rem;"><b style="color:#333;">총합계 보상: <span style="color:#007bff; font-size:1.1rem;">${Number(totalOvertime || 0).toFixed(2)}</span> 시간</b></div>`;
             html += `<div style="font-size:0.95rem;"><b style="color:#333;">총합계 일비: <span style="color:#007bff; font-size:1.1rem;">${Number(totalAllowance || 0).toLocaleString()}</span> 원</b></div>`;
