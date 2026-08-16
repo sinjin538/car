@@ -24,6 +24,7 @@
 
         #app-container { display: none; }
 
+        /* 🔥 1600px 넓이 반영, 사이드바 280px */
         .dispatch-container { display: flex; max-width: 1600px; margin: 20px auto; gap: 20px; padding: 0 20px; }
         .main-section { flex: 3.5; display: flex; flex-direction: column; gap: 20px; min-width: 0; }
         .sidebar-section { width: 280px; min-width: 250px; max-width: 800px; flex-shrink: 0; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); height: fit-content; max-height: 90vh; overflow: auto; }
@@ -168,7 +169,7 @@
             <span id="welcome-msg" style="font-weight: bold; color: #333; font-size: 1.15rem;"></span>
             <div style="display: flex; gap: 6px; align-items: center;">
                 <button onclick="openPwModal()" style="background: #6c757d; color: white; border: none; padding: 4px 10px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 0.75rem;">비밀번호 변경</button>
-                <button onclick="goToAdmin()" style="background: #007bff; color: white; border: none; padding: 4px 10px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 0.75rem;">메인창</button>
+                <button id="btn-go-driver" onclick="goToAdmin()" style="background: #007bff; color: white; border: none; padding: 4px 10px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 0.75rem;">메인창</button>
                 <button onclick="logout()" style="background: #dc3545; color: white; border: none; padding: 4px 10px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 0.75rem;">로그아웃</button>
             </div>
         </div>
@@ -193,6 +194,7 @@
                     <div class="radio-group" id="my-status-radios"></div>
                 </div>
 
+                <!-- 🔥 월간 정산 요약 고정 -->
                 <div id="monthly-summary-container"></div>
 
                 <h3 style="margin-top: 25px; border-bottom: 2px solid #28a745; padding-bottom: 8px;">선택 날짜 내 배차 내역</h3>
@@ -308,7 +310,8 @@
                 }
                 document.getElementById('login-container').style.display = 'none';
                 document.getElementById('app-container').style.display = 'block';
-                document.getElementById('welcome-msg').innerText = `${getDispName(currentUser)}님 배차`;
+                // 🔥 "박기준님 배차" (이름 다 표시, 깔끔하게)
+                document.getElementById('welcome-msg').innerText = `${currentUser}님 배차`;
                 return true;
             }
         }
@@ -348,12 +351,9 @@
         function goToAdmin() { window.location.href = 'index.html'; }
 
         const koreaHolidays = {
-            "01-01": "신정", "03-01": "삼일절", "05-05": "어린이날", "06-06": "현충일", 
-            "08-15": "광복절", "10-03": "개천절", "10-09": "한글날", "12-25": "기독탄신일",
-            "2026-02-16": "설날연휴", "2026-02-17": "설날", "2026-02-18": "설날연휴",
-            "2026-03-02": "대체공휴일", "2026-05-24": "부처님오신날", "2026-05-25": "대체공휴일",
-            "2026-06-03": "지방선거", "2026-08-17": "대체공휴일", "2026-09-24": "추석연휴", 
-            "2026-09-25": "추석", "2026-09-26": "추석연휴", "2026-10-05": "대체공휴일"
+            "01-01": "신정", "03-01": "삼일절", "05-05": "어린이날", "06-06": "현충일", "08-15": "광복절", "10-03": "개천절", "10-09": "한글날", "12-25": "기독탄신일",
+            "2026-02-16": "설날연휴", "2026-02-17": "설날", "2026-02-18": "설날연휴", "2026-03-02": "대체공휴일", "2026-05-24": "부처님오신날", "2026-05-25": "대체공휴일",
+            "2026-06-03": "지방선거", "2026-08-17": "대체공휴일", "2026-09-24": "추석연휴", "2026-09-25": "추석", "2026-09-26": "추석연휴", "2026-10-05": "대체공휴일"
         };
         function getHolidayName(year, month, day) {
             const mmdd = `${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
@@ -448,7 +448,7 @@
                 let assignedNamesHTML = (d.assigned || []).map((name, idx) => {
                     let isUnderline = (d.settlement && d.settlement[name] && d.settlement[name][date] && d.settlement[name][date].isEarly) || false;
                     
-                    let displayName = name; // 🔥 성씨 모두 나오게 (변경 안함)
+                    let displayName = name; // 🔥 성씨 모두 나오도록
                     if (name === currentUser && !d.isCanceled) {
                         displayName = `<span style="color:#0056b3; font-weight:900;">${displayName}</span>`; 
                     }
@@ -471,11 +471,12 @@
             const dutyDrivers = Object.keys(statusData).filter(d => statusData[d] === '당직');
 
             let statusHTML = '';
-            // 기존 코드 삭제 후 이걸로 교체!
-if (dutyDrivers.length > 0) {
-    statusHTML += `<div class="cal-status duty"><span style="color:#f29900; font-weight:700;">당직: ${dutyDrivers.join(', ')}</span></div>`;
-}
+            // 🔥 당직 전체 글자를 노란색(#f29900)으로 표시
+            if (dutyDrivers.length > 0) {
+                statusHTML += `<div class="cal-status duty"><span style="color:#f29900; font-weight:700;">당직: ${dutyDrivers.join(', ')}</span></div>`;
+            }
             
+            // 🔥 휴무자 글자는 빨강, 이름은 파랑, 성 빼기
             if (offDrivers.length > 0) {
                 let offNames = offDrivers.map(n => getDispName(n)).join(', ');
                 statusHTML += `<div class="cal-status off"><span style="color:#d9534f; font-weight:700;">휴무: </span><span class="names" style="color:#007bff; font-weight:700;">${offNames}</span></div>`;
@@ -515,7 +516,7 @@ if (dutyDrivers.length > 0) {
                 imgContainer.innerHTML = `<p style="color:#d9534f; font-size:0.9rem; font-weight:bold; background:#fff3cd; padding:10px; border-radius:6px;">🛡️ 보안 및 용량 관리를 위해 자동 파기된 문서입니다.</p>`;
                 imgContainer.style.display = 'block';
             } else if (d.photoUrl) {
-                const isImg = d.photoUrl.match(/\.(jpeg|jpg|png|gif|webp)/i);
+                const isImg = d.photoUrl.match(/\.(jpeg|jpg|png|gif|webp)(?:\?|$)/i);
                 if (isImg) {
                     imgContainer.innerHTML = `<img src="${d.photoUrl}" style="width: 100%; border-radius: 8px; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">`;
                 } else {
@@ -534,7 +535,7 @@ if (dutyDrivers.length > 0) {
             document.getElementById('detail-modal-overlay').style.display = 'none';
         }
 
-        // 🔥 소수점 두 자리 반올림 처리
+        // 🔥 소수점 2자리 반올림 계산 적용
         function calculateSettlement(dateStr, clockInStr, clockOutStr, type) {
             if (!clockInStr || !clockOutStr) return { overtime: 0, allowance: 0 };
             
@@ -567,7 +568,8 @@ if (dutyDrivers.length > 0) {
                 overtime = (outside * 1.5);
             }
 
-            overtime = Math.round(overtime * 100) / 100; // 🔥 소수점 둘째 자리
+            // 소수점 2자리 반올림
+            overtime = Math.round(overtime * 100) / 100;
 
             let allowance = 0;
             if (type.includes('1박') || type.includes('2박')) {
@@ -678,7 +680,7 @@ if (dutyDrivers.length > 0) {
                     
                     let assignedNamesHTML = (d.assigned || []).map((name, idx) => {
                         let isUnderline = (d.settlement && d.settlement[name] && d.settlement[name][date] && d.settlement[name][date].isEarly) || false;
-                        let dispName = name; // 🔥 성씨 나오도록
+                        let dispName = name; // 🔥 성씨 다 나오게 복구
                         if (name === currentUser && !d.isCanceled) {
                             dispName = `<span style="color:#0056b3; font-weight:900;">${dispName}</span>`; 
                         }
@@ -690,7 +692,7 @@ if (dutyDrivers.length > 0) {
                     let reportText = '';
                     const mySettle = (d.settlement && d.settlement[currentUser] && d.settlement[currentUser][date]) ? d.settlement[currentUser][date] : null;
                     if (mySettle) {
-                        // 🔥 소수점 두 자리 적용
+                        // 🔥 소수점 두 자리로 통일
                         reportText = `<div style="margin-top:8px; font-size:0.85rem; color:#155724; background:#d4edda; padding:6px 10px; border-radius:4px; border: 1px solid #c3e6cb;">
                             ${mySettle.isEarly ? '[선운행] ' : ''}근무: ${mySettle.clockIn || '-'} ~ ${mySettle.clockOut || '-'} <br>
                             보상: <b>${Number(mySettle.overtime || 0).toFixed(2)}</b>시간 | 일비: <b>${Number(mySettle.allowance || 0).toLocaleString()}</b>원
@@ -720,7 +722,7 @@ if (dutyDrivers.length > 0) {
             if (dutyDrivers.length > 0 || offDrivers.length > 0) {
                 html += `<li style="background-color: #fff; border: 2px dashed #28a745; margin-top: 10px; border-radius: 6px;">`;
                 if (dutyDrivers.length > 0) {
-                    html += `<div style="margin-bottom: ${offDrivers.length > 0 ? '8px' : '0'};"><span class="badge" style="background:#f29900; color:#fff;">당직</span> <b style="color:#333;">${dutyDrivers.join(', ')}</b></div>`;
+                    html += `<div style="margin-bottom: ${offDrivers.length > 0 ? '8px' : '0'};"><span style="color:#f29900; font-weight:700;">당직: ${dutyDrivers.join(', ')}</span></div>`;
                 }
                 if (offDrivers.length > 0) {
                     let offNames = offDrivers.map(n => getDispName(n)).join(', ');
@@ -732,63 +734,63 @@ if (dutyDrivers.length > 0) {
             contentUl.innerHTML = html;
         }
 
-        // 🔥 월간 요약 한 줄 정렬(nowrap), 뱃지 삭제, 소수점 2자리 적용 완료
+        // 🔥 월간 정산: 날짜 / 보상 및 일비 2줄로 심플하게 나눔
         function renderMonthlySummary() {
-    const container = document.getElementById('monthly-summary-container');
-    
-    let totalOvertime = 0;
-    let totalAllowance = 0;
-    let hasData = false;
-    let monthData = [];
+            const container = document.getElementById('monthly-summary-container');
+            
+            let totalOvertime = 0;
+            let totalAllowance = 0;
+            let hasData = false;
+            let monthData = [];
 
-    allReservations.forEach(r => {
-        if (r.settlement && r.settlement[currentUser]) {
-            Object.keys(r.settlement[currentUser]).forEach(dateStr => {
-                let [y, m, d] = dateStr.split('-');
-                if (parseInt(y) === currentYear && parseInt(m) - 1 === currentMonth) {
-                    let s = r.settlement[currentUser][dateStr];
-                    monthData.push({
-                        date: dateStr, day: parseInt(d),
-                        overtime: s.overtime || 0, allowance: s.allowance || 0,
-                        type: r.type, vehicle: r.vehicle
+            allReservations.forEach(r => {
+                if (r.settlement && r.settlement[currentUser]) {
+                    Object.keys(r.settlement[currentUser]).forEach(dateStr => {
+                        let [y, m, d] = dateStr.split('-');
+                        if (parseInt(y) === currentYear && parseInt(m) - 1 === currentMonth) {
+                            let s = r.settlement[currentUser][dateStr];
+                            monthData.push({
+                                date: dateStr, day: parseInt(d),
+                                overtime: s.overtime || 0, allowance: s.allowance || 0,
+                                type: r.type, vehicle: r.vehicle
+                            });
+                        }
                     });
                 }
             });
+
+            monthData.sort((a, b) => a.day - b.day);
+
+            let listHtml = '';
+            monthData.forEach(item => {
+                hasData = true;
+                let sType = item.type.replace('예약','').replace('지원','').replace('운행','').replace('투어','').replace('동행','');
+                
+                // 🔥 리스트 아이템 2줄 배치 (날짜/차량 밑에 보상/일비)
+                listHtml += `<li style="padding: 10px; border-bottom: 1px solid #eee; display: flex; flex-direction: column; gap: 4px;">
+                                <span style="color:#333; font-weight:bold; font-size:0.95rem;">${currentMonth + 1}/${item.day} [${item.vehicle}] ${sType}</span>
+                                <span style="color:#555; font-size:0.85rem;">보상: <b style="color:#007bff;">${Number(item.overtime || 0).toFixed(2)}</b>시간 <span style="color:#ccc; margin:0 4px;">|</span> 일비: <b style="color:#007bff;">${Number(item.allowance || 0).toLocaleString()}</b>원</span>
+                             </li>`;
+                totalOvertime += (item.overtime || 0);
+                totalAllowance += (item.allowance || 0);
+            });
+
+            if (!hasData) { listHtml += `<li style="color:#666; padding:10px; font-size: 0.8rem; text-align:center;">이번 달 정산 내역이 없습니다.</li>`; }
+
+            let html = `<h3 style="margin-top: 25px; border-bottom: 2px solid #007bff; padding-bottom: 8px; font-size: 1.1rem;">${currentMonth + 1}월 내 배차 정산 요약</h3>`;
+            
+            // 🔥 총합계 박스도 위아래 두 줄로 배치
+            html += `<div style="background:#e8f0fe; padding:12px; border-radius:6px; margin:10px 0; border:1px solid #c6dafc; text-align:center;">`;
+            html += `<div style="margin-bottom: 5px; font-size:0.95rem;"><b style="color:#333;">총합계 보상: <span style="color:#007bff; font-size:1.1rem;">${Number(totalOvertime || 0).toFixed(2)}</span> 시간</b></div>`;
+            html += `<div style="font-size:0.95rem;"><b style="color:#333;">총합계 일비: <span style="color:#007bff; font-size:1.1rem;">${Number(totalAllowance || 0).toLocaleString()}</span> 원</b></div>`;
+            html += `</div>`;
+            
+            html += `<ul class="result-list" style="padding:0; margin-top:0; max-height: none; overflow-y: visible;">`; 
+            html += listHtml;
+            html += `</ul>`;
+
+            container.innerHTML = html;
         }
-    });
-
-    monthData.sort((a, b) => a.day - b.day);
-
-    let listHtml = '';
-    monthData.forEach(item => {
-        hasData = true;
-        let sType = item.type.replace('예약','').replace('지원','').replace('운행','').replace('투어','').replace('동행','');
-        
-        // 🔥 개별 리스트도 좁은 화면에 맞게 두 줄로 깔끔하게 배치 (위: 날짜/차량, 아래: 금액)
-        listHtml += `<li style="padding: 10px; border-bottom: 1px solid #eee; display: flex; flex-direction: column; gap: 4px;">
-                        <span style="color:#333; font-weight:bold; font-size:0.95rem;">${currentMonth + 1}/${item.day}</span>
-                        <span style="color:#555; font-size:0.85rem;">보상: <b style="color:#007bff;">${Number(item.overtime \vert{}\vert{} 0).toFixed(2)}</b>시간 <span style="color:#ccc; margin:0 4px;">\vert{}</span> 일비: <b style="color:#007bff;">${Number(item.allowance || 0).toLocaleString()}</b>원</span>
-                     </li>`;
-        totalOvertime += (item.overtime || 0);
-        totalAllowance += (item.allowance || 0);
-    });
-
-    if (!hasData) { listHtml += `<li style="color:#666; padding:10px; font-size: 0.8rem; text-align:center;">이번 달 정산 내역이 없습니다.</li>`; }
-
-    let html = `<h3 style="margin-top: 25px; border-bottom: 2px solid #007bff; padding-bottom: 8px; font-size: 1.05rem;">${currentMonth + 1}월 내 배차 정산 요약</h3>`;
-    
-    // 🔥 총합계 박스를 말씀하신 대로 '보상' 밑에 '일비'가 오도록 두 줄로 변경
-    html += `<div style="background:#e8f0fe; padding:12px; border-radius:6px; margin:10px 0; border:1px solid #c6dafc; text-align:center;">`;
-    html += `<div style="margin-bottom: 5px; font-size:0.9rem;"><b style="color:#333;">총합계 보상: <span style="color:#007bff; font-size:1.05rem;">${Number(totalOvertime || 0).toFixed(2)}</span> 시간</b></div>`;
-    html += `<div style="font-size:0.9rem;"><b style="color:#333;">총합계 일비: <span style="color:#007bff; font-size:1.05rem;">${Number(totalAllowance || 0).toLocaleString()}</span> 원</b></div>`;
-    html += `</div>`;
-    
-    html += `<ul class="result-list" style="padding:0; margin-top:0;">`; 
-    html += listHtml;
-    html += `</ul>`;
-
-    container.innerHTML = html;
-}
 
         function selectDate(dateStr) {
             currentDate = dateStr;
