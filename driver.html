@@ -471,7 +471,10 @@
             const dutyDrivers = Object.keys(statusData).filter(d => statusData[d] === '당직');
 
             let statusHTML = '';
-            if (dutyDrivers.length > 0) statusHTML += `<div class="cal-status duty"><span class="label">당직:</span> <span class="names">${dutyDrivers.join(', ')}</span></div>`;
+            // 기존 코드 삭제 후 이걸로 교체!
+if (dutyDrivers.length > 0) {
+    statusHTML += `<div class="cal-status duty"><span style="color:#f29900; font-weight:700;">당직: ${dutyDrivers.join(', ')}</span></div>`;
+}
             
             if (offDrivers.length > 0) {
                 let offNames = offDrivers.map(n => getDispName(n)).join(', ');
@@ -762,9 +765,9 @@
         let sType = item.type.replace('예약','').replace('지원','').replace('운행','').replace('투어','').replace('동행','');
         
         // 🔥 개별 리스트도 좁은 화면에 맞게 두 줄로 깔끔하게 배치 (위: 날짜/차량, 아래: 금액)
-        listHtml += `<li style="padding: 10px; font-size: 0.8rem; border-bottom: 1px solid #eee; display: flex; flex-direction: column; gap: 5px;">
-                        <span style="color:#333; font-weight:bold;">${currentMonth + 1}/${item.day} [${item.vehicle}] ${sType}</span>
-                        <span style="color:#555; text-align: right;">보상: <b style="color:#333;">${Number(item.overtime || 0).toFixed(2)}</b>시간 <span style="color:#ccc; margin:0 4px;">|</span> 일비: <b style="color:#333;">${Number(item.allowance || 0).toLocaleString()}</b>원</span>
+        listHtml += `<li style="padding: 10px; border-bottom: 1px solid #eee; display: flex; flex-direction: column; gap: 4px;">
+                        <span style="color:#333; font-weight:bold; font-size:0.95rem;">${currentMonth + 1}/${item.day}</span>
+                        <span style="color:#555; font-size:0.85rem;">보상: <b style="color:#007bff;">${Number(item.overtime \vert{}\vert{} 0).toFixed(2)}</b>시간 <span style="color:#ccc; margin:0 4px;">\vert{}</span> 일비: <b style="color:#007bff;">${Number(item.allowance || 0).toLocaleString()}</b>원</span>
                      </li>`;
         totalOvertime += (item.overtime || 0);
         totalAllowance += (item.allowance || 0);
