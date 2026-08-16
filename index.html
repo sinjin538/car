@@ -89,11 +89,6 @@
         .form-group select:disabled { background-color: #e9ecef; cursor: not-allowed; }
         .chk-group label { color: #d9534f; cursor: pointer; font-weight: 700; display:flex; align-items:center; gap:6px;}
         
-        .btn-group { display: flex; gap: 6px; margin-top: 15px; }
-        .btn-reserve { flex: 1.2; background: #007bff; color: white; border: none; padding: 10px 4px; border-radius: 4px; font-weight: 700; cursor: pointer; font-family: inherit; font-size: 0.85rem;}
-        .btn-cancel { flex: 1; background: #dc3545; color: white; border: none; padding: 10px 4px; border-radius: 4px; font-weight: 700; cursor: pointer; font-family: inherit; font-size: 0.85rem;}
-        .btn-delete-early { flex: 1; background: #6c757d; color: white; border: none; padding: 10px 4px; border-radius: 4px; font-weight: 700; cursor: pointer; font-family: inherit; font-size: 0.85rem;}
-        
         .result-list { list-style: none; padding: 0; margin-top: 10px; }
         .result-list li { background: #f8f9fa; border: 1px solid #dee2e6; padding: 12px; margin-bottom: 8px; border-radius: 4px; font-size: 0.95rem; line-height: 1.5; }
         
@@ -225,80 +220,80 @@
                     const _baseDrivers = ['박기준', '변석현', '이명순', '김탁', '한상훈', '문인식', '황덕일', '강철규', '이상헌', '함동한'];
                     
                     const formTemplate = (v, isBus) => `
-    <div class="vehicle-item">
-        <div class="vehicle-header">
-            <input type="checkbox" id="v_${v}" onclick="toggleVehicleForm('${v}', this, ${isBus})">
-            <label for="v_${v}" style="cursor: pointer; flex: 1;">${v} (${isBus ? '버스' : '쏠라티'})</label>
-        </div>
-        <div class="vehicle-body" id="form_${v}">
-            <!-- 🔥 버튼 그룹이 제일 위로 올라왔고 크기도 다이어트 됨 -->
-            <div style="display: flex; gap: 4px; margin-bottom: 15px; border-bottom: 1px dashed #ccc; padding-bottom: 12px;">
-                <button style="flex: 1.2; background: #007bff; color: white; border: none; padding: 6px 2px; border-radius: 4px; font-weight: 700; cursor: pointer; font-size: 0.8rem;" onclick="makeReservation('${v}', ${isBus})">예약 등록</button>
-                <button style="flex: 1; background: #dc3545; color: white; border: none; padding: 6px 2px; border-radius: 4px; font-weight: 700; cursor: pointer; font-size: 0.8rem;" onclick="cancelReservation('${v}')">취소</button>
-                <button style="flex: 1.2; background: #6c757d; color: white; border: none; padding: 6px 2px; border-radius: 4px; font-weight: 700; cursor: pointer; font-size: 0.7rem; letter-spacing: -0.5px;" onclick="cancelBefore4Days('${v}')">4일전 취소</button>
-            </div>
+                        <div class="vehicle-item">
+                            <div class="vehicle-header">
+                                <input type="checkbox" id="v_${v}" onclick="toggleVehicleForm('${v}', this, ${isBus})">
+                                <label for="v_${v}" style="cursor: pointer; flex: 1;">${v} (${isBus ? '버스' : '쏠라티'})</label>
+                            </div>
+                            <div class="vehicle-body" id="form_${v}">
+                                <!-- 🔥 버튼 위로 이동 & 다이어트 완료 -->
+                                <div style="display: flex; gap: 4px; margin-bottom: 15px; border-bottom: 1px dashed #ccc; padding-bottom: 12px;">
+                                    <button style="flex: 1.2; background: #007bff; color: white; border: none; padding: 6px 2px; border-radius: 4px; font-weight: 700; cursor: pointer; font-size: 0.8rem;" onclick="makeReservation('${v}', ${isBus})">예약 등록</button>
+                                    <button style="flex: 1; background: #dc3545; color: white; border: none; padding: 6px 2px; border-radius: 4px; font-weight: 700; cursor: pointer; font-size: 0.8rem;" onclick="cancelReservation('${v}')">취소</button>
+                                    <button style="flex: 1.2; background: #6c757d; color: white; border: none; padding: 6px 2px; border-radius: 4px; font-weight: 700; cursor: pointer; font-size: 0.7rem; letter-spacing: -0.5px;" onclick="cancelBefore4Days('${v}')">4일전 취소</button>
+                                </div>
 
-            <div class="form-group"><label>내용</label><input type="text" id="dest_${v}"></div>
-            <div class="form-group">
-                <label>운행 형태</label>
-                <select id="type_${v}">
-                    <option value="공공예약" selected>공공예약</option>
-                    <option value="1박">1박</option>
-                    <option value="2박">2박</option>
-                    <option value="성묘지원">성묘지원</option>
-                    <option value="나들이동행">나들이동행</option>
-                    <option value="시티투어">시티투어</option>
-                    <option value="서울운행">서울운행</option>
-                    <option value="기타">기타</option>
-                </select>
-            </div>
-            <div class="form-group"><label>운행 거리 (km)</label><input type="number" id="km_${v}" value="0"></div>
-            
-            <div class="form-group" style="background: #f8f9fa; padding: 10px; border-radius: 4px; border: 1px solid #ccc; margin-top:15px;">
-                <label style="color: #007bff; font-weight:700; cursor:pointer;">📎 사진/문서 첨부 (선택)</label>
-                <input type="file" id="photo_${v}" style="background: #fff; padding: 5px; font-size: 0.8rem;">
-                <small id="photo_status_${v}" style="display:block; color:#28a745; margin-top:5px; font-weight:bold;"></small>
-            </div>
+                                <div class="form-group"><label>내용</label><input type="text" id="dest_${v}"></div>
+                                <div class="form-group">
+                                    <label>운행 형태</label>
+                                    <select id="type_${v}">
+                                        <option value="공공예약" selected>공공예약</option>
+                                        <option value="1박">1박</option>
+                                        <option value="2박">2박</option>
+                                        <option value="성묘지원">성묘지원</option>
+                                        <option value="나들이동행">나들이동행</option>
+                                        <option value="시티투어">시티투어</option>
+                                        <option value="서울운행">서울운행</option>
+                                        <option value="기타">기타</option>
+                                    </select>
+                                </div>
+                                <div class="form-group"><label>운행 거리 (km)</label><input type="number" id="km_${v}" value="0"></div>
+                                
+                                <div class="form-group" style="background: #f8f9fa; padding: 10px; border-radius: 4px; border: 1px solid #ccc; margin-top:15px;">
+                                    <label style="color: #007bff; font-weight:700; cursor:pointer;">📎 사진/문서 첨부 (선택)</label>
+                                    <input type="file" id="photo_${v}" style="background: #fff; padding: 5px; font-size: 0.8rem;">
+                                    <small id="photo_status_${v}" style="display:block; color:#28a745; margin-top:5px; font-weight:bold;"></small>
+                                </div>
 
-            <div style="border-top: 1px dashed #ccc; margin-top: 15px; padding-top: 10px;">
-                <div style="display:flex; flex-wrap:wrap; gap:15px; align-items:center; margin-bottom:12px; background:#e8f0fe; padding:6px 10px; border-radius:4px;">
-                    ${isBus ? `<div class="form-group chk-group" id="single_box_${v}" style="margin-bottom:0;"><label><input type="checkbox" id="single_${v}"> 1인 배차</label></div>` : ''}
-                    <div class="form-group chk-group" style="margin-bottom:0; color:#007bff;">
-                        <label><input type="checkbox" id="manual_${v}" onchange="toggleManual('${v}', ${isBus})"> 수동 배차</label>
-                    </div>
-                </div>
-                
-                <div style="display:flex; gap:10px; align-items:flex-end; margin-bottom:12px;">
-                    <div class="form-group" style="flex:1; margin-bottom:0;">
-                        <label>배정 운전원 1</label>
-                        <select id="driver1_${v}" disabled>
-                            <option value="">자동 배정</option>
-                            <option value="미지정">미지정</option>
-                        </select>
-                    </div>
-                </div>
+                                <div style="border-top: 1px dashed #ccc; margin-top: 15px; padding-top: 10px;">
+                                    <div style="display:flex; flex-wrap:wrap; gap:15px; align-items:center; margin-bottom:12px; background:#e8f0fe; padding:6px 10px; border-radius:4px;">
+                                        ${isBus ? `<div class="form-group chk-group" id="single_box_${v}" style="margin-bottom:0;"><label><input type="checkbox" id="single_${v}"> 1인 배차</label></div>` : ''}
+                                        <div class="form-group chk-group" style="margin-bottom:0; color:#007bff;">
+                                            <label><input type="checkbox" id="manual_${v}" onchange="toggleManual('${v}', ${isBus})"> 수동 배차</label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div style="display:flex; gap:10px; align-items:flex-end; margin-bottom:12px;">
+                                        <div class="form-group" style="flex:1; margin-bottom:0;">
+                                            <label>배정 운전원 1</label>
+                                            <select id="driver1_${v}" disabled>
+                                                <option value="">자동 배정</option>
+                                                <option value="미지정">미지정</option>
+                                            </select>
+                                        </div>
+                                    </div>
 
-                ${isBus ? `
-                <div style="display:flex; gap:10px; align-items:flex-end; margin-bottom:12px;">
-                    <div class="form-group" style="flex:1; margin-bottom:0;">
-                        <label>배정 운전원 2</label>
-                        <select id="driver2_${v}" disabled>
-                            <option value="">자동 배정</option>
-                            <option value="미지정">미지정</option>
-                        </select>
-                    </div>
-                </div>` : ''}
-                
-                <div class="form-group" style="margin-top:10px; border-top: 1px dashed #eee; padding-top:10px;">
-                    <label style="color:#d9534f;">이 배차 직후, 다음 순번 지정 (선택)</label>
-                    <select id="next_pointer_${v}">
-                        <option value="">자동 유지 (지정 안함)</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-    </div>
-`;
+                                    ${isBus ? `
+                                    <div style="display:flex; gap:10px; align-items:flex-end; margin-bottom:12px;">
+                                        <div class="form-group" style="flex:1; margin-bottom:0;">
+                                            <label>배정 운전원 2</label>
+                                            <select id="driver2_${v}" disabled>
+                                                <option value="">자동 배정</option>
+                                                <option value="미지정">미지정</option>
+                                            </select>
+                                        </div>
+                                    </div>` : ''}
+                                    
+                                    <div class="form-group" style="margin-top:10px; border-top: 1px dashed #eee; padding-top:10px;">
+                                        <label style="color:#d9534f;">이 배차 직후, 다음 순번 지정 (선택)</label>
+                                        <select id="next_pointer_${v}">
+                                            <option value="">자동 유지 (지정 안함)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
                     busList.forEach(v => document.write(formTemplate(v, true)));
                     solatiList.forEach(v => document.write(formTemplate(v, false)));
                 </script>
@@ -394,9 +389,10 @@
             localStorage.setItem('userRole', systemUsers[id].role);
             localStorage.setItem('loggedInPw', realPw); 
             
-            // 🔥 해결 완료: 어설프게 화면만 넘기지 말고, 새로고침으로 깔끔하게 정상 부팅 유도!
+            // 🔥 접속 무한로딩 해결: 로그인 완료 후 화면 새로고침!
             window.location.reload(); 
         }
+
         function openPwModal() {
             document.getElementById('current-pw').value = '';
             document.getElementById('new-pw').value = '';
@@ -1046,12 +1042,11 @@
             const dutyDrivers = Object.keys(statusData).filter(d => statusData[d] === '당직');
 
             let statusHTML = '';
-            // 기존 코드 삭제 후 이걸로 교체!
-if (dutyDrivers.length > 0) {
-    statusHTML += `<div class="cal-status duty"><span style="color:#f29900; font-weight:700;">당직: ${dutyDrivers.join(', ')}</span></div>`;
-}
+            // 🔥 당직 전체 글자색 노란색 적용
+            if (dutyDrivers.length > 0) {
+                statusHTML += `<div class="cal-status duty"><span style="color:#f29900; font-weight:700;">당직: ${dutyDrivers.join(', ')}</span></div>`;
+            }
             
-            // 🔥 휴무자 글자는 빨강, 이름은 파랑
             if (offDrivers.length > 0) {
                 let offNames = offDrivers.map(n => getDispName(n)).join(', ');
                 statusHTML += `<div class="cal-status off"><span style="color:#d9534f; font-weight:700;">휴무: </span><span class="names" style="color:#007bff; font-weight:700;">${offNames}</span></div>`;
@@ -1066,28 +1061,49 @@ if (dutyDrivers.length > 0) {
             }
         }
 
+        // 🔥 사진 터치 시 확대(새 탭 열기) 기능 적용 완료
         function showDispatchDetail(event, id, clickedDate) {
-           if (d.startDate < todayStr && !d.photoUrl) {
-                imgContainer.innerHTML = `<p style="color:#d9534f; font-size:0.9rem; font-weight:bold; background:#fff3cd; padding:10px; border-radius:6px;">🛡️ 보안 및 용량 관리를 위해 자동 파기된 문서입니다.</p>`;
-                imgContainer.style.display = 'block';
-            } else if (d.photoUrl) {
-                const isImg = d.photoUrl.match(/\.(jpeg|jpg|png|gif|webp)(?:\?|$)/i);
-                if (isImg) {
-                    // 🔥 1번 방식 적용: 사진을 a 태그로 감싸서 누르면 새 탭에서 열리도록 수정!
-                    imgContainer.innerHTML = `
-                        <a href="${d.photoUrl}" target="_blank" style="display:block; text-decoration:none;">
-                            <img src="${d.photoUrl}" style="width: 100%; border-radius: 8px; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                        </a>
-                        <p style="font-size:0.75rem; color:#888; margin-top:8px;">👆 사진을 누르면 원본 크기로 확대해서 볼 수 있습니다.</p>
-                    `;
-                } else {
-                    imgContainer.innerHTML = `<a href="${d.photoUrl}" target="_blank" style="display:inline-block; padding:12px 20px; background:#007bff; color:#fff; border-radius:6px; font-weight:bold; text-decoration:none;">📄 첨부된 문서 열기 / 다운로드</a>`;
-                }
-                imgContainer.style.display = 'block';
+            event.stopPropagation(); 
+            const d = allReservations.find(r => r.id === id);
+            if (!d) return;
+
+            const currentUserRole = localStorage.getItem('userRole'); 
+
+            let assigned = (d.assigned && d.assigned.length > 0) ? d.assigned.join(', ') : '미정';
+            document.getElementById('detail-modal-title').innerText = `[${d.vehicle}] ${d.type} (${clickedDate})`;
+            document.getElementById('detail-modal-drivers').innerText = assigned;
+            document.getElementById('detail-modal-dest').innerText = d.dest || '내용 없음'; 
+
+            const imgContainer = document.getElementById('detail-modal-img-container');
+            
+            const todayStr = `${_now.getFullYear()}-${String(_now.getMonth() + 1).padStart(2, '0')}-${String(_now.getDate()).padStart(2, '0')}`;
+            if (currentUserRole === 'driver') {
+                imgContainer.style.display = 'none';
             } else {
-                imgContainer.innerHTML = '<p style="color:#888; font-size:0.9rem;">첨부된 파일이 없습니다.</p>';
-                imgContainer.style.display = 'block';
+                if (d.startDate < todayStr && !d.photoUrl) {
+                    imgContainer.innerHTML = `<p style="color:#d9534f; font-size:0.9rem; font-weight:bold; background:#fff3cd; padding:10px; border-radius:6px;">🛡️ 보안 및 용량 관리를 위해 자동 파기된 문서입니다.</p>`;
+                    imgContainer.style.display = 'block';
+                } else if (d.photoUrl) {
+                    const isImg = d.photoUrl.match(/\.(jpeg|jpg|png|gif|webp)(?:\?|$)/i);
+                    if (isImg) {
+                        imgContainer.innerHTML = `
+                            <a href="${d.photoUrl}" target="_blank" style="display:block; text-decoration:none;">
+                                <img src="${d.photoUrl}" style="width: 100%; border-radius: 8px; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                            </a>
+                            <p style="font-size:0.75rem; color:#888; margin-top:8px;">👆 사진을 누르면 원본 크기로 확대해서 볼 수 있습니다.</p>
+                        `;
+                    } else {
+                        imgContainer.innerHTML = `<a href="${d.photoUrl}" target="_blank" style="display:inline-block; padding:12px 20px; background:#007bff; color:#fff; border-radius:6px; font-weight:bold; text-decoration:none;">📄 첨부된 문서 열기 / 다운로드</a>`;
+                    }
+                    imgContainer.style.display = 'block';
+                } else {
+                    imgContainer.innerHTML = '<p style="color:#888; font-size:0.9rem;">첨부된 파일이 없습니다.</p>';
+                    imgContainer.style.display = 'block';
+                }
             }
+
+            document.getElementById('detail-modal-overlay').style.display = 'flex';
+        }
 
         function closeDetailModal() {
             document.getElementById('detail-modal-overlay').style.display = 'none';
@@ -1131,7 +1147,6 @@ if (dutyDrivers.length > 0) {
                         Object.keys(d.settlement).forEach(drv => {
                             if (d.settlement[drv][date]) {
                                 const s = d.settlement[drv][date];
-                                // 🔥 소수점 두 자리 표기 적용
                                 reportText += `<div style="margin-top:8px; font-size:0.85rem; color:#155724; background:#d4edda; padding:6px 10px; border-radius:4px; border: 1px solid #c3e6cb;">
                                     <b>[${drv}]</b> ${s.isEarly ? '[선운행] ' : ''}근무: ${s.clockIn || '-'} ~ ${s.clockOut || '-'} <br>
                                     보상: <b>${Number(s.overtime || 0).toFixed(2)}</b>시간 | 일비: <b>${Number(s.allowance || 0).toLocaleString()}</b>원
@@ -1161,8 +1176,9 @@ if (dutyDrivers.length > 0) {
 
             if (dutyDrivers.length > 0 || offDrivers.length > 0) {
                 html += `<li style="background-color: #fff; border: 2px dashed #007bff; margin-top: 10px; border-radius: 6px;">`;
+                // 🔥 당직 전체 글자색 노란색 적용
                 if (dutyDrivers.length > 0) {
-                    html += `<div style="margin-bottom: ${offDrivers.length > 0 ? '8px' : '0'};"><span class="duty-badge" style="padding: 3px 6px; font-size: 0.8rem; background:#f29900; color:#fff; border-radius:4px;">당직</span> <b style="color:#333;">${dutyDrivers.join(', ')}</b></div>`;
+                    html += `<div style="margin-bottom: ${offDrivers.length > 0 ? '8px' : '0'};"><span style="color:#f29900; font-weight:700;">당직: ${dutyDrivers.join(', ')}</span></div>`;
                 }
                 if (offDrivers.length > 0) {
                     let offNames = offDrivers.map(n => getDispName(n)).join(', ');
