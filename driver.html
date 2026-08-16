@@ -231,6 +231,10 @@
             '함동한': { role: 'driver', pw: '123456' }
         };
 
+        // 🔥 새롭게 추가된 배차 계산용 변수들
+        const defaultDrivers = ['박기준', '변석현', '이명순', '김탁', '한상훈', '문인식', '황덕일', '강철규', '이상헌', '함동한'];
+        let driverListModifiers = {}; 
+
         let currentUser = '';
         let userRole = '';
         let currentDate = '';
@@ -253,6 +257,112 @@
             if (name.includes('admin')) return name;
             if (name.length >= 2) return name.substring(1);
             return name;
+        }
+
+        // 🔥 엔진 작동을 위한 헬퍼 함수들
+        function getDriverStatus(date, driver) {
+            if (!dailyDriverStatus[date]) return '출근'; 
+            return dailyDriverStatus[date][driver] || '출근';
+        }
+
+        function getEffectiveDriverList(date) {
+            const modDates = Object.keys(driverListModifiers).sort();
+            let effectiveList = [...defaultDrivers];
+            for (const modDate of modDates) {
+                if (modDate <= date) effectiveList = [...driverListModifiers[modDate]];
+            }
+            return effectiveList;
+        }
+
+        // 🔥 기사님 창에 새로 심어진 '배차 재계산 엔진'
+        function recalculateAll(shouldSaveToDB = true) {
+            const originalStateString = JSON.stringify(allReservations);
+
+            allReservations.forEach(r => r.assigned = []);
+            allReservations.sort((a, b) => {
+                if (a.startDate !== b.startDate) return new Date(a.startDate) - new Date(b.startDate);
+                
+                const isBusA = ['1호차', '2호차', '3호차'].includes(a.vehicle);
+                const isBusB = ['1호차', '2호차', '3호차'].includes(b.vehicle);
+                if (isBusA !== isBusB) return isBusA ? -1 : 1; 
+
+                const getTypeWeight = (t, isBus) => {
+                    if (isBus) {
+                        if (t.includes('공공') || t.includes('서울')) return 1; 
+                        if (t.includes('1박')) return 2; if (t.includes('2박')) return 3;
+                        if (t.includes('성묘')) return 4; if (t.includes('나들이')) return 5;
+                        if (t.includes('시티')) return 6; return 99;
+                    } else { 
+                        if (t.includes('공공') || t.includes('서울') || t.includes('성묘')) return 1; 
+                        if (t.includes('1박')) return 2; if (t.includes('2박')) return 3;
+                        if (t.includes('나들이')) return 4; if (t.includes('시티')) return 5; return 99;
+                    }
+                };
+                const wA = getTypeWeight(a.type, isBusA);
+                const wB = getTypeWeight(b.type, isBusB);
+                if (wA !== wB) return wA - wB; 
+
+                if (a.km !== b.km) return a.km - b.km;
+
+                const vehWeight = (v) => {
+                    if (v === '3호차') return 1; if (v === '1호차') return 2; if (v === '2호차') return 3;
+                    if (v === '11호차') return 4; if (v === '12호차') return 5; if (v === '13호차') return 6; if (v === '14호차') return 7; return 99;
+                };
+                return vehWeight(a.vehicle) - vehWeight(b.vehicle); 
+            });
+
+            let pointer = 0; let lastProcessedDate = null; let currentList = [...defaultDrivers];
+
+            allReservations.forEach(res => {
+                if (res.startDate !== lastProcessedDate) {
+                    lastProcessedDate = res.startDate;
+                    currentList = getEffectiveDriverList(res.startDate);
+                    if (currentList.length > 0) pointer = pointer % currentList.length; 
+                }
+
+                if (res.isManual && res.manualDrivers && res.manualDrivers.length > 0) {
+                    res.assigned = [...res.manualDrivers];
+                } else {
+                    let loopGuard = 0;
+                    while (res.assigned.length < res.reqCount && loopGuard < 50 && currentList.length > 0) {
+                        const candidate = currentList[pointer];
+                        let isWorkingAllDays = true;
+                        
+                        for (let d of res.dates) {
+                            if (getDriverStatus(d, candidate) === '휴무') { isWorkingAllDays = false; break; }
+                        }
+
+                        let isOverlapping = false;
+                        for (let other of allReservations) {
+                            if (other.id !== res.id && other.assigned.includes(candidate)) {
+                                if (res.dates.some(d => other.dates.includes(d))) { isOverlapping = true; break; }
+                            }
+                        }
+
+                        if (isWorkingAllDays && !isOverlapping) res.assigned.push(candidate);
+                        pointer = (pointer + 1) % currentList.length;
+                        loopGuard++;
+                    }
+                }
+
+                if (res.nextPointerDriver && currentList.includes(res.nextPointerDriver)) {
+                    pointer = currentList.indexOf(res.nextPointerDriver);
+                }
+            });
+
+            if (shouldSaveToDB) {
+                const oldReservations = JSON.parse(originalStateString);
+                allReservations.forEach(res => {
+                    const oldRes = oldReservations.find(o => o.id === res.id);
+                    if (!oldRes || JSON.stringify(oldRes) !== JSON.stringify(res)) {
+                        db.collection('reservations').doc(res.id).set(res).catch(e=>{});
+                    }
+                });
+            }
+
+            renderCalendar(); 
+            renderDispatchResult(currentDate);
+            renderMonthlySummary();
         }
 
         async function handleLogin() {
@@ -290,7 +400,6 @@
             localStorage.setItem('userRole', systemUsers[id].role);
             localStorage.setItem('loggedInPw', realPw); 
             
-            // 🔥 접속 무한로딩 해결 완료
             window.location.reload(); 
         }
 
@@ -370,9 +479,15 @@
                 const statusSnapshot = await db.collection('daily_status').get();
                 dailyDriverStatus = {};
                 statusSnapshot.forEach(doc => { dailyDriverStatus[doc.id] = doc.data(); });
+
+                // 🔥 기사님 창에서도 순번 변동 명단을 읽어오도록 추가
+                const modSnapshot = await db.collection('driver_modifiers').get();
+                driverListModifiers = {};
+                modSnapshot.forEach(doc => { driverListModifiers[doc.id] = doc.data().list; });
+
             } catch (error) {} 
             finally {
-                renderCalendar();
+                recalculateAll(false); // 처음 켰을 때 화면 최신화 계산
                 selectDate(currentDate);
                 hideLoading(); 
             }
@@ -449,7 +564,7 @@
                 let assignedNamesHTML = (d.assigned || []).map((name, idx) => {
                     let isUnderline = (d.settlement && d.settlement[name] && d.settlement[name][date] && d.settlement[name][date].isEarly) || false;
                     
-                    let displayName = name; // 🔥 성씨 복구 완료
+                    let displayName = name;
                     if (name === currentUser && !d.isCanceled) {
                         displayName = `<span style="color:#0056b3; font-weight:900;">${displayName}</span>`; 
                     }
@@ -472,12 +587,10 @@
             const dutyDrivers = Object.keys(statusData).filter(d => statusData[d] === '당직');
 
             let statusHTML = '';
-            // 🔥 당직 전체 글자색 노란색 적용
             if (dutyDrivers.length > 0) {
                 statusHTML += `<div class="cal-status duty"><span style="color:#f29900; font-weight:700;">당직: ${dutyDrivers.join(', ')}</span></div>`;
             }
             
-            // 🔥 휴무자 글자는 빨강, 이름은 파랑, 성 빼기
             if (offDrivers.length > 0) {
                 let offNames = offDrivers.map(n => getDispName(n)).join(', ');
                 statusHTML += `<div class="cal-status off"><span style="color:#d9534f; font-weight:700;">휴무: </span><span class="names" style="color:#007bff; font-weight:700;">${offNames}</span></div>`;
@@ -492,7 +605,6 @@
             }
         }
 
-        // 🔥 사진 터치 시 확대(새 탭 열기) 기능 적용
         function showDispatchDetail(event, id, clickedDate) {
             event.stopPropagation(); 
             const d = allReservations.find(r => r.id === id);
@@ -636,7 +748,6 @@
             const currentStatus = (dailyDriverStatus[date] && dailyDriverStatus[date][currentUser]) ? dailyDriverStatus[date][currentUser] : '출근';
             
             const radioContainer = document.getElementById('my-status-radios');
-            // 🔥 updateMyStatus에 기존 상태(currentStatus)도 같이 전달하게 수정
             radioContainer.innerHTML = `
                 <label style="color:#333;"><input type="radio" name="my_st" value="출근" ${currentStatus === '출근' ? 'checked' : ''} onchange="updateMyStatus('${date}', '출근', '${currentStatus}')"> 출근</label>
                 <label style="color:#f29900;"><input type="radio" name="my_st" value="당직" ${currentStatus === '당직' ? 'checked' : ''} onchange="updateMyStatus('${date}', '당직', '${currentStatus}')"> 당직</label>
@@ -644,8 +755,8 @@
             `;
         }
 
+        // 🔥 알림창 띄우고 + 배차 계산 엔진 돌려서 서버에 즉시 반영!
         function updateMyStatus(date, newStatus, oldStatus) {
-            // 🔥 휴무 클릭 시 알림창 띄우고, 취소하면 기존 상태로 되돌리기!
             if (newStatus === '휴무') {
                 if (!confirm(`정말 휴무로 변경하시겠습니까?`)) { 
                     renderMyStatusPanel(date); 
@@ -656,10 +767,14 @@
             if (!dailyDriverStatus[date]) dailyDriverStatus[date] = {};
             dailyDriverStatus[date][currentUser] = newStatus;
             
+            // 배차 계산 엔진 즉시 가동 후 서버 저장
+            recalculateAll(true);
+            
             db.collection('daily_status').doc(date).set(dailyDriverStatus[date])
             .then(() => {
                 renderCalendar(); 
                 renderDispatchResult(date); 
+                renderMonthlySummary();
             })
             .catch(e => { alert("상태 업데이트 실패."); });
         }
@@ -747,7 +862,6 @@
             contentUl.innerHTML = html;
         }
 
-        // 🔥 월간 정산 요약: 날짜 밑에 보상/일비 배치, 소수점 2자리 적용 완료
         function renderMonthlySummary() {
             const container = document.getElementById('monthly-summary-container');
             
