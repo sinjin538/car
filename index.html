@@ -1045,7 +1045,10 @@
             const dutyDrivers = Object.keys(statusData).filter(d => statusData[d] === '당직');
 
             let statusHTML = '';
-            if (dutyDrivers.length > 0) statusHTML += `<div class="cal-status duty"><span class="label">당직:</span> <span class="names">${dutyDrivers.join(', ')}</span></div>`;
+            // 기존 코드 삭제 후 이걸로 교체!
+if (dutyDrivers.length > 0) {
+    statusHTML += `<div class="cal-status duty"><span style="color:#f29900; font-weight:700;">당직: ${dutyDrivers.join(', ')}</span></div>`;
+}
             
             // 🔥 휴무자 글자는 빨강, 이름은 파랑
             if (offDrivers.length > 0) {
