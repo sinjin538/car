@@ -1067,42 +1067,27 @@ if (dutyDrivers.length > 0) {
         }
 
         function showDispatchDetail(event, id, clickedDate) {
-            event.stopPropagation(); 
-            const d = allReservations.find(r => r.id === id);
-            if (!d) return;
-
-            const currentUserRole = localStorage.getItem('userRole'); 
-
-            let assigned = (d.assigned && d.assigned.length > 0) ? d.assigned.join(', ') : '미정';
-            document.getElementById('detail-modal-title').innerText = `[${d.vehicle}] ${d.type} (${clickedDate})`;
-            document.getElementById('detail-modal-drivers').innerText = assigned;
-            document.getElementById('detail-modal-dest').innerText = d.dest || '내용 없음'; 
-
-            const imgContainer = document.getElementById('detail-modal-img-container');
-            
-            const todayStr = `${_now.getFullYear()}-${String(_now.getMonth() + 1).padStart(2, '0')}-${String(_now.getDate()).padStart(2, '0')}`;
-            if (currentUserRole === 'driver') {
-                imgContainer.style.display = 'none';
-            } else {
-                if (d.startDate < todayStr && !d.photoUrl) {
-                    imgContainer.innerHTML = `<p style="color:#d9534f; font-size:0.9rem; font-weight:bold; background:#fff3cd; padding:10px; border-radius:6px;">🛡️ 보안 및 용량 관리를 위해 자동 파기된 문서입니다.</p>`;
-                    imgContainer.style.display = 'block';
-                } else if (d.photoUrl) {
-                    const isImg = d.photoUrl.match(/\.(jpeg|jpg|png|gif|webp)/i);
-                    if (isImg) {
-                        imgContainer.innerHTML = `<img src="${d.photoUrl}" style="width: 100%; border-radius: 8px; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">`;
-                    } else {
-                        imgContainer.innerHTML = `<a href="${d.photoUrl}" target="_blank" style="display:inline-block; padding:12px 20px; background:#007bff; color:#fff; border-radius:6px; font-weight:bold; text-decoration:none;">📄 첨부된 문서 열기 / 다운로드</a>`;
-                    }
-                    imgContainer.style.display = 'block';
+           if (d.startDate < todayStr && !d.photoUrl) {
+                imgContainer.innerHTML = `<p style="color:#d9534f; font-size:0.9rem; font-weight:bold; background:#fff3cd; padding:10px; border-radius:6px;">🛡️ 보안 및 용량 관리를 위해 자동 파기된 문서입니다.</p>`;
+                imgContainer.style.display = 'block';
+            } else if (d.photoUrl) {
+                const isImg = d.photoUrl.match(/\.(jpeg|jpg|png|gif|webp)(?:\?|$)/i);
+                if (isImg) {
+                    // 🔥 1번 방식 적용: 사진을 a 태그로 감싸서 누르면 새 탭에서 열리도록 수정!
+                    imgContainer.innerHTML = `
+                        <a href="${d.photoUrl}" target="_blank" style="display:block; text-decoration:none;">
+                            <img src="${d.photoUrl}" style="width: 100%; border-radius: 8px; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        </a>
+                        <p style="font-size:0.75rem; color:#888; margin-top:8px;">👆 사진을 누르면 원본 크기로 확대해서 볼 수 있습니다.</p>
+                    `;
                 } else {
-                    imgContainer.innerHTML = '<p style="color:#888; font-size:0.9rem;">첨부된 파일이 없습니다.</p>';
-                    imgContainer.style.display = 'block';
+                    imgContainer.innerHTML = `<a href="${d.photoUrl}" target="_blank" style="display:inline-block; padding:12px 20px; background:#007bff; color:#fff; border-radius:6px; font-weight:bold; text-decoration:none;">📄 첨부된 문서 열기 / 다운로드</a>`;
                 }
+                imgContainer.style.display = 'block';
+            } else {
+                imgContainer.innerHTML = '<p style="color:#888; font-size:0.9rem;">첨부된 파일이 없습니다.</p>';
+                imgContainer.style.display = 'block';
             }
-
-            document.getElementById('detail-modal-overlay').style.display = 'flex';
-        }
 
         function closeDetailModal() {
             document.getElementById('detail-modal-overlay').style.display = 'none';
