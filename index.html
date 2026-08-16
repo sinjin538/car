@@ -712,7 +712,10 @@
             }
             if (!dailyDriverStatus[currentDate]) dailyDriverStatus[currentDate] = {};
             dailyDriverStatus[currentDate][driver] = newStatus;
-            recalculateAll(false); renderStatusPanel(currentDate);
+            
+            // 🔥 recalculateAll(true)로 변경하여 재계산된 배차 명단을 서버에 즉시 저장합니다!
+            recalculateAll(true); 
+            renderStatusPanel(currentDate);
             db.collection('daily_status').doc(currentDate).set(dailyDriverStatus[currentDate]).catch(e=>{});
         }
 
