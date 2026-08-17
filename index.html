@@ -121,8 +121,8 @@
     <div id="login-container">
         <div class="login-card">
             <h2>배차 시스템 로그인</h2>
-            <input type="text" id="login-id" class="login-input" placeholder="이름 (또는 아이디) 입력">
-            <input type="password" id="login-pw" class="login-input" placeholder="비밀번호 입력">
+            <input type="text" id="login-id" class="login-input" placeholder="이름 (또는 아이디) 입력" onkeypress="if(event.key==='Enter') handleLogin()">
+            <input type="password" id="login-pw" class="login-input" placeholder="비밀번호 입력" onkeypress="if(event.key==='Enter') handleLogin()">
             <button id="btn-login" class="btn-login" onclick="handleLogin()">접속하기</button>
         </div>
     </div>
@@ -427,9 +427,8 @@
         }
 
         function logout() {
-            localStorage.removeItem('loggedInUser');
-            localStorage.removeItem('userRole');
-            localStorage.removeItem('loggedInPw');
+            localStorage.clear();
+            sessionStorage.clear();
             window.location.reload();
         }
 
@@ -1034,7 +1033,7 @@
                 tagsHTML += `
                     <div class="event-box ${boxClass}" style="${canceledBoxStyle}; cursor:pointer;" onclick="showDispatchDetail(event, '${d.id}', '${date}')">
                         <span class="badge ${badgeClass}" style="${canceledBadgeStyle}">${shortTypeStr}</span> 
-                        ${d.vehicle}${attachIcon}: ${assignedNamesHTML}
+                        ${d.vehicle}: ${assignedNamesHTML}${attachIcon}
                     </div>`;
             });
 
