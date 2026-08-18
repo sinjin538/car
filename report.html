@@ -174,47 +174,68 @@
             ctx.strokeStyle = '#000'; 
         }
 
-        // 🔥 페이지 열릴 때 데이터 불러오기 엔진 🔥
+        // 🔥 덮어쓰기 방지! 똑똑해진 데이터 불러오기 엔진 🔥
         window.onload = () => {
             resizeCanvas();
             const newDispatchData = localStorage.getItem('currentReportData');
             const savedDraft = localStorage.getItem('reportDraft');
-            
-            // 1. 배차창에서 버튼 눌러서 새로 들어온 경우 (기존 임시저장 덮어쓰기)
-            if (newDispatchData) {
-                const d = JSON.parse(newDispatchData);
-                document.getElementById('m-date').value = d.date;
-                document.getElementById('m-car').value = d.vehicle;
-                document.getElementById('m-driver').value = d.driver;
-                document.getElementById('m-loc-end').value = d.dest || '';
-                document.getElementById('m-type').value = d.reason.includes('시티') ? 'citytour' : 'general';
-                
-                localStorage.removeItem('currentReportData'); // 1회용 삭제
-                saveDraft(true); // 들어오자마자 임시저장 갱신
 
-            // 2. 창 껐다가 다시 들어온 경우 (임시저장본 불러오기)
+            let loadData = null;
+
+            // 1. 배차창에서 버튼을 누르고 넘어왔을 때
+            if (newDispatchData) {
+                const newData = JSON.parse(newDispatchData);
+                let useDraft = false;
+
+                // 기존에 임시저장된 게 있다면?
+                if (savedDraft) {
+                    const oldDraft = JSON.parse(savedDraft);
+                    // 💡 핵심: 날짜와 차 번호가 같으면, 초기화하지 말고 쓰던 임시저장을 불러옴!
+                    if (oldDraft.date === newData.date && oldDraft.car === newData.vehicle) {
+                        loadData = oldDraft;
+                        useDraft = true;
+                    }
+                }
+
+                // 쓰던 게 아니면 새 빈칸 양식으로 덮어씀
+                if (!useDraft) {
+                    loadData = {
+                        date: newData.date,
+                        car: newData.vehicle,
+                        driver: newData.driver,
+                        type: newData.reason.includes('시티') ? 'citytour' : 'general',
+                        l_end: newData.dest || ''
+                    };
+                }
+                localStorage.removeItem('currentReportData'); // 1회용 티켓 폐기
+
+            // 2. 그냥 새로고침 하거나 직접 들어왔을 때
             } else if (savedDraft) {
-                const d = JSON.parse(savedDraft);
-                document.getElementById('m-date').value = d.date || '';
-                document.getElementById('m-car').value = d.car || '';
-                document.getElementById('m-driver').value = d.driver || '';
-                document.getElementById('m-type').value = d.type || 'general';
-                document.getElementById('m-time-start').value = d.t_start || '';
-                document.getElementById('m-time-end').value = d.t_end || '';
-                document.getElementById('m-km-start').value = d.k_start || '';
-                document.getElementById('m-km-end').value = d.k_end || '';
-                document.getElementById('m-loc-start').value = d.l_start || '';
-                document.getElementById('m-loc-end').value = d.l_end || '';
-                document.getElementById('m-pax-w').value = d.p_w || '';
-                document.getElementById('m-pax-n').value = d.p_n || '';
-                document.getElementById('m-cust-name').value = d.c_name || '';
+                loadData = JSON.parse(savedDraft);
+            }
+
+            // 화면에 데이터 촥촥 뿌리기
+            if (loadData) {
+                document.getElementById('m-date').value = loadData.date || '';
+                document.getElementById('m-car').value = loadData.car || '';
+                document.getElementById('m-driver').value = loadData.driver || '';
+                document.getElementById('m-type').value = loadData.type || 'general';
+                document.getElementById('m-time-start').value = loadData.t_start || '';
+                document.getElementById('m-time-end').value = loadData.t_end || '';
+                document.getElementById('m-km-start').value = loadData.k_start || '';
+                document.getElementById('m-km-end').value = loadData.k_end || '';
+                document.getElementById('m-loc-start').value = loadData.l_start || '';
+                document.getElementById('m-loc-end').value = loadData.l_end || '';
+                document.getElementById('m-pax-w').value = loadData.p_w || '';
+                document.getElementById('m-pax-n').value = loadData.p_n || '';
+                document.getElementById('m-cust-name').value = loadData.c_name || '';
                 calcKm();
 
-                // 저장된 사인(도장) 다시 그리기
-                if (d.sign && d.sign.length > 2000) {
+                // 도장(사인) 복구
+                if (loadData.sign && loadData.sign.length > 2000) {
                     const img = new Image();
                     img.onload = () => { ctx.drawImage(img, 0, 0); };
-                    img.src = d.sign;
+                    img.src = loadData.sign;
                 }
             } else {
                 document.getElementById('m-date').valueAsDate = new Date();
@@ -273,8 +294,7 @@
         function clearSign() { ctx.clearRect(0,0, canvas.width, canvas.height); }
 
         function doPrint() {
-            // 인쇄하기 전에도 혹시 모르니 자동 저장!
-            saveDraft(true);
+            saveDraft(true); // 인쇄 전 묻지마 저장
 
             const type = document.getElementById('m-type').value;
             const printView = document.getElementById('print-view');
