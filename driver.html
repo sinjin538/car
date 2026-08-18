@@ -473,6 +473,8 @@
                     driver: currentUser,
                     reason: d.type || '',
                     dest: d.dest || ''
+                    in: document.getElementById('settle-in').value,
+                    out: document.getElementById('settle-out').value
                 });
                 
                 window.location.href = 'report.html?' + params.toString();
