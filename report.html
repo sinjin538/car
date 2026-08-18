@@ -56,18 +56,17 @@
             .type-general #pt-day { top: 9.5%; left: 44%; }
             .type-general #pt-weekday { top: 9.5%; left: 52%; }
             
-            /* 🔥 [새로운 기능 1] 1박 2일 숫자 분리 좌표 */
-            .type-general #pt-chk-trip-1 { top: 12.5%; left: 32%; } /* 당일운행 체크(✔) */
-            .type-general #pt-chk-trip-2 { top: 12.5%; left: 42%; } /* 1박2일 체크(✔) */
-            .type-general #pt-chk-trip-3 { top: 12.5%; left: 52%; } /* 2박3일 체크(✔) */
+            .type-general #pt-chk-trip-1 { top: 12.5%; left: 32%; } 
+            .type-general #pt-chk-trip-2 { top: 12.5%; left: 42%; } 
+            .type-general #pt-chk-trip-3 { top: 12.5%; left: 52%; } 
             
-            .type-general #pt-trip-night { top: 12.5%; left: 45%; } /* O박 의 숫자(예: 1) 자리 */
-            .type-general #pt-trip-days { top: 12.5%; left: 48%; }  /* O일 의 숫자(예: 2) 자리 */
-            .type-general #pt-trip-day-num { top: 12.5%; left: 62%; font-size: 16px; color: #0056b3; } /* O일차 숫자(예: 1) 자리 */
+            .type-general #pt-trip-night { top: 12.5%; left: 45%; } 
+            .type-general #pt-trip-days { top: 12.5%; left: 48%; }  
+            .type-general #pt-trip-day-num { top: 12.5%; left: 62%; font-size: 16px; color: #0056b3; } 
 
             .type-general #pt-car-type { top: 16%; left: 16%; font-size: 14px;} 
-            .type-general #pt-car-name { top: 16%; left: 26%; } /* 호차 */
-            .type-general #pt-car { top: 16%; left: 38%; } /* 차량번호 */
+            .type-general #pt-car-name { top: 16%; left: 26%; } 
+            .type-general #pt-car { top: 16%; left: 38%; } 
             
             .type-general #pt-driver1 { top: 15%; left: 58%; font-size: 13px; } 
             .type-general #pt-driver2 { top: 17%; left: 58%; font-size: 13px; } 
@@ -80,14 +79,24 @@
             .type-general #pt-chk-4 { top: 22.5%; left: 59%; }   
             .type-general #pt-chk-5 { top: 22.5%; left: 69%; }   
             
-            /* 🔥 [새로운 기능 2] 운행시간 뺄셈 자동계산 좌표 */
+            /* 기존 차고지 출/도착 및 누계 거리 */
             .type-general #pt-time-start { top: 46%; left: 28%; }
             .type-general #pt-time-end { top: 49%; left: 28%; }
-            .type-general #pt-time-total { top: 52%; left: 28%; font-size: 16px; color: #0056b3; } /* 뺀 시간 출력 자리 (예: 09:00) */
-
+            .type-general #pt-time-total { top: 52%; left: 28%; font-size: 16px; color: #0056b3; } 
+            
             .type-general #pt-km-start { top: 46%; left: 65%; }
             .type-general #pt-km-end { top: 49%; left: 65%; }
             .type-general #pt-km-total { top: 52%; left: 65%; font-size: 18px; color: #0056b3; }
+
+            /* 🔥 [새로운 기능] 고객 탑승/하차 시간 및 거리 인쇄 좌표 */
+            .type-general #pt-time-board { top: 55%; left: 28%; }  /* 탑승시간 자리 */
+            .type-general #pt-time-alight { top: 58%; left: 28%; } /* 하차시간 자리 */
+            .type-general #pt-time-board-total { top: 61%; left: 28%; font-size: 16px; color: #155724; } /* 뺀 시간 자리 */
+
+            .type-general #pt-km-board { top: 55%; left: 65%; }  /* 탑승 시 누계 자리 */
+            .type-general #pt-km-alight { top: 58%; left: 65%; } /* 하차 시 누계 자리 */
+            .type-general #pt-km-board-total { top: 61%; left: 65%; font-size: 18px; color: #155724; } /* 탑승 총 거리 자리 */
+
             .type-general #pt-loc-start { top: 61%; left: 25%; }
             .type-general #pt-loc-end { top: 64%; left: 25%; }
             .type-general #pt-pax-w { top: 73%; left: 25%; }
@@ -95,7 +104,7 @@
             .type-general #pt-cust-name { top: 73%; left: 70%; }
             .type-general #pt-cust-sign { top: 71.5%; left: 82%; } 
 
-            /* 시티투어 좌표 */
+            /* 시티투어 좌표 생략 (동일) */
             .type-citytour #pt-year, .type-citytour #pt-month, .type-citytour #pt-weekday { display: none; }
             .type-citytour #pt-chk-trip-1, .type-citytour #pt-chk-trip-2, .type-citytour #pt-chk-trip-3 { display: none; }
             .type-citytour #pt-trip-night, .type-citytour #pt-trip-days, .type-citytour #pt-trip-day-num { display: none; }
@@ -105,12 +114,19 @@
             .type-citytour #pt-driver2 { top: 52%; left: 25%; font-size: 13px;}
             .type-citytour #pt-driver1-sign { top: 47%; left: 40%; }
             .type-citytour #pt-driver2-sign { top: 51%; left: 40%; }
+            
             .type-citytour #pt-time-start { top: 53.5%; left: 25%; }
             .type-citytour #pt-time-end { top: 53.5%; left: 55%; }
             .type-citytour #pt-time-total { display: none; }
+            
             .type-citytour #pt-km-start { top: 56.5%; left: 25%; }
             .type-citytour #pt-km-end { top: 56.5%; left: 55%; }
             .type-citytour #pt-km-total { top: 56.5%; left: 85%; font-size: 18px; color: #0056b3; }
+            
+            /* 시티투어 고객 기록 숨김 (필요시 활성화) */
+            .type-citytour #pt-time-board, .type-citytour #pt-time-alight, .type-citytour #pt-time-board-total,
+            .type-citytour #pt-km-board, .type-citytour #pt-km-alight, .type-citytour #pt-km-board-total { display: none; }
+
             .type-citytour #pt-loc-start { top: 38.5%; left: 25%; }
             .type-citytour #pt-loc-end { top: 41.5%; left: 25%; }
             .type-citytour #pt-pax-w { top: 44.5%; left: 25%; }
@@ -199,13 +215,25 @@
 
             <div class="card">
                 <div class="card-title">2. 운행 기록 및 거리</div>
+                <p style="font-size:0.8rem; color:#888; margin-bottom:10px;">※ 숫자만 입력하면 콤마(,)는 알아서 계산됩니다!</p>
+                
+                <!-- 기존 차고지 정보 -->
                 <div class="grid-2">
-                    <div class="form-group"><label class="form-label">출발시간</label><input type="time" id="m-time-start" class="form-input"></div>
-                    <div class="form-group"><label class="form-label">도착시간</label><input type="time" id="m-time-end" class="form-input"></div>
+                    <div class="form-group"><label class="form-label">차고지 출발시간</label><input type="time" id="m-time-start" class="form-input"></div>
+                    <div class="form-group"><label class="form-label">차고지 도착시간</label><input type="time" id="m-time-end" class="form-input"></div>
                     <div class="form-group"><label class="form-label">출발 누계(km)</label><input type="number" id="m-km-start" class="form-input" oninput="calcKm()"></div>
                     <div class="form-group"><label class="form-label">도착 누계(km)</label><input type="number" id="m-km-end" class="form-input" oninput="calcKm()"></div>
                 </div>
-                <div class="calc-result">총 운행 거리: <span id="m-km-total">0</span> km</div>
+                <div class="calc-result" style="margin-bottom: 15px;">차고지 총 운행 거리: <span id="m-km-total">0</span> km</div>
+
+                <!-- 🔥 고객 탑승 정보 추가 -->
+                <div class="grid-2" style="border-top: 2px dashed #eee; padding-top: 15px;">
+                    <div class="form-group"><label class="form-label">고객 탑승시간</label><input type="time" id="m-time-board" class="form-input"></div>
+                    <div class="form-group"><label class="form-label">고객 하차시간</label><input type="time" id="m-time-alight" class="form-input"></div>
+                    <div class="form-group"><label class="form-label">탑승 시 거리(km)</label><input type="number" id="m-km-board" class="form-input" oninput="calcKm()"></div>
+                    <div class="form-group"><label class="form-label">하차 시 거리(km)</label><input type="number" id="m-km-alight" class="form-input" oninput="calcKm()"></div>
+                </div>
+                <div class="calc-result" style="background:#e8f5e9; border-color:#28a745; color:#155724;">고객 탑승 총 거리: <span id="m-km-board-total">0</span> km</div>
             </div>
 
             <div class="card">
@@ -242,7 +270,6 @@
         <div class="print-data" id="pt-year"></div><div class="print-data" id="pt-month"></div>
         <div class="print-data" id="pt-day"></div><div class="print-data" id="pt-weekday"></div>
         
-        <!-- 🔥 변경: 숙박 숫자 분리 출력 -->
         <div class="print-data chk-mark" id="pt-chk-trip-1" style="display:none;">✔</div>
         <div class="print-data chk-mark" id="pt-chk-trip-2" style="display:none;">✔</div>
         <div class="print-data chk-mark" id="pt-chk-trip-3" style="display:none;">✔</div>
@@ -264,11 +291,20 @@
         <div class="print-data" id="pt-driver1"></div><img class="print-sign" id="pt-driver1-sign" style="display:none;">
         <div class="print-data" id="pt-driver2"></div><img class="print-sign" id="pt-driver2-sign" style="display:none;">
         
+        <!-- 차고지 시간 및 뺀 시간 -->
         <div class="print-data" id="pt-time-start"></div><div class="print-data" id="pt-time-end"></div>
-        <!-- 🔥 추가: 총 운행시간 자동계산 -->
         <div class="print-data" id="pt-time-total"></div>
 
+        <!-- 🔥 고객 탑승 시간 및 뺀 시간 -->
+        <div class="print-data" id="pt-time-board"></div><div class="print-data" id="pt-time-alight"></div>
+        <div class="print-data" id="pt-time-board-total"></div>
+
+        <!-- 콤마 적용된 차고지 거리 -->
         <div class="print-data" id="pt-km-start"></div><div class="print-data" id="pt-km-end"></div><div class="print-data" id="pt-km-total"></div>
+        
+        <!-- 🔥 콤마 적용된 고객 탑승 거리 -->
+        <div class="print-data" id="pt-km-board"></div><div class="print-data" id="pt-km-alight"></div><div class="print-data" id="pt-km-board-total"></div>
+
         <div class="print-data" id="pt-loc-start"></div><div class="print-data" id="pt-loc-end"></div>
         <div class="print-data" id="pt-pax-w"></div><div class="print-data" id="pt-pax-n"></div>
         <div class="print-data" id="pt-cust-name"></div><img class="print-sign" id="pt-cust-sign" style="display:none;">
@@ -384,15 +420,23 @@
                     document.getElementById('m-car').value = data.car || finalCarNum;
                     document.getElementById('m-driver1').value = data.driver1 || d1;
                     document.getElementById('m-driver2').value = data.driver2 || d2;
+                    
+                    // 기존 기록
                     document.getElementById('m-time-start').value = data.t_start || tIn;
                     document.getElementById('m-time-end').value = data.t_end || tOut;
+                    document.getElementById('m-km-start').value = data.k_start || '';
+                    document.getElementById('m-km-end').value = data.k_end || '';
                     
+                    // 고객 기록
+                    document.getElementById('m-time-board').value = data.t_board || '';
+                    document.getElementById('m-time-alight').value = data.t_alight || '';
+                    document.getElementById('m-km-board').value = data.k_board || '';
+                    document.getElementById('m-km-alight').value = data.k_alight || '';
+
                     document.getElementById('m-type').value = data.type || finalType;
                     setRadioValue('m-reason', data.reason || finalReason);
                     setRadioValue('m-trip', data.trip || '당일');
                     document.getElementById('m-trip-day').value = data.tripDay || '';
-                    document.getElementById('m-km-start').value = data.k_start || '';
-                    document.getElementById('m-km-end').value = data.k_end || '';
                     document.getElementById('m-loc-start').value = data.l_start || '';
                     document.getElementById('m-loc-end').value = data.l_end || urlParams.get('dest') || '';
                     document.getElementById('m-pax-w').value = data.p_w || '';
@@ -441,6 +485,10 @@
                     t_end: document.getElementById('m-time-end').value,
                     k_start: document.getElementById('m-km-start').value,
                     k_end: document.getElementById('m-km-end').value,
+                    t_board: document.getElementById('m-time-board').value, // 🔥
+                    t_alight: document.getElementById('m-time-alight').value, // 🔥
+                    k_board: document.getElementById('m-km-board').value, // 🔥
+                    k_alight: document.getElementById('m-km-alight').value, // 🔥
                     l_start: document.getElementById('m-loc-start').value,
                     l_end: document.getElementById('m-loc-end').value,
                     p_w: document.getElementById('m-pax-w').value,
@@ -464,10 +512,29 @@
             }
         }
 
+        // 🔥 입력 즉시 계산 & 화면에 콤마(,) 표시
         function calcKm() {
             let s = parseFloat(document.getElementById('m-km-start').value) || 0;
             let e = parseFloat(document.getElementById('m-km-end').value) || 0;
-            document.getElementById('m-km-total').innerText = Math.max(0, e - s);
+            let total1 = Math.max(0, e - s);
+            document.getElementById('m-km-total').innerText = total1.toLocaleString(); // 콤마 변환
+
+            let bs = parseFloat(document.getElementById('m-km-board').value) || 0;
+            let be = parseFloat(document.getElementById('m-km-alight').value) || 0;
+            let total2 = Math.max(0, be - bs);
+            document.getElementById('m-km-board-total').innerText = total2.toLocaleString(); // 콤마 변환
+        }
+
+        // 🔥 뺀 시간 자동 계산기
+        function calcTimeDiff(start, end) {
+            if(!start || !end) return '';
+            let sParts = start.split(':');
+            let eParts = end.split(':');
+            let diffMins = (parseInt(eParts[0]) * 60 + parseInt(eParts[1])) - (parseInt(sParts[0]) * 60 + parseInt(sParts[1]));
+            if(diffMins < 0) diffMins += 24 * 60; 
+            let h = Math.floor(diffMins / 60);
+            let m = diffMins % 60;
+            return String(h).padStart(2,'0') + ":" + String(m).padStart(2,'0');
         }
 
         function doPrint() {
@@ -487,11 +554,9 @@
                 document.getElementById('pt-weekday').innerText = weekdays[d.getDay()]; 
             }
 
-            // 🔥 [변경] 일정 체크 및 숫자 분리 로직
             const trip = getRadioValue('m-trip');
             const tripDay = document.getElementById('m-trip-day').value;
 
-            // 초기화
             for(let i=1; i<=3; i++) document.getElementById('pt-chk-trip-'+i).style.display = 'none';
             document.getElementById('pt-trip-night').style.display = 'none';
             document.getElementById('pt-trip-days').style.display = 'none';
@@ -533,28 +598,34 @@
             document.getElementById('pt-driver1').innerText = document.getElementById('m-driver1').value || '';
             document.getElementById('pt-driver2').innerText = document.getElementById('m-driver2').value || '';
             
-            // 🔥 [추가] 운행시간 자동 뺄셈 계산
-            const tStart = document.getElementById('m-time-start').value || '';
-            const tEnd = document.getElementById('m-time-end').value || '';
-            
-            document.getElementById('pt-time-start').innerText = tStart;
-            document.getElementById('pt-time-end').innerText = tEnd;
-            
-            if(tStart && tEnd) {
-                let sParts = tStart.split(':');
-                let eParts = tEnd.split(':');
-                let diffMins = (parseInt(eParts[0]) * 60 + parseInt(eParts[1])) - (parseInt(sParts[0]) * 60 + parseInt(sParts[1]));
-                if(diffMins < 0) diffMins += 24 * 60; // 도착이 자정을 넘길 경우를 대비
-                let h = Math.floor(diffMins / 60);
-                let m = diffMins % 60;
-                document.getElementById('pt-time-total').innerText = String(h).padStart(2,'0') + ":" + String(m).padStart(2,'0');
-            } else {
-                document.getElementById('pt-time-total').innerText = '';
-            }
+            // 🔥 운행시간 (기존 + 추가된 고객시간) 자동계산
+            let ts = document.getElementById('m-time-start').value;
+            let te = document.getElementById('m-time-end').value;
+            let tbs = document.getElementById('m-time-board').value;
+            let tba = document.getElementById('m-time-alight').value;
 
-            document.getElementById('pt-km-start').innerText = document.getElementById('m-km-start').value || '';
-            document.getElementById('pt-km-end').innerText = document.getElementById('m-km-end').value || '';
+            document.getElementById('pt-time-start').innerText = ts || '';
+            document.getElementById('pt-time-end').innerText = te || '';
+            document.getElementById('pt-time-total').innerText = calcTimeDiff(ts, te);
+
+            document.getElementById('pt-time-board').innerText = tbs || '';
+            document.getElementById('pt-time-alight').innerText = tba || '';
+            document.getElementById('pt-time-board-total').innerText = calcTimeDiff(tbs, tba);
+
+            // 🔥 거리 (콤마 자동 적용 .toLocaleString())
+            let ks = document.getElementById('m-km-start').value;
+            let ke = document.getElementById('m-km-end').value;
+            let kbs = document.getElementById('m-km-board').value;
+            let kba = document.getElementById('m-km-alight').value;
+
+            document.getElementById('pt-km-start').innerText = ks ? Number(ks).toLocaleString() : '';
+            document.getElementById('pt-km-end').innerText = ke ? Number(ke).toLocaleString() : '';
             document.getElementById('pt-km-total').innerText = document.getElementById('m-km-total').innerText || '';
+            
+            document.getElementById('pt-km-board').innerText = kbs ? Number(kbs).toLocaleString() : '';
+            document.getElementById('pt-km-alight').innerText = kba ? Number(kba).toLocaleString() : '';
+            document.getElementById('pt-km-board-total').innerText = document.getElementById('m-km-board-total').innerText || '';
+
             document.getElementById('pt-loc-start').innerText = document.getElementById('m-loc-start').value || '';
             document.getElementById('pt-loc-end').innerText = document.getElementById('m-loc-end').value || '';
             document.getElementById('pt-pax-w').innerText = document.getElementById('m-pax-w').value || '';
