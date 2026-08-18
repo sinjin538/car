@@ -22,10 +22,13 @@
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .calc-result { background: #e8f0fe; padding: 12px; border-radius: 6px; text-align: center; margin-top: 10px; border: 1px dashed #007bff; font-weight: bold;}
         .signature-area { border: 2px solid #ccc; border-radius: 8px; background: #fafbfc; position: relative; margin-top: 10px; }
-        canvas { width: 100%; height: 200px; display: block; touch-action: none; background: transparent; }
+        canvas { width: 100%; height: 150px; display: block; touch-action: none; background: transparent; }
         .clear-btn { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.5); color: #fff; border: none; padding: 4px 10px; border-radius: 4px; font-size: 0.8rem; cursor: pointer; z-index: 5; }
         
-        /* 버튼 디자인 추가 */
+        .radio-group { display: flex; flex-wrap: wrap; gap: 12px; padding: 10px 0; }
+        .radio-group label { font-size: 1rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+        .radio-group input[type="radio"] { transform: scale(1.2); }
+
         .btn-group { display: flex; gap: 10px; margin-top: 20px; }
         .save-btn { flex: 1; padding: 16px; background: #ffc107; color: #000; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(255,193,7,0.2); }
         .print-btn { flex: 1; padding: 16px; background: #28a745; color: #fff; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(40,167,69,0.2); }
@@ -43,17 +46,30 @@
             .print-sign { position: absolute; z-index: 10; width: 80px; height: 40px; }
 
             /* ========================================================
-               🎯 영점 조절 구역 (이곳의 숫자 %를 수정해서 글씨 위치를 맞춥니다!)
-               - top: 위에서부터 얼만큼 내려올지 (숫자가 커지면 아래로)
-               - left: 왼쪽에서부터 얼만큼 떨어질지 (숫자가 커지면 오른쪽으로)
+               🎯 영점 조절 구역 (대표님이 퍼센트(%)를 고쳐서 맞춰주세요!)
                ======================================================== */
             
-            /* 1. 공공일보 좌표 */
-            .type-general #pt-year { top: 30%; left: 24%; }
-            .type-general #pt-month { top: 30%; left: 35%; }
-            .type-general #pt-day { top: 30%; left: 45%; }
-            .type-general #pt-car { top: 38.5%; left: 42%; }
-            .type-general #pt-driver { top: 38.5%; left: 68%; }
+            /* 1. 상단 날짜 및 요일 */
+            .type-general #pt-year { top: 9.5%; left: 32%; }
+            .type-general #pt-month { top: 9.5%; left: 38%; }
+            .type-general #pt-day { top: 9.5%; left: 44%; }
+            .type-general #pt-weekday { top: 9.5%; left: 52%; } /* 요일 */
+
+            /* 2. 차량 및 운전원 정보 */
+            .type-general #pt-car-type { top: 16%; left: 16%; font-size: 14px;} /* 유니버스/쏠라티 */
+            .type-general #pt-car { top: 16%; left: 38%; } /* 차량번호 */
+            .type-general #pt-driver { top: 16%; left: 58%; }
+            .type-general #pt-driver-sign { top: 14.5%; left: 75%; } /* 기사님 도장 */
+
+            /* 3. 운행 사유 체크 (✔) - 해당되는 것에만 표시됨 */
+            .type-general .chk-mark { font-size: 18px; color: #d9534f; font-weight: bold; }
+            .type-general #pt-chk-1 { top: 22.5%; left: 19.5%; } /* 공공예약 */
+            .type-general #pt-chk-2 { top: 22.5%; left: 36%; }   /* 이동지원 */
+            .type-general #pt-chk-3 { top: 22.5%; left: 49%; }   /* 검사 */
+            .type-general #pt-chk-4 { top: 22.5%; left: 59%; }   /* 수리 */
+            .type-general #pt-chk-5 { top: 22.5%; left: 69%; }   /* 기타 */
+
+            /* 4. 기존 운행 시간 및 거리 */
             .type-general #pt-time-start { top: 46%; left: 28%; }
             .type-general #pt-time-end { top: 49%; left: 28%; }
             .type-general #pt-km-start { top: 46%; left: 65%; }
@@ -64,13 +80,14 @@
             .type-general #pt-pax-w { top: 73%; left: 25%; }
             .type-general #pt-pax-n { top: 73%; left: 38%; }
             .type-general #pt-cust-name { top: 73%; left: 70%; }
-            .type-general #pt-sign { top: 71.5%; left: 82%; }
+            .type-general #pt-cust-sign { top: 71.5%; left: 82%; } /* 고객 도장 */
 
-            /* 2. 시티일보 좌표 */
-            .type-citytour #pt-year, .type-citytour #pt-month { display: none; }
+            /* 시티투어 좌표 (기존 유지) */
+            .type-citytour #pt-year, .type-citytour #pt-month, .type-citytour #pt-weekday { display: none; }
             .type-citytour #pt-day { top: 33%; left: 30%; font-size: 14px; } 
-            .type-citytour #pt-car { display: none; }
+            .type-citytour #pt-car, .type-citytour #pt-car-type { display: none; }
             .type-citytour #pt-driver { top: 50.5%; left: 25%; }
+            .type-citytour #pt-driver-sign { top: 49%; left: 40%; }
             .type-citytour #pt-time-start { top: 53.5%; left: 25%; }
             .type-citytour #pt-time-end { top: 53.5%; left: 55%; }
             .type-citytour #pt-km-start { top: 56.5%; left: 25%; }
@@ -81,7 +98,7 @@
             .type-citytour #pt-pax-w { top: 44.5%; left: 25%; }
             .type-citytour #pt-pax-n { top: 44.5%; left: 45%; }
             .type-citytour #pt-cust-name { top: 75%; left: 70%; }
-            .type-citytour #pt-sign { top: 73%; left: 83%; width: 70px; height: 35px; }
+            .type-citytour #pt-cust-sign { top: 73%; left: 83%; }
         }
     </style>
 </head>
@@ -104,11 +121,38 @@
             </div>
 
             <div class="card">
+                <div class="card-title">📌 운행 사유</div>
+                <div class="radio-group">
+                    <label><input type="radio" name="m-reason" value="공공예약"> 공공예약</label>
+                    <label><input type="radio" name="m-reason" value="이동지원"> 이동지원</label>
+                    <label><input type="radio" name="m-reason" value="검사"> 검사</label>
+                    <label><input type="radio" name="m-reason" value="수리"> 수리</label>
+                    <label><input type="radio" name="m-reason" value="기타"> 기타</label>
+                </div>
+            </div>
+
+            <div class="card">
                 <div class="card-title">1. 운행 정보</div>
                 <div class="grid-2">
                     <div class="form-group"><label class="form-label">운행일자</label><input type="date" id="m-date" class="form-input" readonly></div>
-                    <div class="form-group"><label class="form-label">차량번호</label><input type="text" id="m-car" class="form-input" readonly></div>
+                    <div class="form-group">
+                        <label class="form-label">차종</label>
+                        <select id="m-car-type" class="form-select">
+                            <option value="유니버스">유니버스</option>
+                            <option value="쏠라티">쏠라티</option>
+                            <option value="기타">기타</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label class="form-label">차량번호 (호차)</label><input type="text" id="m-car" class="form-input" readonly></div>
                     <div class="form-group"><label class="form-label">운전원</label><input type="text" id="m-driver" class="form-input" readonly></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">✍️ 운전원 서명</div>
+                <div class="signature-area">
+                    <button class="clear-btn" onclick="clearDriverSign()">지우기</button>
+                    <canvas id="driver-sign-pad"></canvas>
                 </div>
             </div>
 
@@ -137,8 +181,8 @@
                 <div class="card-title">4. 고객 서명</div>
                 <div class="form-group"><label class="form-label">고객 성함</label><input type="text" id="m-cust-name" class="form-input" placeholder="이름"></div>
                 <div class="signature-area">
-                    <button class="clear-btn" onclick="clearSign()">지우기</button>
-                    <canvas id="sign-pad"></canvas>
+                    <button class="clear-btn" onclick="clearCustSign()">지우기</button>
+                    <canvas id="cust-sign-pad"></canvas>
                 </div>
             </div>
 
@@ -152,74 +196,108 @@
 
     <div id="print-view" class="type-general">
         <img id="print-bg" src="공공일보.png" alt="배경양식">
-        <div class="print-data" id="pt-year"></div><div class="print-data" id="pt-month"></div><div class="print-data" id="pt-day"></div>
-        <div class="print-data" id="pt-car"></div><div class="print-data" id="pt-driver"></div>
+        
+        <div class="print-data" id="pt-year"></div><div class="print-data" id="pt-month"></div>
+        <div class="print-data" id="pt-day"></div><div class="print-data" id="pt-weekday"></div>
+        
+        <div class="print-data chk-mark" id="pt-chk-1" style="display:none;">✔</div>
+        <div class="print-data chk-mark" id="pt-chk-2" style="display:none;">✔</div>
+        <div class="print-data chk-mark" id="pt-chk-3" style="display:none;">✔</div>
+        <div class="print-data chk-mark" id="pt-chk-4" style="display:none;">✔</div>
+        <div class="print-data chk-mark" id="pt-chk-5" style="display:none;">✔</div>
+
+        <div class="print-data" id="pt-car-type"></div>
+        <div class="print-data" id="pt-car"></div>
+        <div class="print-data" id="pt-driver"></div>
+        <img class="print-sign" id="pt-driver-sign" style="display:none;">
+
         <div class="print-data" id="pt-time-start"></div><div class="print-data" id="pt-time-end"></div>
         <div class="print-data" id="pt-km-start"></div><div class="print-data" id="pt-km-end"></div><div class="print-data" id="pt-km-total"></div>
         <div class="print-data" id="pt-loc-start"></div><div class="print-data" id="pt-loc-end"></div>
-        <div class="print-data" id="pt-pax-w"></div><div class="print-data" id="pt-pax-n"></div><div class="print-data" id="pt-cust-name"></div>
-        <img class="print-sign" id="pt-sign" style="display:none;">
+        <div class="print-data" id="pt-pax-w"></div><div class="print-data" id="pt-pax-n"></div>
+        
+        <div class="print-data" id="pt-cust-name"></div>
+        <img class="print-sign" id="pt-cust-sign" style="display:none;">
     </div>
 
     <script>
-        const canvas = document.getElementById('sign-pad');
-        const ctx = canvas.getContext('2d');
-        let isDrawing = false;
-        
-        function resizeCanvas() { 
-            canvas.width = canvas.offsetWidth; 
-            canvas.height = 200; 
-            ctx.lineWidth = 4; 
-            ctx.lineCap = 'round'; 
-            ctx.strokeStyle = '#000'; 
+        // 투-사인패드 (기사님용, 고객용) 세팅
+        function initPad(canvasId) {
+            const cvs = document.getElementById(canvasId);
+            const ctx = cvs.getContext('2d');
+            let drawing = false;
+            
+            function resize() { cvs.width = cvs.offsetWidth; cvs.height = 150; ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.strokeStyle = '#000'; }
+            window.addEventListener('resize', resize);
+            setTimeout(resize, 100);
+
+            function getPos(e) {
+                const rect = cvs.getBoundingClientRect();
+                return { x: (e.touches ? e.touches[0].clientX : e.clientX) - rect.left, y: (e.touches ? e.touches[0].clientY : e.clientY) - rect.top };
+            }
+            
+            cvs.addEventListener('mousedown', (e) => { drawing = true; ctx.beginPath(); ctx.moveTo(getPos(e).x, getPos(e).y); });
+            cvs.addEventListener('mousemove', (e) => { if (!drawing) return; ctx.lineTo(getPos(e).x, getPos(e).y); ctx.stroke(); });
+            cvs.addEventListener('mouseup', () => { drawing = false; });
+            cvs.addEventListener('mouseout', () => { drawing = false; });
+            cvs.addEventListener('touchstart', (e) => { e.preventDefault(); drawing = true; ctx.beginPath(); ctx.moveTo(getPos(e).x, getPos(e).y); }, {passive:false});
+            cvs.addEventListener('touchmove', (e) => { e.preventDefault(); if(!drawing) return; ctx.lineTo(getPos(e).x, getPos(e).y); ctx.stroke(); }, {passive:false});
+            cvs.addEventListener('touchend', () => { drawing = false; });
+
+            return { cvs, ctx };
         }
 
-        // 🔥 덮어쓰기 방지! 똑똑해진 데이터 불러오기 엔진 🔥
+        const dPad = initPad('driver-sign-pad');
+        const cPad = initPad('cust-sign-pad');
+
+        function clearDriverSign() { dPad.ctx.clearRect(0,0, dPad.cvs.width, dPad.cvs.height); }
+        function clearCustSign() { cPad.ctx.clearRect(0,0, cPad.cvs.width, cPad.cvs.height); }
+
+        function setRadioValue(name, value) {
+            const radios = document.getElementsByName(name);
+            for(let r of radios) { if(r.value === value) r.checked = true; }
+        }
+        function getRadioValue(name) {
+            const radios = document.getElementsByName(name);
+            for(let r of radios) { if(r.checked) return r.value; }
+            return '';
+        }
+
+        // 🔥 페이지 열릴 때 불러오기 🔥
         window.onload = () => {
-            resizeCanvas();
             const newDispatchData = localStorage.getItem('currentReportData');
             const savedDraft = localStorage.getItem('reportDraft');
-
             let loadData = null;
 
-            // 1. 배차창에서 버튼을 누르고 넘어왔을 때
             if (newDispatchData) {
                 const newData = JSON.parse(newDispatchData);
                 let useDraft = false;
-
-                // 기존에 임시저장된 게 있다면?
                 if (savedDraft) {
                     const oldDraft = JSON.parse(savedDraft);
-                    // 💡 핵심: 날짜와 차 번호가 같으면, 초기화하지 말고 쓰던 임시저장을 불러옴!
                     if (oldDraft.date === newData.date && oldDraft.car === newData.vehicle) {
-                        loadData = oldDraft;
-                        useDraft = true;
+                        loadData = oldDraft; useDraft = true;
                     }
                 }
-
-                // 쓰던 게 아니면 새 빈칸 양식으로 덮어씀
                 if (!useDraft) {
                     loadData = {
-                        date: newData.date,
-                        car: newData.vehicle,
-                        driver: newData.driver,
+                        date: newData.date, car: newData.vehicle, driver: newData.driver,
                         type: newData.reason.includes('시티') ? 'citytour' : 'general',
+                        reason: newData.reason.includes('공공') ? '공공예약' : '기타', // 사유 자동세팅
                         l_end: newData.dest || ''
                     };
                 }
-                localStorage.removeItem('currentReportData'); // 1회용 티켓 폐기
-
-            // 2. 그냥 새로고침 하거나 직접 들어왔을 때
+                localStorage.removeItem('currentReportData'); 
             } else if (savedDraft) {
                 loadData = JSON.parse(savedDraft);
             }
 
-            // 화면에 데이터 촥촥 뿌리기
             if (loadData) {
                 document.getElementById('m-date').value = loadData.date || '';
                 document.getElementById('m-car').value = loadData.car || '';
+                document.getElementById('m-car-type').value = loadData.carType || '유니버스';
                 document.getElementById('m-driver').value = loadData.driver || '';
                 document.getElementById('m-type').value = loadData.type || 'general';
+                setRadioValue('m-reason', loadData.reason || '');
                 document.getElementById('m-time-start').value = loadData.t_start || '';
                 document.getElementById('m-time-end').value = loadData.t_end || '';
                 document.getElementById('m-km-start').value = loadData.k_start || '';
@@ -231,11 +309,11 @@
                 document.getElementById('m-cust-name').value = loadData.c_name || '';
                 calcKm();
 
-                // 도장(사인) 복구
-                if (loadData.sign && loadData.sign.length > 2000) {
-                    const img = new Image();
-                    img.onload = () => { ctx.drawImage(img, 0, 0); };
-                    img.src = loadData.sign;
+                if (loadData.driverSign && loadData.driverSign.length > 2000) {
+                    const i = new Image(); i.onload = () => dPad.ctx.drawImage(i, 0, 0); i.src = loadData.driverSign;
+                }
+                if (loadData.custSign && loadData.custSign.length > 2000) {
+                    const j = new Image(); j.onload = () => cPad.ctx.drawImage(j, 0, 0); j.src = loadData.custSign;
                 }
             } else {
                 document.getElementById('m-date').valueAsDate = new Date();
@@ -247,8 +325,10 @@
             const draft = {
                 date: document.getElementById('m-date').value,
                 car: document.getElementById('m-car').value,
+                carType: document.getElementById('m-car-type').value,
                 driver: document.getElementById('m-driver').value,
                 type: document.getElementById('m-type').value,
+                reason: getRadioValue('m-reason'),
                 t_start: document.getElementById('m-time-start').value,
                 t_end: document.getElementById('m-time-end').value,
                 k_start: document.getElementById('m-km-start').value,
@@ -258,17 +338,16 @@
                 p_w: document.getElementById('m-pax-w').value,
                 p_n: document.getElementById('m-pax-n').value,
                 c_name: document.getElementById('m-cust-name').value,
-                sign: canvas.toDataURL('image/png')
+                driverSign: dPad.cvs.toDataURL('image/png'),
+                custSign: cPad.cvs.toDataURL('image/png')
             };
             localStorage.setItem('reportDraft', JSON.stringify(draft));
-            if(!isSilent) alert('💾 현재까지 입력한 내용과 사인이 임시저장 되었습니다!\n\n앱을 껐다가 다시 켜도 그대로 남아있습니다.');
+            if(!isSilent) alert('💾 현재까지 입력한 내용과 사인이 임시저장 되었습니다!');
         }
 
-        // 🗑️ 초기화 기능
         function clearDraft() {
             if(confirm('진행 중인 모든 내용과 사인을 지우시겠습니까?')) {
-                localStorage.removeItem('reportDraft');
-                window.location.reload();
+                localStorage.removeItem('reportDraft'); window.location.reload();
             }
         }
 
@@ -278,46 +357,35 @@
             document.getElementById('m-km-total').innerText = Math.max(0, e - s);
         }
 
-        function getPos(e) {
-            const rect = canvas.getBoundingClientRect();
-            return { x: (e.touches ? e.touches[0].clientX : e.clientX) - rect.left, y: (e.touches ? e.touches[0].clientY : e.clientY) - rect.top };
-        }
-        
-        canvas.addEventListener('mousedown', (e) => { isDrawing = true; ctx.beginPath(); ctx.moveTo(getPos(e).x, getPos(e).y); });
-        canvas.addEventListener('mousemove', (e) => { if (!isDrawing) return; ctx.lineTo(getPos(e).x, getPos(e).y); ctx.stroke(); });
-        canvas.addEventListener('mouseup', () => { isDrawing = false; });
-        canvas.addEventListener('mouseout', () => { isDrawing = false; });
-        canvas.addEventListener('touchstart', (e) => { e.preventDefault(); isDrawing = true; ctx.beginPath(); ctx.moveTo(getPos(e).x, getPos(e).y); }, {passive:false});
-        canvas.addEventListener('touchmove', (e) => { e.preventDefault(); if(!isDrawing) return; ctx.lineTo(getPos(e).x, getPos(e).y); ctx.stroke(); }, {passive:false});
-        canvas.addEventListener('touchend', () => { isDrawing = false; });
-
-        function clearSign() { ctx.clearRect(0,0, canvas.width, canvas.height); }
-
         function doPrint() {
-            saveDraft(true); // 인쇄 전 묻지마 저장
+            saveDraft(true); 
 
             const type = document.getElementById('m-type').value;
-            const printView = document.getElementById('print-view');
-            const printBg = document.getElementById('print-bg');
+            document.getElementById('print-view').className = type === 'general' ? 'type-general' : 'type-citytour';
+            document.getElementById('print-bg').src = type === 'general' ? '공공일보.png' : '시티일보.png';
 
-            if (type === 'general') {
-                printView.className = 'type-general'; printBg.src = '공공일보.png'; 
-            } else {
-                printView.className = 'type-citytour'; printBg.src = '시티일보.png'; 
-            }
-
+            // 1. 날짜 및 요일 분리
             const dStr = document.getElementById('m-date').value;
             if(dStr) {
                 const d = new Date(dStr);
-                if (type === 'general') {
-                    document.getElementById('pt-year').innerText = d.getFullYear();
-                    document.getElementById('pt-month').innerText = String(d.getMonth()+1).padStart(2,'0');
-                    document.getElementById('pt-day').innerText = String(d.getDate()).padStart(2,'0');
-                } else {
-                    document.getElementById('pt-day').innerText = `${d.getFullYear()}년 ${String(d.getMonth()+1).padStart(2,'0')}월 ${String(d.getDate()).padStart(2,'0')}일`;
-                }
+                const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
+                document.getElementById('pt-year').innerText = d.getFullYear();
+                document.getElementById('pt-month').innerText = String(d.getMonth()+1).padStart(2,'0');
+                document.getElementById('pt-day').innerText = String(d.getDate()).padStart(2,'0');
+                document.getElementById('pt-weekday').innerText = weekdays[d.getDay()]; // 요일!
             }
 
+            // 2. 사유 체크박스 (✔)
+            const reason = getRadioValue('m-reason');
+            for(let i=1; i<=5; i++) document.getElementById('pt-chk-'+i).style.display = 'none';
+            if(reason === '공공예약') document.getElementById('pt-chk-1').style.display = 'block';
+            if(reason === '이동지원') document.getElementById('pt-chk-2').style.display = 'block';
+            if(reason === '검사') document.getElementById('pt-chk-3').style.display = 'block';
+            if(reason === '수리') document.getElementById('pt-chk-4').style.display = 'block';
+            if(reason === '기타') document.getElementById('pt-chk-5').style.display = 'block';
+
+            // 3. 텍스트 입력값
+            document.getElementById('pt-car-type').innerText = document.getElementById('m-car-type').value || '';
             document.getElementById('pt-car').innerText = document.getElementById('m-car').value || '';
             document.getElementById('pt-driver').innerText = document.getElementById('m-driver').value || '';
             document.getElementById('pt-time-start').innerText = document.getElementById('m-time-start').value || '';
@@ -331,13 +399,17 @@
             document.getElementById('pt-pax-n').innerText = document.getElementById('m-pax-n').value || '';
             document.getElementById('pt-cust-name').innerText = document.getElementById('m-cust-name').value || '';
 
-            const signImg = document.getElementById('pt-sign');
-            const dataUrl = canvas.toDataURL('image/png');
-            if(dataUrl.length > 2000) { 
-                signImg.src = dataUrl; signImg.style.display = 'block';
-            } else {
-                signImg.style.display = 'none';
-            }
+            // 4. 투-사인패드 도장 찍기
+            const dSignData = dPad.cvs.toDataURL('image/png');
+            const cSignData = cPad.cvs.toDataURL('image/png');
+            
+            const ptDriverSign = document.getElementById('pt-driver-sign');
+            if(dSignData.length > 2000) { ptDriverSign.src = dSignData; ptDriverSign.style.display = 'block'; } 
+            else { ptDriverSign.style.display = 'none'; }
+
+            const ptCustSign = document.getElementById('pt-cust-sign');
+            if(cSignData.length > 2000) { ptCustSign.src = cSignData; ptCustSign.style.display = 'block'; } 
+            else { ptCustSign.style.display = 'none'; }
 
             setTimeout(() => { window.print(); }, 500);
         }
