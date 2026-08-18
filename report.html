@@ -221,15 +221,19 @@
     </div>
 
     <script>
-        // 투-사인패드 (기사님용, 고객용) 세팅
+        let dPad, cPad;
+
         function initPad(canvasId) {
             const cvs = document.getElementById(canvasId);
             const ctx = cvs.getContext('2d');
             let drawing = false;
             
-            function resize() { cvs.width = cvs.offsetWidth; cvs.height = 150; ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.strokeStyle = '#000'; }
-            window.addEventListener('resize', resize);
-            setTimeout(resize, 100);
+            // 🔥 버그 1 해결: 키보드 올라와도 안 지워지도록 크기를 처음에 딱 한 번만 고정!
+            cvs.width = cvs.parentElement.clientWidth || 300; 
+            cvs.height = 150; 
+            ctx.lineWidth = 4; 
+            ctx.lineCap = 'round'; 
+            ctx.strokeStyle = '#000'; 
 
             function getPos(e) {
                 const rect = cvs.getBoundingClientRect();
@@ -247,24 +251,29 @@
             return { cvs, ctx };
         }
 
-        const dPad = initPad('driver-sign-pad');
-        const cPad = initPad('cust-sign-pad');
-
         function clearDriverSign() { dPad.ctx.clearRect(0,0, dPad.cvs.width, dPad.cvs.height); }
         function clearCustSign() { cPad.ctx.clearRect(0,0, cPad.cvs.width, cPad.cvs.height); }
 
+        // 🔥 버그 2 해결: 구형 스마트폰에서도 무조건 100% 작동하는 방식으로 변경
         function setRadioValue(name, value) {
             const radios = document.getElementsByName(name);
-            for(let r of radios) { if(r.value === value) r.checked = true; }
+            for(let i=0; i<radios.length; i++) { 
+                if(radios[i].value === value) radios[i].checked = true; 
+            }
         }
         function getRadioValue(name) {
             const radios = document.getElementsByName(name);
-            for(let r of radios) { if(r.checked) return r.value; }
+            for(let i=0; i<radios.length; i++) { 
+                if(radios[i].checked) return radios[i].value; 
+            }
             return '';
         }
 
-        // 🔥 페이지 열릴 때 불러오기 🔥
         window.onload = () => {
+            // 화면 켜질 때 캔버스 준비
+            dPad = initPad('driver-sign-pad');
+            cPad = initPad('cust-sign-pad');
+
             const newDispatchData = localStorage.getItem('currentReportData');
             const savedDraft = localStorage.getItem('reportDraft');
             let loadData = null;
@@ -272,17 +281,23 @@
             if (newDispatchData) {
                 const newData = JSON.parse(newDispatchData);
                 let useDraft = false;
+                
                 if (savedDraft) {
                     const oldDraft = JSON.parse(savedDraft);
-                    if (oldDraft.date === newData.date && oldDraft.car === newData.vehicle) {
-                        loadData = oldDraft; useDraft = true;
+                    // 날짜와 차번호가 같으면 무조건 쓰던 것 불러오기
+                    if (oldDraft.date === newData.date && oldDraft.car === (newData.vehicle || '')) {
+                        loadData = oldDraft; 
+                        useDraft = true;
                     }
                 }
+                
                 if (!useDraft) {
                     loadData = {
-                        date: newData.date, car: newData.vehicle, driver: newData.driver,
-                        type: newData.reason.includes('시티') ? 'citytour' : 'general',
-                        reason: newData.reason.includes('공공') ? '공공예약' : '기타', // 사유 자동세팅
+                        date: newData.date, 
+                        car: newData.vehicle || '', 
+                        driver: newData.driver || '',
+                        type: (newData.reason && newData.reason.indexOf('시티') !== -1) ? 'citytour' : 'general',
+                        reason: (newData.reason && newData.reason.indexOf('공공') !== -1) ? '공공예약' : '기타',
                         l_end: newData.dest || ''
                     };
                 }
@@ -309,40 +324,50 @@
                 document.getElementById('m-cust-name').value = loadData.c_name || '';
                 calcKm();
 
-                if (loadData.driverSign && loadData.driverSign.length > 2000) {
-                    const i = new Image(); i.onload = () => dPad.ctx.drawImage(i, 0, 0); i.src = loadData.driverSign;
-                }
-                if (loadData.custSign && loadData.custSign.length > 2000) {
-                    const j = new Image(); j.onload = () => cPad.ctx.drawImage(j, 0, 0); j.src = loadData.custSign;
-                }
+                // 도장 복구 시간차 공격 방지 (살짝 딜레이 줘서 확실히 그림)
+                setTimeout(() => {
+                    if (loadData.driverSign && loadData.driverSign.length > 2000) {
+                        const i = new Image(); i.onload = () => dPad.ctx.drawImage(i, 0, 0); i.src = loadData.driverSign;
+                    }
+                    if (loadData.custSign && loadData.custSign.length > 2000) {
+                        const j = new Image(); j.onload = () => cPad.ctx.drawImage(j, 0, 0); j.src = loadData.custSign;
+                    }
+                }, 100);
             } else {
                 document.getElementById('m-date').valueAsDate = new Date();
             }
+
+            // 🔥 버그 3 해결: 들어오자마자 무조건 한 번 저장! (실수로 뒤로가기 눌러도 안 날아감)
+            setTimeout(() => { saveDraft(true); }, 500);
         };
 
         // 💾 중간 저장 기능
         function saveDraft(isSilent = false) {
-            const draft = {
-                date: document.getElementById('m-date').value,
-                car: document.getElementById('m-car').value,
-                carType: document.getElementById('m-car-type').value,
-                driver: document.getElementById('m-driver').value,
-                type: document.getElementById('m-type').value,
-                reason: getRadioValue('m-reason'),
-                t_start: document.getElementById('m-time-start').value,
-                t_end: document.getElementById('m-time-end').value,
-                k_start: document.getElementById('m-km-start').value,
-                k_end: document.getElementById('m-km-end').value,
-                l_start: document.getElementById('m-loc-start').value,
-                l_end: document.getElementById('m-loc-end').value,
-                p_w: document.getElementById('m-pax-w').value,
-                p_n: document.getElementById('m-pax-n').value,
-                c_name: document.getElementById('m-cust-name').value,
-                driverSign: dPad.cvs.toDataURL('image/png'),
-                custSign: cPad.cvs.toDataURL('image/png')
-            };
-            localStorage.setItem('reportDraft', JSON.stringify(draft));
-            if(!isSilent) alert('💾 현재까지 입력한 내용과 사인이 임시저장 되었습니다!');
+            try {
+                const draft = {
+                    date: document.getElementById('m-date').value,
+                    car: document.getElementById('m-car').value,
+                    carType: document.getElementById('m-car-type').value,
+                    driver: document.getElementById('m-driver').value,
+                    type: document.getElementById('m-type').value,
+                    reason: getRadioValue('m-reason'),
+                    t_start: document.getElementById('m-time-start').value,
+                    t_end: document.getElementById('m-time-end').value,
+                    k_start: document.getElementById('m-km-start').value,
+                    k_end: document.getElementById('m-km-end').value,
+                    l_start: document.getElementById('m-loc-start').value,
+                    l_end: document.getElementById('m-loc-end').value,
+                    p_w: document.getElementById('m-pax-w').value,
+                    p_n: document.getElementById('m-pax-n').value,
+                    c_name: document.getElementById('m-cust-name').value,
+                    driverSign: dPad.cvs.toDataURL('image/png'),
+                    custSign: cPad.cvs.toDataURL('image/png')
+                };
+                localStorage.setItem('reportDraft', JSON.stringify(draft));
+                if(!isSilent) alert('💾 현재까지 입력한 내용과 사인이 임시저장 되었습니다!');
+            } catch (e) {
+                if(!isSilent) alert('저장 중 오류가 발생했습니다. 다시 시도해주세요.');
+            }
         }
 
         function clearDraft() {
@@ -364,7 +389,6 @@
             document.getElementById('print-view').className = type === 'general' ? 'type-general' : 'type-citytour';
             document.getElementById('print-bg').src = type === 'general' ? '공공일보.png' : '시티일보.png';
 
-            // 1. 날짜 및 요일 분리
             const dStr = document.getElementById('m-date').value;
             if(dStr) {
                 const d = new Date(dStr);
@@ -372,10 +396,9 @@
                 document.getElementById('pt-year').innerText = d.getFullYear();
                 document.getElementById('pt-month').innerText = String(d.getMonth()+1).padStart(2,'0');
                 document.getElementById('pt-day').innerText = String(d.getDate()).padStart(2,'0');
-                document.getElementById('pt-weekday').innerText = weekdays[d.getDay()]; // 요일!
+                document.getElementById('pt-weekday').innerText = weekdays[d.getDay()]; 
             }
 
-            // 2. 사유 체크박스 (✔)
             const reason = getRadioValue('m-reason');
             for(let i=1; i<=5; i++) document.getElementById('pt-chk-'+i).style.display = 'none';
             if(reason === '공공예약') document.getElementById('pt-chk-1').style.display = 'block';
@@ -384,7 +407,6 @@
             if(reason === '수리') document.getElementById('pt-chk-4').style.display = 'block';
             if(reason === '기타') document.getElementById('pt-chk-5').style.display = 'block';
 
-            // 3. 텍스트 입력값
             document.getElementById('pt-car-type').innerText = document.getElementById('m-car-type').value || '';
             document.getElementById('pt-car').innerText = document.getElementById('m-car').value || '';
             document.getElementById('pt-driver').innerText = document.getElementById('m-driver').value || '';
@@ -399,7 +421,6 @@
             document.getElementById('pt-pax-n').innerText = document.getElementById('m-pax-n').value || '';
             document.getElementById('pt-cust-name').innerText = document.getElementById('m-cust-name').value || '';
 
-            // 4. 투-사인패드 도장 찍기
             const dSignData = dPad.cvs.toDataURL('image/png');
             const cSignData = cPad.cvs.toDataURL('image/png');
             
