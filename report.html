@@ -645,7 +645,7 @@
             const ptCust = document.getElementById('pt-cust-sign');
             if(cSign.length > 1300) { ptCust.src = cSign; ptCust.style.display = 'block'; } else { ptCust.style.display = 'none'; }
 
-            setTimeout(() => { window.print(); }, 500);
+            window.print(); // 👈 이렇게 깔끔하게 바꿔주세요!
         }
     </script>
 </body>
