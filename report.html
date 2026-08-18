@@ -6,6 +6,10 @@
     <title>스마트 운행일보</title>
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     
+    <!-- 🔥 파이어베이스 엔진 탑재 🔥 -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Pretendard', sans-serif; background-color: #f4f6f9; color: #333; letter-spacing: -0.3px; }
@@ -45,31 +49,21 @@
             .print-data { position: absolute; font-size: 16px; font-weight: bold; color: #000; z-index: 10; font-family: 'Malgun Gothic', sans-serif; white-space: nowrap; }
             .print-sign { position: absolute; z-index: 10; width: 80px; height: 40px; }
 
-            /* ========================================================
-               🎯 영점 조절 구역 (대표님이 퍼센트(%)를 고쳐서 맞춰주세요!)
-               ======================================================== */
-            
-            /* 1. 상단 날짜 및 요일 */
+            /* 영점 조절 구역 */
             .type-general #pt-year { top: 9.5%; left: 32%; }
             .type-general #pt-month { top: 9.5%; left: 38%; }
             .type-general #pt-day { top: 9.5%; left: 44%; }
-            .type-general #pt-weekday { top: 9.5%; left: 52%; } /* 요일 */
-
-            /* 2. 차량 및 운전원 정보 */
-            .type-general #pt-car-type { top: 16%; left: 16%; font-size: 14px;} /* 유니버스/쏠라티 */
-            .type-general #pt-car { top: 16%; left: 38%; } /* 차량번호 */
+            .type-general #pt-weekday { top: 9.5%; left: 52%; }
+            .type-general #pt-car-type { top: 16%; left: 16%; font-size: 14px;} 
+            .type-general #pt-car { top: 16%; left: 38%; } 
             .type-general #pt-driver { top: 16%; left: 58%; }
-            .type-general #pt-driver-sign { top: 14.5%; left: 75%; } /* 기사님 도장 */
-
-            /* 3. 운행 사유 체크 (✔) - 해당되는 것에만 표시됨 */
+            .type-general #pt-driver-sign { top: 14.5%; left: 75%; } 
             .type-general .chk-mark { font-size: 18px; color: #d9534f; font-weight: bold; }
-            .type-general #pt-chk-1 { top: 22.5%; left: 19.5%; } /* 공공예약 */
-            .type-general #pt-chk-2 { top: 22.5%; left: 36%; }   /* 이동지원 */
-            .type-general #pt-chk-3 { top: 22.5%; left: 49%; }   /* 검사 */
-            .type-general #pt-chk-4 { top: 22.5%; left: 59%; }   /* 수리 */
-            .type-general #pt-chk-5 { top: 22.5%; left: 69%; }   /* 기타 */
-
-            /* 4. 기존 운행 시간 및 거리 */
+            .type-general #pt-chk-1 { top: 22.5%; left: 19.5%; } 
+            .type-general #pt-chk-2 { top: 22.5%; left: 36%; }   
+            .type-general #pt-chk-3 { top: 22.5%; left: 49%; }   
+            .type-general #pt-chk-4 { top: 22.5%; left: 59%; }   
+            .type-general #pt-chk-5 { top: 22.5%; left: 69%; }   
             .type-general #pt-time-start { top: 46%; left: 28%; }
             .type-general #pt-time-end { top: 49%; left: 28%; }
             .type-general #pt-km-start { top: 46%; left: 65%; }
@@ -80,9 +74,8 @@
             .type-general #pt-pax-w { top: 73%; left: 25%; }
             .type-general #pt-pax-n { top: 73%; left: 38%; }
             .type-general #pt-cust-name { top: 73%; left: 70%; }
-            .type-general #pt-cust-sign { top: 71.5%; left: 82%; } /* 고객 도장 */
+            .type-general #pt-cust-sign { top: 71.5%; left: 82%; } 
 
-            /* 시티투어 좌표 (기존 유지) */
             .type-citytour #pt-year, .type-citytour #pt-month, .type-citytour #pt-weekday { display: none; }
             .type-citytour #pt-day { top: 33%; left: 30%; font-size: 14px; } 
             .type-citytour #pt-car, .type-citytour #pt-car-type { display: none; }
@@ -107,7 +100,7 @@
     <div id="mobile-view">
         <header class="header">
             <button class="back-btn" onclick="window.location.href='driver.html'">❮</button>
-            운행일보 작성
+            운행일보 작성 (클라우드)
             <div style="width: 24px;"></div>
         </header>
 
@@ -187,59 +180,58 @@
             </div>
 
             <div class="btn-group">
-                <button class="save-btn" onclick="saveDraft()">💾 중간 저장</button>
+                <button class="save-btn" onclick="saveDraft()">☁️ 클라우드 중간 저장</button>
                 <button class="print-btn" onclick="doPrint()">🖨️ 인쇄 (최종 완료)</button>
             </div>
-            <button class="reset-btn" onclick="clearDraft()">🗑️ 현재 입력된 내용 모두 지우기</button>
+            <button class="reset-btn" onclick="clearDraft()">🗑️ 서버에 저장된 내역 삭제</button>
         </div>
     </div>
 
+    <!-- 🖨️ 인쇄 화면 -->
     <div id="print-view" class="type-general">
         <img id="print-bg" src="공공일보.png" alt="배경양식">
-        
         <div class="print-data" id="pt-year"></div><div class="print-data" id="pt-month"></div>
         <div class="print-data" id="pt-day"></div><div class="print-data" id="pt-weekday"></div>
-        
         <div class="print-data chk-mark" id="pt-chk-1" style="display:none;">✔</div>
         <div class="print-data chk-mark" id="pt-chk-2" style="display:none;">✔</div>
         <div class="print-data chk-mark" id="pt-chk-3" style="display:none;">✔</div>
         <div class="print-data chk-mark" id="pt-chk-4" style="display:none;">✔</div>
         <div class="print-data chk-mark" id="pt-chk-5" style="display:none;">✔</div>
-
-        <div class="print-data" id="pt-car-type"></div>
-        <div class="print-data" id="pt-car"></div>
-        <div class="print-data" id="pt-driver"></div>
-        <img class="print-sign" id="pt-driver-sign" style="display:none;">
-
+        <div class="print-data" id="pt-car-type"></div><div class="print-data" id="pt-car"></div>
+        <div class="print-data" id="pt-driver"></div><img class="print-sign" id="pt-driver-sign" style="display:none;">
         <div class="print-data" id="pt-time-start"></div><div class="print-data" id="pt-time-end"></div>
         <div class="print-data" id="pt-km-start"></div><div class="print-data" id="pt-km-end"></div><div class="print-data" id="pt-km-total"></div>
         <div class="print-data" id="pt-loc-start"></div><div class="print-data" id="pt-loc-end"></div>
         <div class="print-data" id="pt-pax-w"></div><div class="print-data" id="pt-pax-n"></div>
-        
-        <div class="print-data" id="pt-cust-name"></div>
-        <img class="print-sign" id="pt-cust-sign" style="display:none;">
+        <div class="print-data" id="pt-cust-name"></div><img class="print-sign" id="pt-cust-sign" style="display:none;">
     </div>
 
     <script>
+        // 🔥 대표님이 올려주신 munseo 프로젝트 설정 적용 완료! 🔥
+        const firebaseConfig = {
+            apiKey: "AIzaSyD3KPnvBMz14fqe3znaSNxQurJ_mSHG9mY",
+            authDomain: "munseo-aaa76.firebaseapp.com",
+            projectId: "munseo-aaa76",
+            storageBucket: "munseo-aaa76.firebasestorage.app",
+            messagingSenderId: "30162440740",
+            appId: "1:30162440740:web:02d9a78c31e437bcd77eb1"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
         let dPad, cPad;
+        let globalDocId = ""; // 서버에서 찾을 핵심 열쇠(배차ID)
 
         function initPad(canvasId) {
             const cvs = document.getElementById(canvasId);
             const ctx = cvs.getContext('2d');
             let drawing = false;
-            
-            // 🔥 버그 1 해결: 키보드 올라와도 안 지워지도록 크기를 처음에 딱 한 번만 고정!
             cvs.width = cvs.parentElement.clientWidth || 300; 
-            cvs.height = 150; 
-            ctx.lineWidth = 4; 
-            ctx.lineCap = 'round'; 
-            ctx.strokeStyle = '#000'; 
-
+            cvs.height = 150; ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.strokeStyle = '#000'; 
             function getPos(e) {
                 const rect = cvs.getBoundingClientRect();
                 return { x: (e.touches ? e.touches[0].clientX : e.clientX) - rect.left, y: (e.touches ? e.touches[0].clientY : e.clientY) - rect.top };
             }
-            
             cvs.addEventListener('mousedown', (e) => { drawing = true; ctx.beginPath(); ctx.moveTo(getPos(e).x, getPos(e).y); });
             cvs.addEventListener('mousemove', (e) => { if (!drawing) return; ctx.lineTo(getPos(e).x, getPos(e).y); ctx.stroke(); });
             cvs.addEventListener('mouseup', () => { drawing = false; });
@@ -247,104 +239,91 @@
             cvs.addEventListener('touchstart', (e) => { e.preventDefault(); drawing = true; ctx.beginPath(); ctx.moveTo(getPos(e).x, getPos(e).y); }, {passive:false});
             cvs.addEventListener('touchmove', (e) => { e.preventDefault(); if(!drawing) return; ctx.lineTo(getPos(e).x, getPos(e).y); ctx.stroke(); }, {passive:false});
             cvs.addEventListener('touchend', () => { drawing = false; });
-
             return { cvs, ctx };
         }
 
         function clearDriverSign() { dPad.ctx.clearRect(0,0, dPad.cvs.width, dPad.cvs.height); }
         function clearCustSign() { cPad.ctx.clearRect(0,0, cPad.cvs.width, cPad.cvs.height); }
 
-        // 🔥 버그 2 해결: 구형 스마트폰에서도 무조건 100% 작동하는 방식으로 변경
         function setRadioValue(name, value) {
             const radios = document.getElementsByName(name);
-            for(let i=0; i<radios.length; i++) { 
-                if(radios[i].value === value) radios[i].checked = true; 
-            }
+            for(let i=0; i<radios.length; i++) { if(radios[i].value === value) radios[i].checked = true; }
         }
         function getRadioValue(name) {
             const radios = document.getElementsByName(name);
-            for(let i=0; i<radios.length; i++) { 
-                if(radios[i].checked) return radios[i].value; 
-            }
+            for(let i=0; i<radios.length; i++) { if(radios[i].checked) return radios[i].value; }
             return '';
         }
 
-        window.onload = () => {
-            // 화면 켜질 때 캔버스 준비
+        // 🔥 모듈 2에서 보낸 주소(URL) 읽어서 파이어베이스 연결하기 🔥
+        window.onload = async () => {
             dPad = initPad('driver-sign-pad');
             cPad = initPad('cust-sign-pad');
 
-            const newDispatchData = localStorage.getItem('currentReportData');
-            const savedDraft = localStorage.getItem('reportDraft');
-            let loadData = null;
-
-            if (newDispatchData) {
-                const newData = JSON.parse(newDispatchData);
-                let useDraft = false;
-                
-                if (savedDraft) {
-                    const oldDraft = JSON.parse(savedDraft);
-                    // 날짜와 차번호가 같으면 무조건 쓰던 것 불러오기
-                    if (oldDraft.date === newData.date && oldDraft.car === (newData.vehicle || '')) {
-                        loadData = oldDraft; 
-                        useDraft = true;
-                    }
-                }
-                
-                if (!useDraft) {
-                    loadData = {
-                        date: newData.date, 
-                        car: newData.vehicle || '', 
-                        driver: newData.driver || '',
-                        type: (newData.reason && newData.reason.indexOf('시티') !== -1) ? 'citytour' : 'general',
-                        reason: (newData.reason && newData.reason.indexOf('공공') !== -1) ? '공공예약' : '기타',
-                        l_end: newData.dest || ''
-                    };
-                }
-                localStorage.removeItem('currentReportData'); 
-            } else if (savedDraft) {
-                loadData = JSON.parse(savedDraft);
+            const urlParams = new URLSearchParams(window.location.search);
+            const resId = urlParams.get('resId'); // 입장권 번호 확인
+            const pDate = urlParams.get('date');
+            
+            if(!resId || !pDate) {
+                alert("배차 정보가 정상적으로 넘어오지 않았습니다. 뒤로 돌아갑니다.");
+                window.location.href = 'driver.html';
+                return;
             }
 
-            if (loadData) {
-                document.getElementById('m-date').value = loadData.date || '';
-                document.getElementById('m-car').value = loadData.car || '';
-                document.getElementById('m-car-type').value = loadData.carType || '유니버스';
-                document.getElementById('m-driver').value = loadData.driver || '';
-                document.getElementById('m-type').value = loadData.type || 'general';
-                setRadioValue('m-reason', loadData.reason || '');
-                document.getElementById('m-time-start').value = loadData.t_start || '';
-                document.getElementById('m-time-end').value = loadData.t_end || '';
-                document.getElementById('m-km-start').value = loadData.k_start || '';
-                document.getElementById('m-km-end').value = loadData.k_end || '';
-                document.getElementById('m-loc-start').value = loadData.l_start || '';
-                document.getElementById('m-loc-end').value = loadData.l_end || '';
-                document.getElementById('m-pax-w').value = loadData.p_w || '';
-                document.getElementById('m-pax-n').value = loadData.p_n || '';
-                document.getElementById('m-cust-name').value = loadData.c_name || '';
-                calcKm();
+            globalDocId = resId + "_" + pDate; // 파이어베이스 문서 고유 이름 생성
 
-                // 도장 복구 시간차 공격 방지 (살짝 딜레이 줘서 확실히 그림)
-                setTimeout(() => {
-                    if (loadData.driverSign && loadData.driverSign.length > 2000) {
-                        const i = new Image(); i.onload = () => dPad.ctx.drawImage(i, 0, 0); i.src = loadData.driverSign;
-                    }
-                    if (loadData.custSign && loadData.custSign.length > 2000) {
-                        const j = new Image(); j.onload = () => cPad.ctx.drawImage(j, 0, 0); j.src = loadData.custSign;
-                    }
-                }, 100);
-            } else {
-                document.getElementById('m-date').valueAsDate = new Date();
+            try {
+                // 1. 파이어베이스(클라우드) 금고부터 뒤져보기
+                const docSnap = await db.collection('reports').doc(globalDocId).get();
+                
+                if(docSnap.exists) {
+                    // 금고에 저장된 게 있다면 싹 긁어오기!
+                    const data = docSnap.data();
+                    document.getElementById('m-date').value = data.date || '';
+                    document.getElementById('m-car').value = data.car || '';
+                    document.getElementById('m-car-type').value = data.carType || '유니버스';
+                    document.getElementById('m-driver').value = data.driver || '';
+                    document.getElementById('m-type').value = data.type || 'general';
+                    setRadioValue('m-reason', data.reason || '');
+                    document.getElementById('m-time-start').value = data.t_start || '';
+                    document.getElementById('m-time-end').value = data.t_end || '';
+                    document.getElementById('m-km-start').value = data.k_start || '';
+                    document.getElementById('m-km-end').value = data.k_end || '';
+                    document.getElementById('m-loc-start').value = data.l_start || '';
+                    document.getElementById('m-loc-end').value = data.l_end || '';
+                    document.getElementById('m-pax-w').value = data.p_w || '';
+                    document.getElementById('m-pax-n').value = data.p_n || '';
+                    document.getElementById('m-cust-name').value = data.c_name || '';
+                    calcKm();
+
+                    setTimeout(() => {
+                        if (data.driverSign && data.driverSign.length > 2000) {
+                            const i = new Image(); i.onload = () => dPad.ctx.drawImage(i, 0, 0); i.src = data.driverSign;
+                        }
+                        if (data.custSign && data.custSign.length > 2000) {
+                            const j = new Image(); j.onload = () => cPad.ctx.drawImage(j, 0, 0); j.src = data.custSign;
+                        }
+                    }, 100);
+                } else {
+                    // 금고가 비어있으면? URL에 가져온 빈칸 정보 채워넣기 (새로 작성)
+                    document.getElementById('m-date').value = pDate;
+                    document.getElementById('m-car').value = urlParams.get('car') || '';
+                    document.getElementById('m-driver').value = urlParams.get('driver') || '';
+                    const reason = urlParams.get('reason') || '';
+                    document.getElementById('m-type').value = reason.includes('시티') ? 'citytour' : 'general';
+                    setRadioValue('m-reason', reason.includes('공공') ? '공공예약' : '기타');
+                    document.getElementById('m-loc-end').value = urlParams.get('dest') || '';
+                }
+            } catch(e) {
+                console.error("DB Load Error", e);
             }
-
-            // 🔥 버그 3 해결: 들어오자마자 무조건 한 번 저장! (실수로 뒤로가기 눌러도 안 날아감)
-            setTimeout(() => { saveDraft(true); }, 500);
         };
 
-        // 💾 중간 저장 기능
-        function saveDraft(isSilent = false) {
+        // ☁️ 클라우드로 쏘는 진짜 저장 기능!
+        async function saveDraft(isSilent = false) {
+            if(!globalDocId) return;
             try {
-                const draft = {
+                const reportData = {
                     date: document.getElementById('m-date').value,
                     car: document.getElementById('m-car').value,
                     carType: document.getElementById('m-car-type').value,
@@ -363,16 +342,19 @@
                     driverSign: dPad.cvs.toDataURL('image/png'),
                     custSign: cPad.cvs.toDataURL('image/png')
                 };
-                localStorage.setItem('reportDraft', JSON.stringify(draft));
-                if(!isSilent) alert('💾 현재까지 입력한 내용과 사인이 임시저장 되었습니다!');
-            } catch (e) {
-                if(!isSilent) alert('저장 중 오류가 발생했습니다. 다시 시도해주세요.');
+                
+                await db.collection('reports').doc(globalDocId).set(reportData);
+                if(!isSilent) alert('☁️ 파이어베이스 클라우드에 완벽하게 저장되었습니다!\n다른 기기(폰/PC)로 열어도 이어 쓸 수 있습니다.');
+            } catch(e) {
+                if(!isSilent) alert('저장 중 오류 발생: ' + e.message);
             }
         }
 
-        function clearDraft() {
-            if(confirm('진행 중인 모든 내용과 사인을 지우시겠습니까?')) {
-                localStorage.removeItem('reportDraft'); window.location.reload();
+        async function clearDraft() {
+            if(!globalDocId) return;
+            if(confirm('서버에 저장된 이 배차의 일보를 완전히 삭제하시겠습니까?')) {
+                await db.collection('reports').doc(globalDocId).delete();
+                window.location.reload();
             }
         }
 
