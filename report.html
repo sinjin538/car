@@ -22,12 +22,16 @@
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .calc-result { background: #e8f0fe; padding: 12px; border-radius: 6px; text-align: center; margin-top: 10px; border: 1px dashed #007bff; font-weight: bold;}
         .signature-area { border: 2px solid #ccc; border-radius: 8px; background: #fafbfc; position: relative; margin-top: 10px; }
-        canvas { width: 100%; height: 200px; display: block; touch-action: none; }
-        .clear-btn { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.5); color: #fff; border: none; padding: 4px 10px; border-radius: 4px; font-size: 0.8rem; cursor: pointer; }
+        canvas { width: 100%; height: 200px; display: block; touch-action: none; background: transparent; }
+        .clear-btn { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.5); color: #fff; border: none; padding: 4px 10px; border-radius: 4px; font-size: 0.8rem; cursor: pointer; z-index: 5; }
+        
+        /* 버튼 디자인 추가 */
         .btn-group { display: flex; gap: 10px; margin-top: 20px; }
-        .print-btn { flex: 1; padding: 16px; background: #28a745; color: #fff; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; }
+        .save-btn { flex: 1; padding: 16px; background: #ffc107; color: #000; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(255,193,7,0.2); }
+        .print-btn { flex: 1; padding: 16px; background: #28a745; color: #fff; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(40,167,69,0.2); }
+        .reset-btn { width: 100%; margin-top: 10px; padding: 12px; background: #dc3545; color: #fff; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; }
 
-        /* 🖨️ 인쇄 화면 CSS는 이전과 완벽히 동일 */
+        /* 🖨️ 인쇄 화면 CSS */
         #print-view { display: none; }
         @media print {
             @page { size: A4 portrait; margin: 0; }
@@ -38,7 +42,13 @@
             .print-data { position: absolute; font-size: 16px; font-weight: bold; color: #000; z-index: 10; font-family: 'Malgun Gothic', sans-serif; white-space: nowrap; }
             .print-sign { position: absolute; z-index: 10; width: 80px; height: 40px; }
 
-            /* 공공일보 좌표 */
+            /* ========================================================
+               🎯 영점 조절 구역 (이곳의 숫자 %를 수정해서 글씨 위치를 맞춥니다!)
+               - top: 위에서부터 얼만큼 내려올지 (숫자가 커지면 아래로)
+               - left: 왼쪽에서부터 얼만큼 떨어질지 (숫자가 커지면 오른쪽으로)
+               ======================================================== */
+            
+            /* 1. 공공일보 좌표 */
             .type-general #pt-year { top: 30%; left: 24%; }
             .type-general #pt-month { top: 30%; left: 35%; }
             .type-general #pt-day { top: 30%; left: 45%; }
@@ -56,7 +66,7 @@
             .type-general #pt-cust-name { top: 73%; left: 70%; }
             .type-general #pt-sign { top: 71.5%; left: 82%; }
 
-            /* 시티일보 좌표 */
+            /* 2. 시티일보 좌표 */
             .type-citytour #pt-year, .type-citytour #pt-month { display: none; }
             .type-citytour #pt-day { top: 33%; left: 30%; font-size: 14px; } 
             .type-citytour #pt-car { display: none; }
@@ -86,7 +96,7 @@
 
         <div class="container">
             <div class="card" style="background: #fff3cd; border: 1px solid #ffe69c;">
-                <div class="form-label">⚙️ 양식 종류 (자동선택됨)</div>
+                <div class="form-label">⚙️ 양식 종류</div>
                 <select id="m-type" class="form-select">
                     <option value="general">일반/공공 운행 (공공일보.png)</option>
                     <option value="citytour">서울시티투어 (시티일보.png)</option>
@@ -94,7 +104,7 @@
             </div>
 
             <div class="card">
-                <div class="card-title">1. 운행 정보 (자동입력)</div>
+                <div class="card-title">1. 운행 정보</div>
                 <div class="grid-2">
                     <div class="form-group"><label class="form-label">운행일자</label><input type="date" id="m-date" class="form-input" readonly></div>
                     <div class="form-group"><label class="form-label">차량번호</label><input type="text" id="m-car" class="form-input" readonly></div>
@@ -133,8 +143,10 @@
             </div>
 
             <div class="btn-group">
-                <button class="print-btn" onclick="doPrint()">🖨️ 인쇄 (기사님 완료 후 관리자 전송)</button>
+                <button class="save-btn" onclick="saveDraft()">💾 중간 저장</button>
+                <button class="print-btn" onclick="doPrint()">🖨️ 인쇄 (최종 완료)</button>
             </div>
+            <button class="reset-btn" onclick="clearDraft()">🗑️ 현재 입력된 내용 모두 지우기</button>
         </div>
     </div>
 
@@ -150,32 +162,94 @@
     </div>
 
     <script>
-        // 🔥 데이터 보따리 받는 마법 (자동 채움) 🔥
+        const canvas = document.getElementById('sign-pad');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+        
+        function resizeCanvas() { 
+            canvas.width = canvas.offsetWidth; 
+            canvas.height = 200; 
+            ctx.lineWidth = 4; 
+            ctx.lineCap = 'round'; 
+            ctx.strokeStyle = '#000'; 
+        }
+
+        // 🔥 페이지 열릴 때 데이터 불러오기 엔진 🔥
         window.onload = () => {
             resizeCanvas();
-            const savedData = localStorage.getItem('currentReportData');
+            const newDispatchData = localStorage.getItem('currentReportData');
+            const savedDraft = localStorage.getItem('reportDraft');
             
-            if (savedData) {
-                const d = JSON.parse(savedData);
+            // 1. 배차창에서 버튼 눌러서 새로 들어온 경우 (기존 임시저장 덮어쓰기)
+            if (newDispatchData) {
+                const d = JSON.parse(newDispatchData);
                 document.getElementById('m-date').value = d.date;
                 document.getElementById('m-car').value = d.vehicle;
                 document.getElementById('m-driver').value = d.driver;
                 document.getElementById('m-loc-end').value = d.dest || '';
+                document.getElementById('m-type').value = d.reason.includes('시티') ? 'citytour' : 'general';
                 
-                // 시티투어면 양식 자동으로 변경
-                if(d.reason.includes('시티')) {
-                    document.getElementById('m-type').value = 'citytour';
-                } else {
-                    document.getElementById('m-type').value = 'general';
+                localStorage.removeItem('currentReportData'); // 1회용 삭제
+                saveDraft(true); // 들어오자마자 임시저장 갱신
+
+            // 2. 창 껐다가 다시 들어온 경우 (임시저장본 불러오기)
+            } else if (savedDraft) {
+                const d = JSON.parse(savedDraft);
+                document.getElementById('m-date').value = d.date || '';
+                document.getElementById('m-car').value = d.car || '';
+                document.getElementById('m-driver').value = d.driver || '';
+                document.getElementById('m-type').value = d.type || 'general';
+                document.getElementById('m-time-start').value = d.t_start || '';
+                document.getElementById('m-time-end').value = d.t_end || '';
+                document.getElementById('m-km-start').value = d.k_start || '';
+                document.getElementById('m-km-end').value = d.k_end || '';
+                document.getElementById('m-loc-start').value = d.l_start || '';
+                document.getElementById('m-loc-end').value = d.l_end || '';
+                document.getElementById('m-pax-w').value = d.p_w || '';
+                document.getElementById('m-pax-n').value = d.p_n || '';
+                document.getElementById('m-cust-name').value = d.c_name || '';
+                calcKm();
+
+                // 저장된 사인(도장) 다시 그리기
+                if (d.sign && d.sign.length > 2000) {
+                    const img = new Image();
+                    img.onload = () => { ctx.drawImage(img, 0, 0); };
+                    img.src = d.sign;
                 }
-                
-                // 일회용이라 쓴 뒤에는 지워줌
-                localStorage.removeItem('currentReportData');
             } else {
-                // 테스트용 (모듈2 안거치고 들어왔을때)
                 document.getElementById('m-date').valueAsDate = new Date();
             }
         };
+
+        // 💾 중간 저장 기능
+        function saveDraft(isSilent = false) {
+            const draft = {
+                date: document.getElementById('m-date').value,
+                car: document.getElementById('m-car').value,
+                driver: document.getElementById('m-driver').value,
+                type: document.getElementById('m-type').value,
+                t_start: document.getElementById('m-time-start').value,
+                t_end: document.getElementById('m-time-end').value,
+                k_start: document.getElementById('m-km-start').value,
+                k_end: document.getElementById('m-km-end').value,
+                l_start: document.getElementById('m-loc-start').value,
+                l_end: document.getElementById('m-loc-end').value,
+                p_w: document.getElementById('m-pax-w').value,
+                p_n: document.getElementById('m-pax-n').value,
+                c_name: document.getElementById('m-cust-name').value,
+                sign: canvas.toDataURL('image/png')
+            };
+            localStorage.setItem('reportDraft', JSON.stringify(draft));
+            if(!isSilent) alert('💾 현재까지 입력한 내용과 사인이 임시저장 되었습니다!\n\n앱을 껐다가 다시 켜도 그대로 남아있습니다.');
+        }
+
+        // 🗑️ 초기화 기능
+        function clearDraft() {
+            if(confirm('진행 중인 모든 내용과 사인을 지우시겠습니까?')) {
+                localStorage.removeItem('reportDraft');
+                window.location.reload();
+            }
+        }
 
         function calcKm() {
             let s = parseFloat(document.getElementById('m-km-start').value) || 0;
@@ -183,12 +257,6 @@
             document.getElementById('m-km-total').innerText = Math.max(0, e - s);
         }
 
-        const canvas = document.getElementById('sign-pad');
-        const ctx = canvas.getContext('2d');
-        let isDrawing = false;
-        
-        function resizeCanvas() { canvas.width = canvas.offsetWidth; canvas.height = 200; ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.strokeStyle = '#000'; }
-        
         function getPos(e) {
             const rect = canvas.getBoundingClientRect();
             return { x: (e.touches ? e.touches[0].clientX : e.clientX) - rect.left, y: (e.touches ? e.touches[0].clientY : e.clientY) - rect.top };
@@ -205,6 +273,9 @@
         function clearSign() { ctx.clearRect(0,0, canvas.width, canvas.height); }
 
         function doPrint() {
+            // 인쇄하기 전에도 혹시 모르니 자동 저장!
+            saveDraft(true);
+
             const type = document.getElementById('m-type').value;
             const printView = document.getElementById('print-view');
             const printBg = document.getElementById('print-bg');
