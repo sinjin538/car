@@ -6,7 +6,6 @@
     <title>스마트 운행일보</title>
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     
-    <!-- 🔥 파이어베이스 엔진 탑재 -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
@@ -38,7 +37,6 @@
         .print-btn { flex: 1; padding: 16px; background: #28a745; color: #fff; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; }
         .reset-btn { width: 100%; margin-top: 10px; padding: 12px; background: #dc3545; color: #fff; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; }
 
-        /* 🖨️ 인쇄 화면 CSS */
         #print-view { display: none; }
         @media print {
             @page { size: A4 portrait; margin: 0; }
@@ -50,7 +48,6 @@
             .print-sign { position: absolute; z-index: 10; width: 70px; height: 35px; }
             .chk-mark { font-size: 16px; color: #d9534f; font-weight: bold; }
 
-            /* 🎯 영점 조절 구역 */
             .type-general #pt-year { top: 9.5%; left: 32%; }
             .type-general #pt-month { top: 9.5%; left: 38%; }
             .type-general #pt-day { top: 9.5%; left: 44%; }
@@ -302,7 +299,6 @@
             return '';
         }
 
-        // 🚗 호차 -> 실제 차량번호 및 차종 변환 맵핑
         const carMap = {
             "1호차": { type: "유니버스", num: "78무4922" },
             "2호차": { type: "유니버스", num: "78무4921" },
@@ -312,6 +308,17 @@
             "13호차": { type: "쏠라티", num: "732무8375" },
             "14호차": { type: "쏠라티", num: "732무8376" }
         };
+
+        // 🔥 숫자(8, 21.5)를 시간형식(08:00, 21:30)으로 완벽하게 바꿔주는 마법의 함수
+        function parseTimeParam(t) {
+            if (!t) return '';
+            if (t.includes(':')) return t; 
+            let num = parseFloat(t);
+            if (isNaN(num)) return '';
+            let h = Math.floor(num);
+            let m = Math.round((num - h) * 60);
+            return String(h).padStart(2, '0') + ":" + String(m).padStart(2, '0');
+        }
 
         window.onload = async () => {
             initPad('driver1-sign-pad');
@@ -325,26 +332,46 @@
             if(!resId || !pDate) return;
             globalDocId = resId + "_" + pDate; 
 
+            // 🔥 배차창에서 넘어온 정보들 예쁘게 다듬기
+            let tIn = parseTimeParam(urlParams.get('in'));
+            let tOut = parseTimeParam(urlParams.get('out'));
+            
+            let passedCar = (urlParams.get('car') || '').trim();
+            let finalCarType = carMap[passedCar] ? carMap[passedCar].type : '유니버스';
+            let finalCarNum = carMap[passedCar] ? carMap[passedCar].num : passedCar;
+
+            let driversRaw = (urlParams.get('driver') || '').split(',');
+            let drivers = driversRaw.map(d => d.trim()).filter(d => d && d !== '황덕일');
+            let d1 = drivers[0] || '';
+            let d2 = drivers[1] || '';
+
+            const reasonRaw = urlParams.get('reason') || '';
+            const finalType = reasonRaw.includes('시티') ? 'citytour' : 'general';
+            const finalReason = reasonRaw.includes('공공') ? '공공예약' : '기타';
+
             try {
                 const docSnap = await db.collection('reports').doc(globalDocId).get();
                 
                 if(docSnap.exists) {
                     const data = docSnap.data();
-                    document.getElementById('m-date').value = data.date || '';
-                    document.getElementById('m-car-type').value = data.carType || '유니버스';
-                    document.getElementById('m-car').value = data.car || '';
-                    document.getElementById('m-driver1').value = data.driver1 || '';
-                    document.getElementById('m-driver2').value = data.driver2 || '';
-                    document.getElementById('m-type').value = data.type || 'general';
-                    setRadioValue('m-reason', data.reason || '');
+                    document.getElementById('m-date').value = data.date || pDate;
+                    
+                    // 💡 DB에 저장된 게 빈칸이면, 배차창에서 넘어온 따끈따끈한 정보를 강제로 넣습니다!
+                    document.getElementById('m-car-type').value = data.carType || finalCarType;
+                    document.getElementById('m-car').value = data.car || finalCarNum;
+                    document.getElementById('m-driver1').value = data.driver1 || d1;
+                    document.getElementById('m-driver2').value = data.driver2 || d2;
+                    document.getElementById('m-time-start').value = data.t_start || tIn;
+                    document.getElementById('m-time-end').value = data.t_end || tOut;
+                    
+                    document.getElementById('m-type').value = data.type || finalType;
+                    setRadioValue('m-reason', data.reason || finalReason);
                     setRadioValue('m-trip', data.trip || '당일');
                     document.getElementById('m-trip-day').value = data.tripDay || '';
-                    document.getElementById('m-time-start').value = data.t_start || '';
-                    document.getElementById('m-time-end').value = data.t_end || '';
                     document.getElementById('m-km-start').value = data.k_start || '';
                     document.getElementById('m-km-end').value = data.k_end || '';
                     document.getElementById('m-loc-start').value = data.l_start || '';
-                    document.getElementById('m-loc-end').value = data.l_end || '';
+                    document.getElementById('m-loc-end').value = data.l_end || urlParams.get('dest') || '';
                     document.getElementById('m-pax-w').value = data.p_w || '';
                     document.getElementById('m-pax-n').value = data.p_n || '';
                     document.getElementById('m-cust-name').value = data.c_name || '';
@@ -357,31 +384,15 @@
                     }, 100);
                 } else {
                     document.getElementById('m-date').value = pDate;
-                    
-                    let passedCar = (urlParams.get('car') || '').trim();
-                    if(carMap[passedCar]) {
-                        document.getElementById('m-car-type').value = carMap[passedCar].type;
-                        document.getElementById('m-car').value = carMap[passedCar].num;
-                    } else {
-                        document.getElementById('m-car').value = passedCar; 
-                    }
-
-                    // 💡 황덕일 기사님 원천 차단 필터 적용!
-                    let driversRaw = (urlParams.get('driver') || '').split(',');
-                    let drivers = driversRaw.map(d => d.trim()).filter(d => d && d !== '황덕일');
-                    
-                    document.getElementById('m-driver1').value = drivers[0] || '';
-                    document.getElementById('m-driver2').value = drivers[1] || '';
-
-                    const reason = urlParams.get('reason') || '';
-                    document.getElementById('m-type').value = reason.includes('시티') ? 'citytour' : 'general';
+                    document.getElementById('m-car-type').value = finalCarType;
+                    document.getElementById('m-car').value = finalCarNum;
+                    document.getElementById('m-driver1').value = d1;
+                    document.getElementById('m-driver2').value = d2;
+                    document.getElementById('m-time-start').value = tIn;
+                    document.getElementById('m-time-end').value = tOut;
+                    document.getElementById('m-type').value = finalType;
+                    setRadioValue('m-reason', finalReason);
                     document.getElementById('m-loc-end').value = urlParams.get('dest') || '';
-                    setRadioValue('m-reason', reason.includes('공공') ? '공공예약' : '기타');
-                    
-                    let tIn = urlParams.get('in');
-                    let tOut = urlParams.get('out');
-                    if(tIn) { let h = Math.floor(tIn); let m = Math.round((tIn-h)*60); document.getElementById('m-time-start').value = String(h).padStart(2,'0')+":"+String(m).padStart(2,'0'); }
-                    if(tOut) { let h = Math.floor(tOut); let m = Math.round((tOut-h)*60); document.getElementById('m-time-end').value = String(h).padStart(2,'0')+":"+String(m).padStart(2,'0'); }
                 }
             } catch(e) { console.error("DB Load Error", e); }
             
