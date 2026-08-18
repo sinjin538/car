@@ -59,6 +59,8 @@
             .type-general #pt-trip-day { top: 12.5%; left: 62%; font-size: 14px; color: #0056b3; }
 
             .type-general #pt-car-type { top: 16%; left: 16%; font-size: 14px;} 
+            /* 🔥 호차(예: 13호차) 인쇄 위치 (필요에 따라 % 수정) */
+            .type-general #pt-car-name { top: 16%; left: 26%; } 
             .type-general #pt-car { top: 16%; left: 38%; } 
             
             .type-general #pt-driver1 { top: 15%; left: 58%; font-size: 13px; } 
@@ -87,7 +89,7 @@
             .type-citytour #pt-year, .type-citytour #pt-month, .type-citytour #pt-weekday { display: none; }
             .type-citytour #pt-chk-trip-1, .type-citytour #pt-chk-trip-2, .type-citytour #pt-chk-trip-3, .type-citytour #pt-trip-day { display: none; }
             .type-citytour #pt-day { top: 33%; left: 30%; font-size: 14px; } 
-            .type-citytour #pt-car, .type-citytour #pt-car-type { display: none; }
+            .type-citytour #pt-car-type, .type-citytour #pt-car-name, .type-citytour #pt-car { display: none; }
             .type-citytour #pt-driver1 { top: 49%; left: 25%; font-size: 13px;}
             .type-citytour #pt-driver2 { top: 52%; left: 25%; font-size: 13px;}
             .type-citytour #pt-driver1-sign { top: 47%; left: 40%; }
@@ -160,7 +162,9 @@
                             <option value="기타">기타</option>
                         </select>
                     </div>
-                    <div class="form-group"><label class="form-label">차량번호 (자동변환)</label><input type="text" id="m-car" class="form-input" readonly></div>
+                    <!-- 🔥 호차 칸과 차량번호 칸을 완전히 분리했습니다! -->
+                    <div class="form-group"><label class="form-label">호차</label><input type="text" id="m-car-name" class="form-input" readonly></div>
+                    <div class="form-group"><label class="form-label">차량번호</label><input type="text" id="m-car" class="form-input" readonly></div>
                     
                     <div class="form-group"><label class="form-label">운전원 (정)</label><input type="text" id="m-driver1" class="form-input" readonly></div>
                     <div class="form-group"><label class="form-label">부운전원 (부)</label><input type="text" id="m-driver2" class="form-input" readonly></div>
@@ -238,7 +242,9 @@
         <div class="print-data chk-mark" id="pt-chk-4" style="display:none;">✔</div>
         <div class="print-data chk-mark" id="pt-chk-5" style="display:none;">✔</div>
         
-        <div class="print-data" id="pt-car-type"></div><div class="print-data" id="pt-car"></div>
+        <div class="print-data" id="pt-car-type"></div>
+        <div class="print-data" id="pt-car-name"></div> <!-- 🔥 호차 인쇄용 태그 추가 -->
+        <div class="print-data" id="pt-car"></div>
         
         <div class="print-data" id="pt-driver1"></div><img class="print-sign" id="pt-driver1-sign" style="display:none;">
         <div class="print-data" id="pt-driver2"></div><img class="print-sign" id="pt-driver2-sign" style="display:none;">
@@ -309,7 +315,6 @@
             "14호차": { type: "쏠라티", num: "732무8376" }
         };
 
-        // 🔥 숫자(8, 21.5)를 시간형식(08:00, 21:30)으로 완벽하게 바꿔주는 마법의 함수
         function parseTimeParam(t) {
             if (!t) return '';
             if (t.includes(':')) return t; 
@@ -332,13 +337,13 @@
             if(!resId || !pDate) return;
             globalDocId = resId + "_" + pDate; 
 
-            // 🔥 배차창에서 넘어온 정보들 예쁘게 다듬기
             let tIn = parseTimeParam(urlParams.get('in'));
             let tOut = parseTimeParam(urlParams.get('out'));
             
             let passedCar = (urlParams.get('car') || '').trim();
             let finalCarType = carMap[passedCar] ? carMap[passedCar].type : '유니버스';
-            let finalCarNum = carMap[passedCar] ? carMap[passedCar].num : passedCar;
+            let finalCarName = passedCar; // 호차 (예: 13호차)
+            let finalCarNum = carMap[passedCar] ? carMap[passedCar].num : passedCar; // 차량번호 (예: 732무8375)
 
             let driversRaw = (urlParams.get('driver') || '').split(',');
             let drivers = driversRaw.map(d => d.trim()).filter(d => d && d !== '황덕일');
@@ -356,8 +361,8 @@
                     const data = docSnap.data();
                     document.getElementById('m-date').value = data.date || pDate;
                     
-                    // 💡 DB에 저장된 게 빈칸이면, 배차창에서 넘어온 따끈따끈한 정보를 강제로 넣습니다!
                     document.getElementById('m-car-type').value = data.carType || finalCarType;
+                    document.getElementById('m-car-name').value = data.carName || finalCarName; // 🔥 호차 데이터
                     document.getElementById('m-car').value = data.car || finalCarNum;
                     document.getElementById('m-driver1').value = data.driver1 || d1;
                     document.getElementById('m-driver2').value = data.driver2 || d2;
@@ -385,6 +390,7 @@
                 } else {
                     document.getElementById('m-date').value = pDate;
                     document.getElementById('m-car-type').value = finalCarType;
+                    document.getElementById('m-car-name').value = finalCarName; // 🔥 호차 새문서 데이터
                     document.getElementById('m-car').value = finalCarNum;
                     document.getElementById('m-driver1').value = d1;
                     document.getElementById('m-driver2').value = d2;
@@ -405,6 +411,7 @@
                 const reportData = {
                     date: document.getElementById('m-date').value,
                     carType: document.getElementById('m-car-type').value,
+                    carName: document.getElementById('m-car-name').value, // 🔥 호차 저장
                     car: document.getElementById('m-car').value,
                     driver1: document.getElementById('m-driver1').value,
                     driver2: document.getElementById('m-driver2').value,
@@ -479,6 +486,7 @@
             if(reason === '기타') document.getElementById('pt-chk-5').style.display = 'block';
 
             document.getElementById('pt-car-type').innerText = document.getElementById('m-car-type').value || '';
+            document.getElementById('pt-car-name').innerText = document.getElementById('m-car-name').value || ''; // 🔥 호차 인쇄
             document.getElementById('pt-car').innerText = document.getElementById('m-car').value || '';
             
             document.getElementById('pt-driver1').innerText = document.getElementById('m-driver1').value || '';
