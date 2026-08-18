@@ -458,6 +458,7 @@
         }
         // 🔥 모듈 3으로 데이터를 싸서 던져주는 엔진 🔥
         // 🔥 클라우드 시대에 맞게 진화한 모듈 3 연결 엔진 🔥
+        // 🔥 클라우드 시대에 맞게 진화한 모듈 3 연결 엔진 🔥
         function goToReport() {
             const resId = document.getElementById('settle-res-id').value;
             const clickedDate = document.getElementById('settle-date').value;
@@ -465,12 +466,14 @@
             const d = allReservations.find(r => r.id === resId);
             
             if (d) {
-                // 로컬스토리지(임시저장)는 버리고, 주소창(URL)에 입장권 정보를 달아서 보냅니다!
+                // 🔥 범인 검거 완료! (d.assigned 바구니에 있는 명단을 쉼표로 묶어서 보냅니다)
+                const driversStr = (d.assigned && d.assigned.length > 0) ? d.assigned.join(',') : currentUser;
+
                 const params = new URLSearchParams({
                     resId: resId,
                     date: clickedDate,
                     car: d.vehicle || '',
-                    driver: d.driver || currentUser,   // 👈 해결: '박기준, 변석현' 통째로 챙겨서 보냄!
+                    driver: driversStr,   // 👈 드디어 '박기준,변석현' 통째로 날아갑니다!
                     reason: d.type || '',
                     dest: d.dest || '',
                     in: document.getElementById('settle-in').value,
