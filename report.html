@@ -48,20 +48,26 @@
             .print-sign { position: absolute; z-index: 10; width: 70px; height: 35px; }
             .chk-mark { font-size: 16px; color: #d9534f; font-weight: bold; }
 
+            /* ========================================================
+               🎯 영점 조절 구역 (대표님이 퍼센트(%)를 고쳐서 맞춰주세요!)
+               ======================================================== */
             .type-general #pt-year { top: 9.5%; left: 32%; }
             .type-general #pt-month { top: 9.5%; left: 38%; }
             .type-general #pt-day { top: 9.5%; left: 44%; }
             .type-general #pt-weekday { top: 9.5%; left: 52%; }
             
-            .type-general #pt-chk-trip-1 { top: 12.5%; left: 32%; }
-            .type-general #pt-chk-trip-2 { top: 12.5%; left: 42%; }
-            .type-general #pt-chk-trip-3 { top: 12.5%; left: 52%; }
-            .type-general #pt-trip-day { top: 12.5%; left: 62%; font-size: 14px; color: #0056b3; }
+            /* 🔥 [새로운 기능 1] 1박 2일 숫자 분리 좌표 */
+            .type-general #pt-chk-trip-1 { top: 12.5%; left: 32%; } /* 당일운행 체크(✔) */
+            .type-general #pt-chk-trip-2 { top: 12.5%; left: 42%; } /* 1박2일 체크(✔) */
+            .type-general #pt-chk-trip-3 { top: 12.5%; left: 52%; } /* 2박3일 체크(✔) */
+            
+            .type-general #pt-trip-night { top: 12.5%; left: 45%; } /* O박 의 숫자(예: 1) 자리 */
+            .type-general #pt-trip-days { top: 12.5%; left: 48%; }  /* O일 의 숫자(예: 2) 자리 */
+            .type-general #pt-trip-day-num { top: 12.5%; left: 62%; font-size: 16px; color: #0056b3; } /* O일차 숫자(예: 1) 자리 */
 
             .type-general #pt-car-type { top: 16%; left: 16%; font-size: 14px;} 
-            /* 🔥 호차(예: 13호차) 인쇄 위치 (필요에 따라 % 수정) */
-            .type-general #pt-car-name { top: 16%; left: 26%; } 
-            .type-general #pt-car { top: 16%; left: 38%; } 
+            .type-general #pt-car-name { top: 16%; left: 26%; } /* 호차 */
+            .type-general #pt-car { top: 16%; left: 38%; } /* 차량번호 */
             
             .type-general #pt-driver1 { top: 15%; left: 58%; font-size: 13px; } 
             .type-general #pt-driver2 { top: 17%; left: 58%; font-size: 13px; } 
@@ -74,8 +80,11 @@
             .type-general #pt-chk-4 { top: 22.5%; left: 59%; }   
             .type-general #pt-chk-5 { top: 22.5%; left: 69%; }   
             
+            /* 🔥 [새로운 기능 2] 운행시간 뺄셈 자동계산 좌표 */
             .type-general #pt-time-start { top: 46%; left: 28%; }
             .type-general #pt-time-end { top: 49%; left: 28%; }
+            .type-general #pt-time-total { top: 52%; left: 28%; font-size: 16px; color: #0056b3; } /* 뺀 시간 출력 자리 (예: 09:00) */
+
             .type-general #pt-km-start { top: 46%; left: 65%; }
             .type-general #pt-km-end { top: 49%; left: 65%; }
             .type-general #pt-km-total { top: 52%; left: 65%; font-size: 18px; color: #0056b3; }
@@ -86,8 +95,10 @@
             .type-general #pt-cust-name { top: 73%; left: 70%; }
             .type-general #pt-cust-sign { top: 71.5%; left: 82%; } 
 
+            /* 시티투어 좌표 */
             .type-citytour #pt-year, .type-citytour #pt-month, .type-citytour #pt-weekday { display: none; }
-            .type-citytour #pt-chk-trip-1, .type-citytour #pt-chk-trip-2, .type-citytour #pt-chk-trip-3, .type-citytour #pt-trip-day { display: none; }
+            .type-citytour #pt-chk-trip-1, .type-citytour #pt-chk-trip-2, .type-citytour #pt-chk-trip-3 { display: none; }
+            .type-citytour #pt-trip-night, .type-citytour #pt-trip-days, .type-citytour #pt-trip-day-num { display: none; }
             .type-citytour #pt-day { top: 33%; left: 30%; font-size: 14px; } 
             .type-citytour #pt-car-type, .type-citytour #pt-car-name, .type-citytour #pt-car { display: none; }
             .type-citytour #pt-driver1 { top: 49%; left: 25%; font-size: 13px;}
@@ -96,6 +107,7 @@
             .type-citytour #pt-driver2-sign { top: 51%; left: 40%; }
             .type-citytour #pt-time-start { top: 53.5%; left: 25%; }
             .type-citytour #pt-time-end { top: 53.5%; left: 55%; }
+            .type-citytour #pt-time-total { display: none; }
             .type-citytour #pt-km-start { top: 56.5%; left: 25%; }
             .type-citytour #pt-km-end { top: 56.5%; left: 55%; }
             .type-citytour #pt-km-total { top: 56.5%; left: 85%; font-size: 18px; color: #0056b3; }
@@ -135,7 +147,7 @@
                 </div>
                 <div style="margin-top: 10px; display: flex; align-items: center; gap: 10px;">
                     <label style="font-weight: 600; color: #555;">진행 일차:</label>
-                    <input type="number" id="m-trip-day" class="form-input" style="width: 80px; padding: 8px;" placeholder="예: 2"> <span style="font-weight: 600;">일차</span>
+                    <input type="number" id="m-trip-day" class="form-input" style="width: 80px; padding: 8px;" placeholder="예: 2"> <span style="font-weight: 600;">일차 숫자만 입력</span>
                 </div>
             </div>
 
@@ -155,14 +167,13 @@
                 <div class="grid-2">
                     <div class="form-group"><label class="form-label">운행일자</label><input type="date" id="m-date" class="form-input" readonly></div>
                     <div class="form-group">
-                        <label class="form-label">차종 (자동선택)</label>
+                        <label class="form-label">차종</label>
                         <select id="m-car-type" class="form-select" readonly style="background-color: #e9ecef; pointer-events: none;">
                             <option value="유니버스">유니버스</option>
                             <option value="쏠라티">쏠라티</option>
                             <option value="기타">기타</option>
                         </select>
                     </div>
-                    <!-- 🔥 호차 칸과 차량번호 칸을 완전히 분리했습니다! -->
                     <div class="form-group"><label class="form-label">호차</label><input type="text" id="m-car-name" class="form-input" readonly></div>
                     <div class="form-group"><label class="form-label">차량번호</label><input type="text" id="m-car" class="form-input" readonly></div>
                     
@@ -231,10 +242,14 @@
         <div class="print-data" id="pt-year"></div><div class="print-data" id="pt-month"></div>
         <div class="print-data" id="pt-day"></div><div class="print-data" id="pt-weekday"></div>
         
+        <!-- 🔥 변경: 숙박 숫자 분리 출력 -->
         <div class="print-data chk-mark" id="pt-chk-trip-1" style="display:none;">✔</div>
         <div class="print-data chk-mark" id="pt-chk-trip-2" style="display:none;">✔</div>
         <div class="print-data chk-mark" id="pt-chk-trip-3" style="display:none;">✔</div>
-        <div class="print-data" id="pt-trip-day"></div>
+        
+        <div class="print-data" id="pt-trip-night" style="display:none;"></div>
+        <div class="print-data" id="pt-trip-days" style="display:none;"></div>
+        <div class="print-data" id="pt-trip-day-num" style="display:none;"></div>
 
         <div class="print-data chk-mark" id="pt-chk-1" style="display:none;">✔</div>
         <div class="print-data chk-mark" id="pt-chk-2" style="display:none;">✔</div>
@@ -243,13 +258,16 @@
         <div class="print-data chk-mark" id="pt-chk-5" style="display:none;">✔</div>
         
         <div class="print-data" id="pt-car-type"></div>
-        <div class="print-data" id="pt-car-name"></div> <!-- 🔥 호차 인쇄용 태그 추가 -->
+        <div class="print-data" id="pt-car-name"></div>
         <div class="print-data" id="pt-car"></div>
         
         <div class="print-data" id="pt-driver1"></div><img class="print-sign" id="pt-driver1-sign" style="display:none;">
         <div class="print-data" id="pt-driver2"></div><img class="print-sign" id="pt-driver2-sign" style="display:none;">
         
         <div class="print-data" id="pt-time-start"></div><div class="print-data" id="pt-time-end"></div>
+        <!-- 🔥 추가: 총 운행시간 자동계산 -->
+        <div class="print-data" id="pt-time-total"></div>
+
         <div class="print-data" id="pt-km-start"></div><div class="print-data" id="pt-km-end"></div><div class="print-data" id="pt-km-total"></div>
         <div class="print-data" id="pt-loc-start"></div><div class="print-data" id="pt-loc-end"></div>
         <div class="print-data" id="pt-pax-w"></div><div class="print-data" id="pt-pax-n"></div>
@@ -342,8 +360,8 @@
             
             let passedCar = (urlParams.get('car') || '').trim();
             let finalCarType = carMap[passedCar] ? carMap[passedCar].type : '유니버스';
-            let finalCarName = passedCar; // 호차 (예: 13호차)
-            let finalCarNum = carMap[passedCar] ? carMap[passedCar].num : passedCar; // 차량번호 (예: 732무8375)
+            let finalCarName = passedCar; 
+            let finalCarNum = carMap[passedCar] ? carMap[passedCar].num : passedCar; 
 
             let driversRaw = (urlParams.get('driver') || '').split(',');
             let drivers = driversRaw.map(d => d.trim()).filter(d => d && d !== '황덕일');
@@ -362,7 +380,7 @@
                     document.getElementById('m-date').value = data.date || pDate;
                     
                     document.getElementById('m-car-type').value = data.carType || finalCarType;
-                    document.getElementById('m-car-name').value = data.carName || finalCarName; // 🔥 호차 데이터
+                    document.getElementById('m-car-name').value = data.carName || finalCarName; 
                     document.getElementById('m-car').value = data.car || finalCarNum;
                     document.getElementById('m-driver1').value = data.driver1 || d1;
                     document.getElementById('m-driver2').value = data.driver2 || d2;
@@ -390,7 +408,7 @@
                 } else {
                     document.getElementById('m-date').value = pDate;
                     document.getElementById('m-car-type').value = finalCarType;
-                    document.getElementById('m-car-name').value = finalCarName; // 🔥 호차 새문서 데이터
+                    document.getElementById('m-car-name').value = finalCarName; 
                     document.getElementById('m-car').value = finalCarNum;
                     document.getElementById('m-driver1').value = d1;
                     document.getElementById('m-driver2').value = d2;
@@ -411,7 +429,7 @@
                 const reportData = {
                     date: document.getElementById('m-date').value,
                     carType: document.getElementById('m-car-type').value,
-                    carName: document.getElementById('m-car-name').value, // 🔥 호차 저장
+                    carName: document.getElementById('m-car-name').value, 
                     car: document.getElementById('m-car').value,
                     driver1: document.getElementById('m-driver1').value,
                     driver2: document.getElementById('m-driver2').value,
@@ -469,13 +487,36 @@
                 document.getElementById('pt-weekday').innerText = weekdays[d.getDay()]; 
             }
 
+            // 🔥 [변경] 일정 체크 및 숫자 분리 로직
             const trip = getRadioValue('m-trip');
-            for(let i=1; i<=3; i++) document.getElementById('pt-chk-trip-'+i).style.display = 'none';
-            if(trip === '당일') document.getElementById('pt-chk-trip-1').style.display = 'block';
-            if(trip === '1박2일') document.getElementById('pt-chk-trip-2').style.display = 'block';
-            if(trip === '2박3일') document.getElementById('pt-chk-trip-3').style.display = 'block';
             const tripDay = document.getElementById('m-trip-day').value;
-            document.getElementById('pt-trip-day').innerText = tripDay ? `(${tripDay}) 일차` : '';
+
+            // 초기화
+            for(let i=1; i<=3; i++) document.getElementById('pt-chk-trip-'+i).style.display = 'none';
+            document.getElementById('pt-trip-night').style.display = 'none';
+            document.getElementById('pt-trip-days').style.display = 'none';
+            document.getElementById('pt-trip-day-num').style.display = 'none';
+
+            if(trip === '당일') {
+                document.getElementById('pt-chk-trip-1').style.display = 'block';
+            } else if(trip === '1박2일') {
+                document.getElementById('pt-chk-trip-2').style.display = 'block';
+                document.getElementById('pt-trip-night').innerText = '1';
+                document.getElementById('pt-trip-night').style.display = 'block';
+                document.getElementById('pt-trip-days').innerText = '2';
+                document.getElementById('pt-trip-days').style.display = 'block';
+            } else if(trip === '2박3일') {
+                document.getElementById('pt-chk-trip-3').style.display = 'block';
+                document.getElementById('pt-trip-night').innerText = '2';
+                document.getElementById('pt-trip-night').style.display = 'block';
+                document.getElementById('pt-trip-days').innerText = '3';
+                document.getElementById('pt-trip-days').style.display = 'block';
+            }
+            
+            if (trip !== '당일' && tripDay) {
+                document.getElementById('pt-trip-day-num').innerText = tripDay;
+                document.getElementById('pt-trip-day-num').style.display = 'block';
+            }
 
             const reason = getRadioValue('m-reason');
             for(let i=1; i<=5; i++) document.getElementById('pt-chk-'+i).style.display = 'none';
@@ -486,14 +527,31 @@
             if(reason === '기타') document.getElementById('pt-chk-5').style.display = 'block';
 
             document.getElementById('pt-car-type').innerText = document.getElementById('m-car-type').value || '';
-            document.getElementById('pt-car-name').innerText = document.getElementById('m-car-name').value || ''; // 🔥 호차 인쇄
+            document.getElementById('pt-car-name').innerText = document.getElementById('m-car-name').value || ''; 
             document.getElementById('pt-car').innerText = document.getElementById('m-car').value || '';
             
             document.getElementById('pt-driver1').innerText = document.getElementById('m-driver1').value || '';
             document.getElementById('pt-driver2').innerText = document.getElementById('m-driver2').value || '';
             
-            document.getElementById('pt-time-start').innerText = document.getElementById('m-time-start').value || '';
-            document.getElementById('pt-time-end').innerText = document.getElementById('m-time-end').value || '';
+            // 🔥 [추가] 운행시간 자동 뺄셈 계산
+            const tStart = document.getElementById('m-time-start').value || '';
+            const tEnd = document.getElementById('m-time-end').value || '';
+            
+            document.getElementById('pt-time-start').innerText = tStart;
+            document.getElementById('pt-time-end').innerText = tEnd;
+            
+            if(tStart && tEnd) {
+                let sParts = tStart.split(':');
+                let eParts = tEnd.split(':');
+                let diffMins = (parseInt(eParts[0]) * 60 + parseInt(eParts[1])) - (parseInt(sParts[0]) * 60 + parseInt(sParts[1]));
+                if(diffMins < 0) diffMins += 24 * 60; // 도착이 자정을 넘길 경우를 대비
+                let h = Math.floor(diffMins / 60);
+                let m = diffMins % 60;
+                document.getElementById('pt-time-total').innerText = String(h).padStart(2,'0') + ":" + String(m).padStart(2,'0');
+            } else {
+                document.getElementById('pt-time-total').innerText = '';
+            }
+
             document.getElementById('pt-km-start').innerText = document.getElementById('m-km-start').value || '';
             document.getElementById('pt-km-end').innerText = document.getElementById('m-km-end').value || '';
             document.getElementById('pt-km-total').innerText = document.getElementById('m-km-total').innerText || '';
