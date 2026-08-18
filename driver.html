@@ -451,10 +451,10 @@
             hideLoading();
         }
 
-        function logout() {
-            localStorage.clear();
-            sessionStorage.clear();
-            window.location.reload();
+        // 🔥 수정된 로그아웃 엔진 (로그인 기록만 쏙 지우기) 🔥
+        function logout() { 
+            localStorage.removeItem('loggedInUser'); 
+            window.location.reload(); 
         }
         // 🔥 모듈 3으로 데이터를 싸서 던져주는 엔진 🔥
         function goToReport() {
