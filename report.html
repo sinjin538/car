@@ -45,20 +45,22 @@
             #print-view { display: block !important; position: relative; width: 210mm; height: 297mm; overflow: hidden; page-break-after: avoid; }
             #print-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; object-fit: fill; }
             .print-data { position: absolute; font-size: 15px; font-weight: bold; color: #000; z-index: 10; font-family: 'Malgun Gothic', sans-serif; white-space: nowrap; }
-            .print-sign { position: absolute; z-index: 10; width: 70px; height: 35px; }
+            
+            /* 🔥 서명 크기를 시원하게 100x50으로 키웠습니다! */
+            .print-sign { position: absolute; z-index: 10; width: 100px; height: 50px; }
             .chk-mark { font-size: 16px; color: #d9534f; font-weight: bold; }
 
             /* ========================================================
-               🎯 영점 조절 구역 (대표님이 퍼센트(%)를 고쳐서 맞춰주세요!)
+               🎯 영점 조절 구역 (인쇄 화면 보시고 % 숫자를 수정하세요!)
                ======================================================== */
             .type-general #pt-year { top: 8.9%; left: 22.8%; font-size:18px;}
             .type-general #pt-month { top: 8.9%; left: 36%; font-size:18px; }
             .type-general #pt-day { top: 8.9%; left: 46%; font-size:18px; }
             .type-general #pt-weekday { top: 8.9%; left: 54.8%; font-size:18px; }
-/*운행사유*/
+            
             .type-general #pt-chk-trip-1 { top: 14.5%; left: 20%; } 
             .type-general #pt-chk-trip-2 { top: 14.5%; left: 42%; } 
-            .type-general #pt-chk-trip-3 { top: 14.5%; left: 52%; } 
+            .type-general #pt-chk-trip-3 { top: 14.5%; left: 52%; }
             
             .type-general #pt-trip-night { top: 22.7%; left: 50%; } 
             .type-general #pt-trip-days { top: 12.5%; left: 48%; }  
@@ -77,7 +79,7 @@
             .type-general #pt-chk-2 { top: 22.5%; left: 36%; }   
             .type-general #pt-chk-3 { top: 22.5%; left: 49%; }   
             .type-general #pt-chk-4 { top: 22.5%; left: 59%; }   
-            .type-general #pt-chk-5 { top: 22.5%; left: 69%; }   
+            .type-general #pt-chk-5 { top: 22.5%; left: 69%; } 
             
             /* 기존 차고지 출/도착 및 누계 거리 */
             .type-general #pt-time-start { top: 28%; left: 32%; font-size: 18px; }
@@ -86,8 +88,8 @@
             
             .type-general #pt-km-start { top: 28%; left: 78%; font-size: 18px; }
             .type-general #pt-km-end { top: 30.8%; left: 78%; font-size: 18px;}
-            .type-general #pt-km-total { top: 33.6%; left: 79%; font-size: 18px;}
-
+            .type-general #pt-km-total { top: 33.6%; left: 79%; font-size: 18px;} 
+            
             /* 🔥 [새로운 기능] 고객 탑승/하차 시간 및 거리 인쇄 좌표 */
             .type-general #pt-time-board { top: 42.2%; left: 32%; font-size: 18px;}  /* 탑승시간 자리 */
             .type-general #pt-time-alight { top: 47.8%; left: 32%; font-size: 18px;} /* 하차시간 자리 */
@@ -95,14 +97,22 @@
 
             .type-general #pt-km-board { top: 42.2%; left: 78%; font-size: 18px;}  /* 탑승 시 누계 자리 */
             .type-general #pt-km-alight { top: 47.8%; left: 78%; font-size: 18px;} /* 하차 시 누계 자리 */
-            .type-general #pt-km-board-total { top: 50.3%; left: 79%; font-size: 18px;} /* 탑승 총 거리 자리 */
+            .type-general #pt-km-board-total { top: 50.3%; left: 79%; font-size: 18px;} /* 탑승 총 거리 자리 */ 
 
             .type-general #pt-loc-start { top: 40.1%; left: 25%; font-size: 18px; }
             .type-general #pt-loc-end { top: 45.5%; left: 25%; font-size: 18px;}
             .type-general #pt-pax-w { top: 53.5%; left: 26.7%; font-size: 18px; }
             .type-general #pt-pax-n { top: 53.5%; left: 37.5%; font-size: 18px; }
+            
+            /* 🔥 [새로 추가된 영점 조절 구역] 장애인/비장애인, 기타사항, 두번째 서명 */
+            .type-general #pt-pax-disabled { top: 76%; left: 25%; } /* 장애인(명) 위치 */
+            .type-general #pt-pax-non-disabled { top: 76%; left: 38%; } /* 비장애인(명) 위치 */
+            .type-general #pt-note { top: 79%; left: 25%; font-size: 14px; } /* 기타사항 위치 */
+            
             .type-general #pt-cust-name { top: 53.5%; left: 78%; font-size: 18px; }
-            .type-general #pt-cust-sign { top: 63.5%; left: 80%; } 
+            .type-general #pt-cust-sign { top: 63.5%; left: 80%; } /* 1번째 고객 서명 위치 */
+            .type-general #pt-cust-sign2 { top: 82%; left: 82%; } /* 🔥 2번째 고객 서명 복사본 위치 */
+
             /* 시티투어 좌표 생략 (동일) */
             .type-citytour #pt-year, .type-citytour #pt-month, .type-citytour #pt-weekday { display: none; }
             .type-citytour #pt-chk-trip-1, .type-citytour #pt-chk-trip-2, .type-citytour #pt-chk-trip-3 { display: none; }
@@ -122,7 +132,6 @@
             .type-citytour #pt-km-end { top: 56.5%; left: 55%; }
             .type-citytour #pt-km-total { top: 56.5%; left: 85%; font-size: 18px; color: #0056b3; }
             
-            /* 시티투어 고객 기록 숨김 (필요시 활성화) */
             .type-citytour #pt-time-board, .type-citytour #pt-time-alight, .type-citytour #pt-time-board-total,
             .type-citytour #pt-km-board, .type-citytour #pt-km-alight, .type-citytour #pt-km-board-total { display: none; }
 
@@ -130,6 +139,8 @@
             .type-citytour #pt-loc-end { top: 41.5%; left: 25%; }
             .type-citytour #pt-pax-w { top: 44.5%; left: 25%; }
             .type-citytour #pt-pax-n { top: 44.5%; left: 45%; }
+            .type-citytour #pt-pax-disabled, .type-citytour #pt-pax-non-disabled, .type-citytour #pt-note, .type-citytour #pt-cust-sign2 { display: none; }
+
             .type-citytour #pt-cust-name { top: 75%; left: 70%; }
             .type-citytour #pt-cust-sign { top: 73%; left: 83%; }
         }
@@ -216,7 +227,6 @@
                 <div class="card-title">2. 운행 기록 및 거리</div>
                 <p style="font-size:0.8rem; color:#888; margin-bottom:10px;">※ 숫자만 입력하면 콤마(,)는 알아서 계산됩니다!</p>
                 
-                <!-- 기존 차고지 정보 -->
                 <div class="grid-2">
                     <div class="form-group"><label class="form-label">차고지 출발시간</label><input type="time" id="m-time-start" class="form-input"></div>
                     <div class="form-group"><label class="form-label">차고지 도착시간</label><input type="time" id="m-time-end" class="form-input"></div>
@@ -225,7 +235,6 @@
                 </div>
                 <div class="calc-result" style="margin-bottom: 15px;">차고지 총 운행 거리: <span id="m-km-total">0</span> km</div>
 
-                <!-- 🔥 고객 탑승 정보 추가 -->
                 <div class="grid-2" style="border-top: 2px dashed #eee; padding-top: 15px;">
                     <div class="form-group"><label class="form-label">고객 탑승시간</label><input type="time" id="m-time-board" class="form-input"></div>
                     <div class="form-group"><label class="form-label">고객 하차시간</label><input type="time" id="m-time-alight" class="form-input"></div>
@@ -236,12 +245,23 @@
             </div>
 
             <div class="card">
-                <div class="card-title">3. 탑승객 정보</div>
+                <div class="card-title">3. 탑승객 정보 및 기타사항</div>
                 <div class="grid-2">
                     <div class="form-group"><label class="form-label">출발지</label><input type="text" id="m-loc-start" class="form-input"></div>
                     <div class="form-group"><label class="form-label">목적지</label><input type="text" id="m-loc-end" class="form-input"></div>
+                    
                     <div class="form-group"><label class="form-label">휠체어 (명)</label><input type="number" id="m-pax-w" class="form-input"></div>
                     <div class="form-group"><label class="form-label">일반 (명)</label><input type="number" id="m-pax-n" class="form-input"></div>
+                    
+                    <!-- 🔥 장애인 / 비장애인 추가 -->
+                    <div class="form-group"><label class="form-label">장애인 (명)</label><input type="number" id="m-pax-disabled" class="form-input"></div>
+                    <div class="form-group"><label class="form-label">비장애인 (명)</label><input type="number" id="m-pax-non-disabled" class="form-input"></div>
+                </div>
+                
+                <!-- 🔥 기타사항(메모) 추가 -->
+                <div class="form-group" style="margin-top: 10px;">
+                    <label class="form-label">기타사항 (메모)</label>
+                    <input type="text" id="m-note" class="form-input" placeholder="특이사항을 자유롭게 적어주세요">
                 </div>
             </div>
 
@@ -252,6 +272,7 @@
                     <button class="clear-btn" onclick="clearSign('cust-sign-pad')">지우기</button>
                     <canvas id="cust-sign-pad"></canvas>
                 </div>
+                <p style="font-size:0.8rem; color:#007bff; margin-top:5px; text-align:center;">※ 한 번만 서명하시면 인쇄 시 지정된 2곳에 자동으로 찍힙니다!</p>
             </div>
 
             <div class="btn-group">
@@ -290,23 +311,27 @@
         <div class="print-data" id="pt-driver1"></div><img class="print-sign" id="pt-driver1-sign" style="display:none;">
         <div class="print-data" id="pt-driver2"></div><img class="print-sign" id="pt-driver2-sign" style="display:none;">
         
-        <!-- 차고지 시간 및 뺀 시간 -->
         <div class="print-data" id="pt-time-start"></div><div class="print-data" id="pt-time-end"></div>
         <div class="print-data" id="pt-time-total"></div>
 
-        <!-- 🔥 고객 탑승 시간 및 뺀 시간 -->
         <div class="print-data" id="pt-time-board"></div><div class="print-data" id="pt-time-alight"></div>
         <div class="print-data" id="pt-time-board-total"></div>
 
-        <!-- 콤마 적용된 차고지 거리 -->
         <div class="print-data" id="pt-km-start"></div><div class="print-data" id="pt-km-end"></div><div class="print-data" id="pt-km-total"></div>
-        
-        <!-- 🔥 콤마 적용된 고객 탑승 거리 -->
         <div class="print-data" id="pt-km-board"></div><div class="print-data" id="pt-km-alight"></div><div class="print-data" id="pt-km-board-total"></div>
 
         <div class="print-data" id="pt-loc-start"></div><div class="print-data" id="pt-loc-end"></div>
         <div class="print-data" id="pt-pax-w"></div><div class="print-data" id="pt-pax-n"></div>
-        <div class="print-data" id="pt-cust-name"></div><img class="print-sign" id="pt-cust-sign" style="display:none;">
+        
+        <!-- 🔥 새로 추가된 인쇄 항목들 -->
+        <div class="print-data" id="pt-pax-disabled"></div>
+        <div class="print-data" id="pt-pax-non-disabled"></div>
+        <div class="print-data" id="pt-note"></div>
+
+        <div class="print-data" id="pt-cust-name"></div>
+        <!-- 🔥 고객서명 1번, 2번 복사본 태그 -->
+        <img class="print-sign" id="pt-cust-sign" style="display:none;">
+        <img class="print-sign" id="pt-cust-sign2" style="display:none;">
     </div>
 
     <script>
@@ -329,7 +354,9 @@
             const ctx = cvs.getContext('2d');
             let drawing = false;
             cvs.width = cvs.parentElement.clientWidth || 300; 
-            cvs.height = 120; ctx.lineWidth = 12; ctx.lineCap = 'round'; ctx.strokeStyle = '#000'; 
+            
+            // 🔥 사인 굵기를 8로 키워서 선명하고 두껍게 나옵니다!
+            cvs.height = 120; ctx.lineWidth = 8; ctx.lineCap = 'round'; ctx.strokeStyle = '#000'; 
             
             function getPos(e) {
                 const rect = cvs.getBoundingClientRect();
@@ -407,6 +434,11 @@
             const finalType = reasonRaw.includes('시티') ? 'citytour' : 'general';
             const finalReason = reasonRaw.includes('공공') ? '공공예약' : '기타';
 
+            // 🔥 1박/2박 주소창 자동 인식 로직 추가
+            let initialTrip = '당일';
+            if(reasonRaw.includes('1박')) initialTrip = '1박2일';
+            else if(reasonRaw.includes('2박')) initialTrip = '2박3일';
+
             try {
                 const docSnap = await db.collection('reports').doc(globalDocId).get();
                 
@@ -420,13 +452,11 @@
                     document.getElementById('m-driver1').value = data.driver1 || d1;
                     document.getElementById('m-driver2').value = data.driver2 || d2;
                     
-                    // 기존 기록
                     document.getElementById('m-time-start').value = data.t_start || tIn;
                     document.getElementById('m-time-end').value = data.t_end || tOut;
                     document.getElementById('m-km-start').value = data.k_start || '';
                     document.getElementById('m-km-end').value = data.k_end || '';
                     
-                    // 고객 기록
                     document.getElementById('m-time-board').value = data.t_board || '';
                     document.getElementById('m-time-alight').value = data.t_alight || '';
                     document.getElementById('m-km-board').value = data.k_board || '';
@@ -434,12 +464,19 @@
 
                     document.getElementById('m-type').value = data.type || finalType;
                     setRadioValue('m-reason', data.reason || finalReason);
-                    setRadioValue('m-trip', data.trip || '당일');
+                    setRadioValue('m-trip', data.trip || initialTrip); // 🔥 자동인식 적용
+                    
                     document.getElementById('m-trip-day').value = data.tripDay || '';
                     document.getElementById('m-loc-start').value = data.l_start || '';
                     document.getElementById('m-loc-end').value = data.l_end || urlParams.get('dest') || '';
                     document.getElementById('m-pax-w').value = data.p_w || '';
                     document.getElementById('m-pax-n').value = data.p_n || '';
+                    
+                    // 🔥 추가 항목 로드
+                    document.getElementById('m-pax-disabled').value = data.p_disabled || '';
+                    document.getElementById('m-pax-non-disabled').value = data.p_non_disabled || '';
+                    document.getElementById('m-note').value = data.note || '';
+
                     document.getElementById('m-cust-name').value = data.c_name || '';
                     calcKm();
 
@@ -459,6 +496,7 @@
                     document.getElementById('m-time-end').value = tOut;
                     document.getElementById('m-type').value = finalType;
                     setRadioValue('m-reason', finalReason);
+                    setRadioValue('m-trip', initialTrip); // 🔥 자동인식 적용
                     document.getElementById('m-loc-end').value = urlParams.get('dest') || '';
                 }
             } catch(e) { console.error("DB Load Error", e); }
@@ -484,14 +522,17 @@
                     t_end: document.getElementById('m-time-end').value,
                     k_start: document.getElementById('m-km-start').value,
                     k_end: document.getElementById('m-km-end').value,
-                    t_board: document.getElementById('m-time-board').value, // 🔥
-                    t_alight: document.getElementById('m-time-alight').value, // 🔥
-                    k_board: document.getElementById('m-km-board').value, // 🔥
-                    k_alight: document.getElementById('m-km-alight').value, // 🔥
+                    t_board: document.getElementById('m-time-board').value, 
+                    t_alight: document.getElementById('m-time-alight').value, 
+                    k_board: document.getElementById('m-km-board').value, 
+                    k_alight: document.getElementById('m-km-alight').value, 
                     l_start: document.getElementById('m-loc-start').value,
                     l_end: document.getElementById('m-loc-end').value,
                     p_w: document.getElementById('m-pax-w').value,
                     p_n: document.getElementById('m-pax-n').value,
+                    p_disabled: document.getElementById('m-pax-disabled').value, // 🔥
+                    p_non_disabled: document.getElementById('m-pax-non-disabled').value, // 🔥
+                    note: document.getElementById('m-note').value, // 🔥
                     c_name: document.getElementById('m-cust-name').value,
                     driver1Sign: pads['driver1-sign-pad'].cvs.toDataURL('image/png'),
                     driver2Sign: pads['driver2-sign-pad'].cvs.toDataURL('image/png'),
@@ -511,20 +552,18 @@
             }
         }
 
-        // 🔥 입력 즉시 계산 & 화면에 콤마(,) 표시
         function calcKm() {
             let s = parseFloat(document.getElementById('m-km-start').value) || 0;
             let e = parseFloat(document.getElementById('m-km-end').value) || 0;
             let total1 = Math.max(0, e - s);
-            document.getElementById('m-km-total').innerText = total1.toLocaleString(); // 콤마 변환
+            document.getElementById('m-km-total').innerText = total1.toLocaleString(); 
 
             let bs = parseFloat(document.getElementById('m-km-board').value) || 0;
             let be = parseFloat(document.getElementById('m-km-alight').value) || 0;
             let total2 = Math.max(0, be - bs);
-            document.getElementById('m-km-board-total').innerText = total2.toLocaleString(); // 콤마 변환
+            document.getElementById('m-km-board-total').innerText = total2.toLocaleString(); 
         }
 
-        // 🔥 뺀 시간 자동 계산기
         function calcTimeDiff(start, end) {
             if(!start || !end) return '';
             let sParts = start.split(':');
@@ -597,7 +636,6 @@
             document.getElementById('pt-driver1').innerText = document.getElementById('m-driver1').value || '';
             document.getElementById('pt-driver2').innerText = document.getElementById('m-driver2').value || '';
             
-            // 🔥 운행시간 (기존 + 추가된 고객시간) 자동계산
             let ts = document.getElementById('m-time-start').value;
             let te = document.getElementById('m-time-end').value;
             let tbs = document.getElementById('m-time-board').value;
@@ -611,7 +649,6 @@
             document.getElementById('pt-time-alight').innerText = tba || '';
             document.getElementById('pt-time-board-total').innerText = calcTimeDiff(tbs, tba);
 
-            // 🔥 거리 (콤마 자동 적용 .toLocaleString())
             let ks = document.getElementById('m-km-start').value;
             let ke = document.getElementById('m-km-end').value;
             let kbs = document.getElementById('m-km-board').value;
@@ -629,6 +666,12 @@
             document.getElementById('pt-loc-end').innerText = document.getElementById('m-loc-end').value || '';
             document.getElementById('pt-pax-w').innerText = document.getElementById('m-pax-w').value || '';
             document.getElementById('pt-pax-n').innerText = document.getElementById('m-pax-n').value || '';
+            
+            // 🔥 추가된 항목들 인쇄 매핑
+            document.getElementById('pt-pax-disabled').innerText = document.getElementById('m-pax-disabled').value || '';
+            document.getElementById('pt-pax-non-disabled').innerText = document.getElementById('m-pax-non-disabled').value || '';
+            document.getElementById('pt-note').innerText = document.getElementById('m-note').value || '';
+
             document.getElementById('pt-cust-name').innerText = document.getElementById('m-cust-name').value || '';
 
             const d1Sign = pads['driver1-sign-pad'].cvs.toDataURL('image/png');
@@ -641,10 +684,19 @@
             const ptD2 = document.getElementById('pt-driver2-sign');
             if(d2Sign.length > 1300) { ptD2.src = d2Sign; ptD2.style.display = 'block'; } else { ptD2.style.display = 'none'; }
 
+            // 🔥 고객 서명 2개 동시 출력 (분신술)
             const ptCust = document.getElementById('pt-cust-sign');
-            if(cSign.length > 1300) { ptCust.src = cSign; ptCust.style.display = 'block'; } else { ptCust.style.display = 'none'; }
+            const ptCust2 = document.getElementById('pt-cust-sign2');
+            if(cSign.length > 1300) { 
+                ptCust.src = cSign; ptCust.style.display = 'block'; 
+                ptCust2.src = cSign; ptCust2.style.display = 'block'; 
+            } else { 
+                ptCust.style.display = 'none'; 
+                ptCust2.style.display = 'none'; 
+            }
 
-            window.print(); // 👈 이렇게 깔끔하게 바꿔주세요!
+            // 🔥 딜레이(setTimeout) 삭제! 누르자마자 바로 인쇄창 뜸!
+            window.print();
         }
     </script>
 </body>
