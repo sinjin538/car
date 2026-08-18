@@ -1,212 +1,4 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>스마트 운행일보</title>
-    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
-    
-    <!-- 🔥 파이어베이스 엔진 탑재 🔥 -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Pretendard', sans-serif; background-color: #f4f6f9; color: #333; letter-spacing: -0.3px; }
-        #mobile-view { padding-bottom: 80px; }
-        .header { background: #007bff; color: #fff; padding: 15px 20px; text-align: center; font-size: 1.2rem; font-weight: bold; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
-        .back-btn { background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer; }
-        .container { max-width: 600px; margin: 0 auto; padding: 15px; }
-        .card { background: #fff; border-radius: 8px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .card-title { font-size: 1.1rem; font-weight: 700; color: #007bff; margin-bottom: 15px; border-bottom: 2px solid #e8f0fe; padding-bottom: 8px; }
-        .form-group { margin-bottom: 15px; }
-        .form-label { display: block; font-size: 0.9rem; font-weight: 600; color: #555; margin-bottom: 5px; }
-        .form-input, .form-select { width: 100%; padding: 12px; border: 1px solid #ced4da; border-radius: 6px; font-size: 1rem; font-family: inherit; }
-        .form-input[readonly] { background-color: #e9ecef; font-weight: bold; color: #0056b3; border: none;}
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .calc-result { background: #e8f0fe; padding: 12px; border-radius: 6px; text-align: center; margin-top: 10px; border: 1px dashed #007bff; font-weight: bold;}
-        .signature-area { border: 2px solid #ccc; border-radius: 8px; background: #fafbfc; position: relative; margin-top: 10px; }
-        canvas { width: 100%; height: 150px; display: block; touch-action: none; background: transparent; }
-        .clear-btn { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.5); color: #fff; border: none; padding: 4px 10px; border-radius: 4px; font-size: 0.8rem; cursor: pointer; z-index: 5; }
-        
-        .radio-group { display: flex; flex-wrap: wrap; gap: 12px; padding: 10px 0; }
-        .radio-group label { font-size: 1rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; }
-        .radio-group input[type="radio"] { transform: scale(1.2); }
-
-        .btn-group { display: flex; gap: 10px; margin-top: 20px; }
-        .save-btn { flex: 1; padding: 16px; background: #ffc107; color: #000; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(255,193,7,0.2); }
-        .print-btn { flex: 1; padding: 16px; background: #28a745; color: #fff; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(40,167,69,0.2); }
-        .reset-btn { width: 100%; margin-top: 10px; padding: 12px; background: #dc3545; color: #fff; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; }
-
-        /* 🖨️ 인쇄 화면 CSS */
-        #print-view { display: none; }
-        @media print {
-            @page { size: A4 portrait; margin: 0; }
-            html, body { margin: 0; padding: 0; background: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; width: 100%; height: 100%; }
-            #mobile-view { display: none !important; }
-            #print-view { display: block !important; position: relative; width: 210mm; height: 297mm; overflow: hidden; page-break-after: avoid; }
-            #print-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; object-fit: fill; }
-            .print-data { position: absolute; font-size: 16px; font-weight: bold; color: #000; z-index: 10; font-family: 'Malgun Gothic', sans-serif; white-space: nowrap; }
-            .print-sign { position: absolute; z-index: 10; width: 80px; height: 40px; }
-
-            /* 영점 조절 구역 */
-            .type-general #pt-year { top: 9.5%; left: 32%; }
-            .type-general #pt-month { top: 9.5%; left: 38%; }
-            .type-general #pt-day { top: 9.5%; left: 44%; }
-            .type-general #pt-weekday { top: 9.5%; left: 52%; }
-            .type-general #pt-car-type { top: 16%; left: 16%; font-size: 14px;} 
-            .type-general #pt-car { top: 16%; left: 38%; } 
-            .type-general #pt-driver { top: 16%; left: 58%; }
-            .type-general #pt-driver-sign { top: 14.5%; left: 75%; } 
-            .type-general .chk-mark { font-size: 18px; color: #d9534f; font-weight: bold; }
-            .type-general #pt-chk-1 { top: 22.5%; left: 19.5%; } 
-            .type-general #pt-chk-2 { top: 22.5%; left: 36%; }   
-            .type-general #pt-chk-3 { top: 22.5%; left: 49%; }   
-            .type-general #pt-chk-4 { top: 22.5%; left: 59%; }   
-            .type-general #pt-chk-5 { top: 22.5%; left: 69%; }   
-            .type-general #pt-time-start { top: 46%; left: 28%; }
-            .type-general #pt-time-end { top: 49%; left: 28%; }
-            .type-general #pt-km-start { top: 46%; left: 65%; }
-            .type-general #pt-km-end { top: 49%; left: 65%; }
-            .type-general #pt-km-total { top: 52%; left: 65%; font-size: 18px; color: #0056b3; }
-            .type-general #pt-loc-start { top: 61%; left: 25%; }
-            .type-general #pt-loc-end { top: 64%; left: 25%; }
-            .type-general #pt-pax-w { top: 73%; left: 25%; }
-            .type-general #pt-pax-n { top: 73%; left: 38%; }
-            .type-general #pt-cust-name { top: 73%; left: 70%; }
-            .type-general #pt-cust-sign { top: 71.5%; left: 82%; } 
-
-            .type-citytour #pt-year, .type-citytour #pt-month, .type-citytour #pt-weekday { display: none; }
-            .type-citytour #pt-day { top: 33%; left: 30%; font-size: 14px; } 
-            .type-citytour #pt-car, .type-citytour #pt-car-type { display: none; }
-            .type-citytour #pt-driver { top: 50.5%; left: 25%; }
-            .type-citytour #pt-driver-sign { top: 49%; left: 40%; }
-            .type-citytour #pt-time-start { top: 53.5%; left: 25%; }
-            .type-citytour #pt-time-end { top: 53.5%; left: 55%; }
-            .type-citytour #pt-km-start { top: 56.5%; left: 25%; }
-            .type-citytour #pt-km-end { top: 56.5%; left: 55%; }
-            .type-citytour #pt-km-total { top: 56.5%; left: 85%; font-size: 18px; color: #0056b3; }
-            .type-citytour #pt-loc-start { top: 38.5%; left: 25%; }
-            .type-citytour #pt-loc-end { top: 41.5%; left: 25%; }
-            .type-citytour #pt-pax-w { top: 44.5%; left: 25%; }
-            .type-citytour #pt-pax-n { top: 44.5%; left: 45%; }
-            .type-citytour #pt-cust-name { top: 75%; left: 70%; }
-            .type-citytour #pt-cust-sign { top: 73%; left: 83%; }
-        }
-    </style>
-</head>
-<body>
-
-    <div id="mobile-view">
-        <header class="header">
-            <button class="back-btn" onclick="window.location.href='driver.html'">❮</button>
-            운행일보 작성 (클라우드)
-            <div style="width: 24px;"></div>
-        </header>
-
-        <div class="container">
-            <div class="card" style="background: #fff3cd; border: 1px solid #ffe69c;">
-                <div class="form-label">⚙️ 양식 종류</div>
-                <select id="m-type" class="form-select">
-                    <option value="general">일반/공공 운행 (공공일보.png)</option>
-                    <option value="citytour">서울시티투어 (시티일보.png)</option>
-                </select>
-            </div>
-
-            <div class="card">
-                <div class="card-title">📌 운행 사유</div>
-                <div class="radio-group">
-                    <label><input type="radio" name="m-reason" value="공공예약"> 공공예약</label>
-                    <label><input type="radio" name="m-reason" value="이동지원"> 이동지원</label>
-                    <label><input type="radio" name="m-reason" value="검사"> 검사</label>
-                    <label><input type="radio" name="m-reason" value="수리"> 수리</label>
-                    <label><input type="radio" name="m-reason" value="기타"> 기타</label>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-title">1. 운행 정보</div>
-                <div class="grid-2">
-                    <div class="form-group"><label class="form-label">운행일자</label><input type="date" id="m-date" class="form-input" readonly></div>
-                    <div class="form-group">
-                        <label class="form-label">차종</label>
-                        <select id="m-car-type" class="form-select">
-                            <option value="유니버스">유니버스</option>
-                            <option value="쏠라티">쏠라티</option>
-                            <option value="기타">기타</option>
-                        </select>
-                    </div>
-                    <div class="form-group"><label class="form-label">차량번호 (호차)</label><input type="text" id="m-car" class="form-input" readonly></div>
-                    <div class="form-group"><label class="form-label">운전원</label><input type="text" id="m-driver" class="form-input" readonly></div>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-title">✍️ 운전원 서명</div>
-                <div class="signature-area">
-                    <button class="clear-btn" onclick="clearDriverSign()">지우기</button>
-                    <canvas id="driver-sign-pad"></canvas>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-title">2. 운행 기록 및 거리</div>
-                <div class="grid-2">
-                    <div class="form-group"><label class="form-label">출발시간</label><input type="time" id="m-time-start" class="form-input"></div>
-                    <div class="form-group"><label class="form-label">도착시간</label><input type="time" id="m-time-end" class="form-input"></div>
-                    <div class="form-group"><label class="form-label">출발 누계(km)</label><input type="number" id="m-km-start" class="form-input" oninput="calcKm()"></div>
-                    <div class="form-group"><label class="form-label">도착 누계(km)</label><input type="number" id="m-km-end" class="form-input" oninput="calcKm()"></div>
-                </div>
-                <div class="calc-result">총 운행 거리: <span id="m-km-total">0</span> km</div>
-            </div>
-
-            <div class="card">
-                <div class="card-title">3. 탑승객 정보</div>
-                <div class="grid-2">
-                    <div class="form-group"><label class="form-label">출발지</label><input type="text" id="m-loc-start" class="form-input"></div>
-                    <div class="form-group"><label class="form-label">목적지</label><input type="text" id="m-loc-end" class="form-input"></div>
-                    <div class="form-group"><label class="form-label">휠체어 (명)</label><input type="number" id="m-pax-w" class="form-input"></div>
-                    <div class="form-group"><label class="form-label">일반 (명)</label><input type="number" id="m-pax-n" class="form-input"></div>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-title">4. 고객 서명</div>
-                <div class="form-group"><label class="form-label">고객 성함</label><input type="text" id="m-cust-name" class="form-input" placeholder="이름"></div>
-                <div class="signature-area">
-                    <button class="clear-btn" onclick="clearCustSign()">지우기</button>
-                    <canvas id="cust-sign-pad"></canvas>
-                </div>
-            </div>
-
-            <div class="btn-group">
-                <button class="save-btn" onclick="saveDraft()">☁️ 클라우드 중간 저장</button>
-                <button class="print-btn" onclick="doPrint()">🖨️ 인쇄 (최종 완료)</button>
-            </div>
-            <button class="reset-btn" onclick="clearDraft()">🗑️ 서버에 저장된 내역 삭제</button>
-        </div>
-    </div>
-
-    <!-- 🖨️ 인쇄 화면 -->
-    <div id="print-view" class="type-general">
-        <img id="print-bg" src="공공일보.png" alt="배경양식">
-        <div class="print-data" id="pt-year"></div><div class="print-data" id="pt-month"></div>
-        <div class="print-data" id="pt-day"></div><div class="print-data" id="pt-weekday"></div>
-        <div class="print-data chk-mark" id="pt-chk-1" style="display:none;">✔</div>
-        <div class="print-data chk-mark" id="pt-chk-2" style="display:none;">✔</div>
-        <div class="print-data chk-mark" id="pt-chk-3" style="display:none;">✔</div>
-        <div class="print-data chk-mark" id="pt-chk-4" style="display:none;">✔</div>
-        <div class="print-data chk-mark" id="pt-chk-5" style="display:none;">✔</div>
-        <div class="print-data" id="pt-car-type"></div><div class="print-data" id="pt-car"></div>
-        <div class="print-data" id="pt-driver"></div><img class="print-sign" id="pt-driver-sign" style="display:none;">
-        <div class="print-data" id="pt-time-start"></div><div class="print-data" id="pt-time-end"></div>
-        <div class="print-data" id="pt-km-start"></div><div class="print-data" id="pt-km-end"></div><div class="print-data" id="pt-km-total"></div>
-        <div class="print-data" id="pt-loc-start"></div><div class="print-data" id="pt-loc-end"></div>
-        <div class="print-data" id="pt-pax-w"></div><div class="print-data" id="pt-pax-n"></div>
-        <div class="print-data" id="pt-cust-name"></div><img class="print-sign" id="pt-cust-sign" style="display:none;">
-    </div>
-
-    <script>
+<script>
         // 🔥 대표님이 올려주신 munseo 프로젝트 설정 적용 완료! 🔥
         const firebaseConfig = {
             apiKey: "AIzaSyD3KPnvBMz14fqe3znaSNxQurJ_mSHG9mY",
@@ -220,7 +12,7 @@
         const db = firebase.firestore();
 
         let dPad, cPad;
-        let globalDocId = ""; // 서버에서 찾을 핵심 열쇠(배차ID)
+        let globalDocId = ""; 
 
         function initPad(canvasId) {
             const cvs = document.getElementById(canvasId);
@@ -255,29 +47,25 @@
             return '';
         }
 
-        // 🔥 모듈 2에서 보낸 주소(URL) 읽어서 파이어베이스 연결하기 🔥
         window.onload = async () => {
             dPad = initPad('driver-sign-pad');
             cPad = initPad('cust-sign-pad');
 
             const urlParams = new URLSearchParams(window.location.search);
-            const resId = urlParams.get('resId'); // 입장권 번호 확인
+            const resId = urlParams.get('resId'); 
             const pDate = urlParams.get('date');
             
             if(!resId || !pDate) {
-                alert("배차 정보가 정상적으로 넘어오지 않았습니다. 뒤로 돌아갑니다.");
-                window.location.href = 'driver.html';
+                // 단독 실행 시 오류 방지
                 return;
             }
 
-            globalDocId = resId + "_" + pDate; // 파이어베이스 문서 고유 이름 생성
+            globalDocId = resId + "_" + pDate; 
 
             try {
-                // 1. 파이어베이스(클라우드) 금고부터 뒤져보기
                 const docSnap = await db.collection('reports').doc(globalDocId).get();
                 
                 if(docSnap.exists) {
-                    // 금고에 저장된 게 있다면 싹 긁어오기!
                     const data = docSnap.data();
                     document.getElementById('m-date').value = data.date || '';
                     document.getElementById('m-car').value = data.car || '';
@@ -297,15 +85,15 @@
                     calcKm();
 
                     setTimeout(() => {
-                        if (data.driverSign && data.driverSign.length > 2000) {
+                        // 🔥 용량 제한 1300으로 대폭 하향 (점 하나만 찍어도 저장됨) 🔥
+                        if (data.driverSign && data.driverSign.length > 1300) {
                             const i = new Image(); i.onload = () => dPad.ctx.drawImage(i, 0, 0); i.src = data.driverSign;
                         }
-                        if (data.custSign && data.custSign.length > 2000) {
+                        if (data.custSign && data.custSign.length > 1300) {
                             const j = new Image(); j.onload = () => cPad.ctx.drawImage(j, 0, 0); j.src = data.custSign;
                         }
                     }, 100);
                 } else {
-                    // 금고가 비어있으면? URL에 가져온 빈칸 정보 채워넣기 (새로 작성)
                     document.getElementById('m-date').value = pDate;
                     document.getElementById('m-car').value = urlParams.get('car') || '';
                     document.getElementById('m-driver').value = urlParams.get('driver') || '';
@@ -317,9 +105,10 @@
             } catch(e) {
                 console.error("DB Load Error", e);
             }
+            
+            setTimeout(() => { saveDraft(true); }, 500);
         };
 
-        // ☁️ 클라우드로 쏘는 진짜 저장 기능!
         async function saveDraft(isSilent = false) {
             if(!globalDocId) return;
             try {
@@ -344,7 +133,7 @@
                 };
                 
                 await db.collection('reports').doc(globalDocId).set(reportData);
-                if(!isSilent) alert('☁️ 파이어베이스 클라우드에 완벽하게 저장되었습니다!\n다른 기기(폰/PC)로 열어도 이어 쓸 수 있습니다.');
+                if(!isSilent) alert('☁️ 파이어베이스 클라우드에 완벽하게 저장되었습니다!');
             } catch(e) {
                 if(!isSilent) alert('저장 중 오류 발생: ' + e.message);
             }
@@ -406,16 +195,15 @@
             const dSignData = dPad.cvs.toDataURL('image/png');
             const cSignData = cPad.cvs.toDataURL('image/png');
             
+            // 🔥 용량 제한 1300으로 대폭 하향 (인쇄할 때도 표시되도록) 🔥
             const ptDriverSign = document.getElementById('pt-driver-sign');
-            if(dSignData.length > 2000) { ptDriverSign.src = dSignData; ptDriverSign.style.display = 'block'; } 
+            if(dSignData.length > 1300) { ptDriverSign.src = dSignData; ptDriverSign.style.display = 'block'; } 
             else { ptDriverSign.style.display = 'none'; }
 
             const ptCustSign = document.getElementById('pt-cust-sign');
-            if(cSignData.length > 2000) { ptCustSign.src = cSignData; ptCustSign.style.display = 'block'; } 
+            if(cSignData.length > 1300) { ptCustSign.src = cSignData; ptCustSign.style.display = 'block'; } 
             else { ptCustSign.style.display = 'none'; }
 
             setTimeout(() => { window.print(); }, 500);
         }
     </script>
-</body>
-</html>
