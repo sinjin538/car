@@ -470,7 +470,7 @@
                     resId: resId,
                     date: clickedDate,
                     car: d.vehicle || '',
-                    driver: currentUser,
+                    driver: d.driver || currentUser,   // 👈 해결: '박기준, 변석현' 통째로 챙겨서 보냄!
                     reason: d.type || '',
                     dest: d.dest || '',
                     in: document.getElementById('settle-in').value,
