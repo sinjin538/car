@@ -1,5 +1,272 @@
-<script>
-        // 🔥 대표님이 올려주신 munseo 프로젝트 설정 적용 완료! 🔥
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>스마트 운행일보</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    
+    <!-- 🔥 파이어베이스 엔진 탑재 -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Pretendard', sans-serif; background-color: #f4f6f9; color: #333; letter-spacing: -0.3px; }
+        #mobile-view { padding-bottom: 80px; }
+        .header { background: #007bff; color: #fff; padding: 15px 20px; text-align: center; font-size: 1.2rem; font-weight: bold; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+        .back-btn { background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer; }
+        .container { max-width: 600px; margin: 0 auto; padding: 15px; }
+        .card { background: #fff; border-radius: 8px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .card-title { font-size: 1.1rem; font-weight: 700; color: #007bff; margin-bottom: 15px; border-bottom: 2px solid #e8f0fe; padding-bottom: 8px; }
+        .form-group { margin-bottom: 15px; }
+        .form-label { display: block; font-size: 0.9rem; font-weight: 600; color: #555; margin-bottom: 5px; }
+        .form-input, .form-select { width: 100%; padding: 12px; border: 1px solid #ced4da; border-radius: 6px; font-size: 1rem; font-family: inherit; }
+        .form-input[readonly] { background-color: #e9ecef; font-weight: bold; color: #0056b3; border: none;}
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .calc-result { background: #e8f0fe; padding: 12px; border-radius: 6px; text-align: center; margin-top: 10px; border: 1px dashed #007bff; font-weight: bold;}
+        .signature-area { border: 2px solid #ccc; border-radius: 8px; background: #fafbfc; position: relative; margin-top: 10px; }
+        canvas { width: 100%; height: 120px; display: block; touch-action: none; background: transparent; }
+        .clear-btn { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.5); color: #fff; border: none; padding: 4px 10px; border-radius: 4px; font-size: 0.8rem; cursor: pointer; z-index: 5; }
+        
+        .radio-group { display: flex; flex-wrap: wrap; gap: 12px; padding: 10px 0; }
+        .radio-group label { font-size: 1rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+        .radio-group input[type="radio"] { transform: scale(1.2); }
+
+        .btn-group { display: flex; gap: 10px; margin-top: 20px; }
+        .save-btn { flex: 1; padding: 16px; background: #ffc107; color: #000; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; }
+        .print-btn { flex: 1; padding: 16px; background: #28a745; color: #fff; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; }
+        .reset-btn { width: 100%; margin-top: 10px; padding: 12px; background: #dc3545; color: #fff; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; }
+
+        /* 🖨️ 인쇄 화면 CSS */
+        #print-view { display: none; }
+        @media print {
+            @page { size: A4 portrait; margin: 0; }
+            html, body { margin: 0; padding: 0; background: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; width: 100%; height: 100%; }
+            #mobile-view { display: none !important; }
+            #print-view { display: block !important; position: relative; width: 210mm; height: 297mm; overflow: hidden; page-break-after: avoid; }
+            #print-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; object-fit: fill; }
+            .print-data { position: absolute; font-size: 15px; font-weight: bold; color: #000; z-index: 10; font-family: 'Malgun Gothic', sans-serif; white-space: nowrap; }
+            .print-sign { position: absolute; z-index: 10; width: 70px; height: 35px; }
+            .chk-mark { font-size: 16px; color: #d9534f; font-weight: bold; }
+
+            /* ==============================================
+               🎯 영점 조절 구역 (인쇄 화면 글씨 위치 수정) 
+               ============================================== */
+            /* 1. 상단 날짜 및 일정 */
+            .type-general #pt-year { top: 9.5%; left: 32%; }
+            .type-general #pt-month { top: 9.5%; left: 38%; }
+            .type-general #pt-day { top: 9.5%; left: 44%; }
+            .type-general #pt-weekday { top: 9.5%; left: 52%; }
+            
+            .type-general #pt-chk-trip-1 { top: 12.5%; left: 32%; } /* 당일 체크 */
+            .type-general #pt-chk-trip-2 { top: 12.5%; left: 42%; } /* 1박2일 체크 */
+            .type-general #pt-chk-trip-3 { top: 12.5%; left: 52%; } /* 2박3일 체크 */
+            .type-general #pt-trip-day { top: 12.5%; left: 62%; font-size: 14px; color: #0056b3; } /* ( ) 일차 */
+
+            /* 2. 차량 및 운전원 */
+            .type-general #pt-car-type { top: 16%; left: 16%; font-size: 14px;} 
+            .type-general #pt-car { top: 16%; left: 38%; } 
+            
+            .type-general #pt-driver1 { top: 15%; left: 58%; font-size: 13px; } /* 기사 1 */
+            .type-general #pt-driver2 { top: 17%; left: 58%; font-size: 13px; } /* 기사 2 (부운전원) */
+            .type-general #pt-driver1-sign { top: 13%; left: 75%; } 
+            .type-general #pt-driver2-sign { top: 16.5%; left: 75%; } 
+
+            /* 3. 사유 체크박스 */
+            .type-general #pt-chk-1 { top: 22.5%; left: 19.5%; } 
+            .type-general #pt-chk-2 { top: 22.5%; left: 36%; }   
+            .type-general #pt-chk-3 { top: 22.5%; left: 49%; }   
+            .type-general #pt-chk-4 { top: 22.5%; left: 59%; }   
+            .type-general #pt-chk-5 { top: 22.5%; left: 69%; }   
+            
+            /* 4. 기록 및 고객 */
+            .type-general #pt-time-start { top: 46%; left: 28%; }
+            .type-general #pt-time-end { top: 49%; left: 28%; }
+            .type-general #pt-km-start { top: 46%; left: 65%; }
+            .type-general #pt-km-end { top: 49%; left: 65%; }
+            .type-general #pt-km-total { top: 52%; left: 65%; font-size: 18px; color: #0056b3; }
+            .type-general #pt-loc-start { top: 61%; left: 25%; }
+            .type-general #pt-loc-end { top: 64%; left: 25%; }
+            .type-general #pt-pax-w { top: 73%; left: 25%; }
+            .type-general #pt-pax-n { top: 73%; left: 38%; }
+            .type-general #pt-cust-name { top: 73%; left: 70%; }
+            .type-general #pt-cust-sign { top: 71.5%; left: 82%; } 
+
+            /* 시티투어 좌표 (필요시 위치 수정) */
+            .type-citytour #pt-year, .type-citytour #pt-month, .type-citytour #pt-weekday { display: none; }
+            .type-citytour #pt-chk-trip-1, .type-citytour #pt-chk-trip-2, .type-citytour #pt-chk-trip-3, .type-citytour #pt-trip-day { display: none; }
+            .type-citytour #pt-day { top: 33%; left: 30%; font-size: 14px; } 
+            .type-citytour #pt-car, .type-citytour #pt-car-type { display: none; }
+            .type-citytour #pt-driver1 { top: 49%; left: 25%; font-size: 13px;}
+            .type-citytour #pt-driver2 { top: 52%; left: 25%; font-size: 13px;}
+            .type-citytour #pt-driver1-sign { top: 47%; left: 40%; }
+            .type-citytour #pt-driver2-sign { top: 51%; left: 40%; }
+            .type-citytour #pt-time-start { top: 53.5%; left: 25%; }
+            .type-citytour #pt-time-end { top: 53.5%; left: 55%; }
+            .type-citytour #pt-km-start { top: 56.5%; left: 25%; }
+            .type-citytour #pt-km-end { top: 56.5%; left: 55%; }
+            .type-citytour #pt-km-total { top: 56.5%; left: 85%; font-size: 18px; color: #0056b3; }
+            .type-citytour #pt-loc-start { top: 38.5%; left: 25%; }
+            .type-citytour #pt-loc-end { top: 41.5%; left: 25%; }
+            .type-citytour #pt-pax-w { top: 44.5%; left: 25%; }
+            .type-citytour #pt-pax-n { top: 44.5%; left: 45%; }
+            .type-citytour #pt-cust-name { top: 75%; left: 70%; }
+            .type-citytour #pt-cust-sign { top: 73%; left: 83%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="mobile-view">
+        <header class="header">
+            <button class="back-btn" onclick="window.location.href='driver.html'">❮</button>
+            운행일보 작성 (클라우드)
+            <div style="width: 24px;"></div>
+        </header>
+
+        <div class="container">
+            <div class="card" style="background: #fff3cd; border: 1px solid #ffe69c;">
+                <div class="form-label">⚙️ 양식 종류</div>
+                <select id="m-type" class="form-select">
+                    <option value="general">일반/공공 운행 (공공일보.png)</option>
+                    <option value="citytour">서울시티투어 (시티일보.png)</option>
+                </select>
+            </div>
+
+            <!-- 🔥 추가: 운행 일정 및 일차 -->
+            <div class="card">
+                <div class="card-title">🗓️ 운행 일정</div>
+                <div class="radio-group">
+                    <label><input type="radio" name="m-trip" value="당일" checked> 당일운행</label>
+                    <label><input type="radio" name="m-trip" value="1박2일"> 1박 2일</label>
+                    <label><input type="radio" name="m-trip" value="2박3일"> 2박 3일</label>
+                </div>
+                <div style="margin-top: 10px; display: flex; align-items: center; gap: 10px;">
+                    <label style="font-weight: 600; color: #555;">진행 일차:</label>
+                    <input type="number" id="m-trip-day" class="form-input" style="width: 80px; padding: 8px;" placeholder="예: 2"> <span style="font-weight: 600;">일차</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">📌 운행 사유</div>
+                <div class="radio-group">
+                    <label><input type="radio" name="m-reason" value="공공예약"> 공공예약</label>
+                    <label><input type="radio" name="m-reason" value="이동지원"> 이동지원</label>
+                    <label><input type="radio" name="m-reason" value="검사"> 검사</label>
+                    <label><input type="radio" name="m-reason" value="수리"> 수리</label>
+                    <label><input type="radio" name="m-reason" value="기타"> 기타</label>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">1. 운행 정보</div>
+                <div class="grid-2">
+                    <div class="form-group"><label class="form-label">운행일자</label><input type="date" id="m-date" class="form-input" readonly></div>
+                    <div class="form-group">
+                        <label class="form-label">차종 (자동선택)</label>
+                        <select id="m-car-type" class="form-select" readonly style="background-color: #e9ecef; pointer-events: none;">
+                            <option value="유니버스">유니버스</option>
+                            <option value="쏠라티">쏠라티</option>
+                            <option value="기타">기타</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label class="form-label">차량번호 (자동변환)</label><input type="text" id="m-car" class="form-input" readonly></div>
+                    
+                    <!-- 🔥 2인 기사 지원 -->
+                    <div class="form-group"><label class="form-label">운전원 (정)</label><input type="text" id="m-driver1" class="form-input" readonly></div>
+                    <div class="form-group"><label class="form-label">부운전원 (부)</label><input type="text" id="m-driver2" class="form-input" readonly></div>
+                </div>
+            </div>
+
+            <!-- 🔥 운전원 / 부운전원 서명 -->
+            <div class="card">
+                <div class="card-title">✍️ 운전원 서명</div>
+                <label class="form-label">정운전원 서명</label>
+                <div class="signature-area">
+                    <button class="clear-btn" onclick="clearSign('driver1-sign-pad')">지우기</button>
+                    <canvas id="driver1-sign-pad"></canvas>
+                </div>
+                <div style="margin-top:15px;"></div>
+                <label class="form-label">부운전원 서명 (선택)</label>
+                <div class="signature-area">
+                    <button class="clear-btn" onclick="clearSign('driver2-sign-pad')">지우기</button>
+                    <canvas id="driver2-sign-pad"></canvas>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">2. 운행 기록 및 거리</div>
+                <div class="grid-2">
+                    <div class="form-group"><label class="form-label">출발시간</label><input type="time" id="m-time-start" class="form-input"></div>
+                    <div class="form-group"><label class="form-label">도착시간</label><input type="time" id="m-time-end" class="form-input"></div>
+                    <div class="form-group"><label class="form-label">출발 누계(km)</label><input type="number" id="m-km-start" class="form-input" oninput="calcKm()"></div>
+                    <div class="form-group"><label class="form-label">도착 누계(km)</label><input type="number" id="m-km-end" class="form-input" oninput="calcKm()"></div>
+                </div>
+                <div class="calc-result">총 운행 거리: <span id="m-km-total">0</span> km</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">3. 탑승객 정보</div>
+                <div class="grid-2">
+                    <div class="form-group"><label class="form-label">출발지</label><input type="text" id="m-loc-start" class="form-input"></div>
+                    <div class="form-group"><label class="form-label">목적지</label><input type="text" id="m-loc-end" class="form-input"></div>
+                    <div class="form-group"><label class="form-label">휠체어 (명)</label><input type="number" id="m-pax-w" class="form-input"></div>
+                    <div class="form-group"><label class="form-label">일반 (명)</label><input type="number" id="m-pax-n" class="form-input"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">4. 고객 서명</div>
+                <div class="form-group"><label class="form-label">고객 성함</label><input type="text" id="m-cust-name" class="form-input" placeholder="이름"></div>
+                <div class="signature-area">
+                    <button class="clear-btn" onclick="clearSign('cust-sign-pad')">지우기</button>
+                    <canvas id="cust-sign-pad"></canvas>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button class="save-btn" onclick="saveDraft()">☁️ 클라우드 중간 저장</button>
+                <button class="print-btn" onclick="doPrint()">🖨️ 인쇄 (최종 완료)</button>
+            </div>
+            <button class="reset-btn" onclick="clearDraft()">🗑️ 서버에 저장된 내역 삭제</button>
+        </div>
+    </div>
+
+    <!-- 🖨️ 인쇄 전용 화면 -->
+    <div id="print-view" class="type-general">
+        <img id="print-bg" src="공공일보.png" alt="배경양식">
+        
+        <div class="print-data" id="pt-year"></div><div class="print-data" id="pt-month"></div>
+        <div class="print-data" id="pt-day"></div><div class="print-data" id="pt-weekday"></div>
+        
+        <!-- 일정 체크 -->
+        <div class="print-data chk-mark" id="pt-chk-trip-1" style="display:none;">✔</div>
+        <div class="print-data chk-mark" id="pt-chk-trip-2" style="display:none;">✔</div>
+        <div class="print-data chk-mark" id="pt-chk-trip-3" style="display:none;">✔</div>
+        <div class="print-data" id="pt-trip-day"></div>
+
+        <!-- 사유 체크 -->
+        <div class="print-data chk-mark" id="pt-chk-1" style="display:none;">✔</div>
+        <div class="print-data chk-mark" id="pt-chk-2" style="display:none;">✔</div>
+        <div class="print-data chk-mark" id="pt-chk-3" style="display:none;">✔</div>
+        <div class="print-data chk-mark" id="pt-chk-4" style="display:none;">✔</div>
+        <div class="print-data chk-mark" id="pt-chk-5" style="display:none;">✔</div>
+        
+        <div class="print-data" id="pt-car-type"></div><div class="print-data" id="pt-car"></div>
+        
+        <!-- 2인 기사 -->
+        <div class="print-data" id="pt-driver1"></div><img class="print-sign" id="pt-driver1-sign" style="display:none;">
+        <div class="print-data" id="pt-driver2"></div><img class="print-sign" id="pt-driver2-sign" style="display:none;">
+        
+        <div class="print-data" id="pt-time-start"></div><div class="print-data" id="pt-time-end"></div>
+        <div class="print-data" id="pt-km-start"></div><div class="print-data" id="pt-km-end"></div><div class="print-data" id="pt-km-total"></div>
+        <div class="print-data" id="pt-loc-start"></div><div class="print-data" id="pt-loc-end"></div>
+        <div class="print-data" id="pt-pax-w"></div><div class="print-data" id="pt-pax-n"></div>
+        <div class="print-data" id="pt-cust-name"></div><img class="print-sign" id="pt-cust-sign" style="display:none;">
+    </div>
+
+    <script>
         const firebaseConfig = {
             apiKey: "AIzaSyD3KPnvBMz14fqe3znaSNxQurJ_mSHG9mY",
             authDomain: "munseo-aaa76.firebaseapp.com",
@@ -11,15 +278,16 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        let dPad, cPad;
         let globalDocId = ""; 
+        const pads = {}; // 캔버스 통합 관리 객체
 
         function initPad(canvasId) {
             const cvs = document.getElementById(canvasId);
             const ctx = cvs.getContext('2d');
             let drawing = false;
             cvs.width = cvs.parentElement.clientWidth || 300; 
-            cvs.height = 150; ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.strokeStyle = '#000'; 
+            cvs.height = 120; ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.strokeStyle = '#000'; 
+            
             function getPos(e) {
                 const rect = cvs.getBoundingClientRect();
                 return { x: (e.touches ? e.touches[0].clientX : e.clientX) - rect.left, y: (e.touches ? e.touches[0].clientY : e.clientY) - rect.top };
@@ -31,11 +299,11 @@
             cvs.addEventListener('touchstart', (e) => { e.preventDefault(); drawing = true; ctx.beginPath(); ctx.moveTo(getPos(e).x, getPos(e).y); }, {passive:false});
             cvs.addEventListener('touchmove', (e) => { e.preventDefault(); if(!drawing) return; ctx.lineTo(getPos(e).x, getPos(e).y); ctx.stroke(); }, {passive:false});
             cvs.addEventListener('touchend', () => { drawing = false; });
-            return { cvs, ctx };
+            
+            pads[canvasId] = { cvs, ctx };
         }
 
-        function clearDriverSign() { dPad.ctx.clearRect(0,0, dPad.cvs.width, dPad.cvs.height); }
-        function clearCustSign() { cPad.ctx.clearRect(0,0, cPad.cvs.width, cPad.cvs.height); }
+        function clearSign(id) { pads[id].ctx.clearRect(0,0, pads[id].cvs.width, pads[id].cvs.height); }
 
         function setRadioValue(name, value) {
             const radios = document.getElementsByName(name);
@@ -47,32 +315,44 @@
             return '';
         }
 
+        // 🚗 호차 -> 실제 차량번호 변환 맵핑
+        const carMap = {
+            "1호차": { type: "유니버스", num: "78무4922" },
+            "2호차": { type: "유니버스", num: "78무4921" },
+            "3호차": { type: "유니버스", num: "70부1557" },
+            "11호차": { type: "쏠라티", num: "732무8319" },
+            "12호차": { type: "쏠라티", num: "732무8320" },
+            "13호차": { type: "쏠라티", num: "732무8375" },
+            "14호차": { type: "쏠라티", num: "732무8376" }
+        };
+
         window.onload = async () => {
-            dPad = initPad('driver-sign-pad');
-            cPad = initPad('cust-sign-pad');
+            initPad('driver1-sign-pad');
+            initPad('driver2-sign-pad');
+            initPad('cust-sign-pad');
 
             const urlParams = new URLSearchParams(window.location.search);
             const resId = urlParams.get('resId'); 
             const pDate = urlParams.get('date');
             
-            if(!resId || !pDate) {
-                // 단독 실행 시 오류 방지
-                return;
-            }
-
+            if(!resId || !pDate) return;
             globalDocId = resId + "_" + pDate; 
 
             try {
                 const docSnap = await db.collection('reports').doc(globalDocId).get();
                 
                 if(docSnap.exists) {
+                    // 🔥 기존 데이터 불러오기
                     const data = docSnap.data();
                     document.getElementById('m-date').value = data.date || '';
-                    document.getElementById('m-car').value = data.car || '';
                     document.getElementById('m-car-type').value = data.carType || '유니버스';
-                    document.getElementById('m-driver').value = data.driver || '';
+                    document.getElementById('m-car').value = data.car || '';
+                    document.getElementById('m-driver1').value = data.driver1 || '';
+                    document.getElementById('m-driver2').value = data.driver2 || '';
                     document.getElementById('m-type').value = data.type || 'general';
                     setRadioValue('m-reason', data.reason || '');
+                    setRadioValue('m-trip', data.trip || '당일');
+                    document.getElementById('m-trip-day').value = data.tripDay || '';
                     document.getElementById('m-time-start').value = data.t_start || '';
                     document.getElementById('m-time-end').value = data.t_end || '';
                     document.getElementById('m-km-start').value = data.k_start || '';
@@ -85,26 +365,40 @@
                     calcKm();
 
                     setTimeout(() => {
-                        // 🔥 용량 제한 1300으로 대폭 하향 (점 하나만 찍어도 저장됨) 🔥
-                        if (data.driverSign && data.driverSign.length > 1300) {
-                            const i = new Image(); i.onload = () => dPad.ctx.drawImage(i, 0, 0); i.src = data.driverSign;
-                        }
-                        if (data.custSign && data.custSign.length > 1300) {
-                            const j = new Image(); j.onload = () => cPad.ctx.drawImage(j, 0, 0); j.src = data.custSign;
-                        }
+                        if (data.driver1Sign && data.driver1Sign.length > 1300) { const img = new Image(); img.onload = () => pads['driver1-sign-pad'].ctx.drawImage(img, 0, 0); img.src = data.driver1Sign; }
+                        if (data.driver2Sign && data.driver2Sign.length > 1300) { const img = new Image(); img.onload = () => pads['driver2-sign-pad'].ctx.drawImage(img, 0, 0); img.src = data.driver2Sign; }
+                        if (data.custSign && data.custSign.length > 1300) { const img = new Image(); img.onload = () => pads['cust-sign-pad'].ctx.drawImage(img, 0, 0); img.src = data.custSign; }
                     }, 100);
                 } else {
+                    // 🔥 새 문서 시작 (자동변환 싹 다 적용)
                     document.getElementById('m-date').value = pDate;
-                    document.getElementById('m-car').value = urlParams.get('car') || '';
-                    document.getElementById('m-driver').value = urlParams.get('driver') || '';
+                    
+                    // 1. 차량 변환 마법
+                    let passedCar = (urlParams.get('car') || '').trim();
+                    if(carMap[passedCar]) {
+                        document.getElementById('m-car-type').value = carMap[passedCar].type;
+                        document.getElementById('m-car').value = carMap[passedCar].num;
+                    } else {
+                        document.getElementById('m-car').value = passedCar; // 맵에 없으면 그냥 텍스트 넣음
+                    }
+
+                    // 2. 기사 분리 마법 (쉼표 기준)
+                    let drivers = (urlParams.get('driver') || '').split(',');
+                    document.getElementById('m-driver1').value = drivers[0] ? drivers[0].trim() : '';
+                    document.getElementById('m-driver2').value = drivers[1] ? drivers[1].trim() : '';
+
                     const reason = urlParams.get('reason') || '';
                     document.getElementById('m-type').value = reason.includes('시티') ? 'citytour' : 'general';
-                    setRadioValue('m-reason', reason.includes('공공') ? '공공예약' : '기타');
                     document.getElementById('m-loc-end').value = urlParams.get('dest') || '';
+                    setRadioValue('m-reason', reason.includes('공공') ? '공공예약' : '기타');
+                    
+                    // 3. 시간 연동 마법 (모듈2에서 url에 in/out 파라미터가 있을 경우 변환)
+                    let tIn = urlParams.get('in');
+                    let tOut = urlParams.get('out');
+                    if(tIn) { let h = Math.floor(tIn); let m = Math.round((tIn-h)*60); document.getElementById('m-time-start').value = String(h).padStart(2,'0')+":"+String(m).padStart(2,'0'); }
+                    if(tOut) { let h = Math.floor(tOut); let m = Math.round((tOut-h)*60); document.getElementById('m-time-end').value = String(h).padStart(2,'0')+":"+String(m).padStart(2,'0'); }
                 }
-            } catch(e) {
-                console.error("DB Load Error", e);
-            }
+            } catch(e) { console.error("DB Load Error", e); }
             
             setTimeout(() => { saveDraft(true); }, 500);
         };
@@ -114,10 +408,13 @@
             try {
                 const reportData = {
                     date: document.getElementById('m-date').value,
-                    car: document.getElementById('m-car').value,
                     carType: document.getElementById('m-car-type').value,
-                    driver: document.getElementById('m-driver').value,
+                    car: document.getElementById('m-car').value,
+                    driver1: document.getElementById('m-driver1').value,
+                    driver2: document.getElementById('m-driver2').value,
                     type: document.getElementById('m-type').value,
+                    trip: getRadioValue('m-trip'),
+                    tripDay: document.getElementById('m-trip-day').value,
                     reason: getRadioValue('m-reason'),
                     t_start: document.getElementById('m-time-start').value,
                     t_end: document.getElementById('m-time-end').value,
@@ -128,15 +425,14 @@
                     p_w: document.getElementById('m-pax-w').value,
                     p_n: document.getElementById('m-pax-n').value,
                     c_name: document.getElementById('m-cust-name').value,
-                    driverSign: dPad.cvs.toDataURL('image/png'),
-                    custSign: cPad.cvs.toDataURL('image/png')
+                    driver1Sign: pads['driver1-sign-pad'].cvs.toDataURL('image/png'),
+                    driver2Sign: pads['driver2-sign-pad'].cvs.toDataURL('image/png'),
+                    custSign: pads['cust-sign-pad'].cvs.toDataURL('image/png')
                 };
                 
                 await db.collection('reports').doc(globalDocId).set(reportData);
                 if(!isSilent) alert('☁️ 파이어베이스 클라우드에 완벽하게 저장되었습니다!');
-            } catch(e) {
-                if(!isSilent) alert('저장 중 오류 발생: ' + e.message);
-            }
+            } catch(e) { if(!isSilent) alert('저장 중 오류 발생: ' + e.message); }
         }
 
         async function clearDraft() {
@@ -170,6 +466,16 @@
                 document.getElementById('pt-weekday').innerText = weekdays[d.getDay()]; 
             }
 
+            // 일정 표시
+            const trip = getRadioValue('m-trip');
+            for(let i=1; i<=3; i++) document.getElementById('pt-chk-trip-'+i).style.display = 'none';
+            if(trip === '당일') document.getElementById('pt-chk-trip-1').style.display = 'block';
+            if(trip === '1박2일') document.getElementById('pt-chk-trip-2').style.display = 'block';
+            if(trip === '2박3일') document.getElementById('pt-chk-trip-3').style.display = 'block';
+            const tripDay = document.getElementById('m-trip-day').value;
+            document.getElementById('pt-trip-day').innerText = tripDay ? `(${tripDay}) 일차` : '';
+
+            // 사유 표시
             const reason = getRadioValue('m-reason');
             for(let i=1; i<=5; i++) document.getElementById('pt-chk-'+i).style.display = 'none';
             if(reason === '공공예약') document.getElementById('pt-chk-1').style.display = 'block';
@@ -180,7 +486,10 @@
 
             document.getElementById('pt-car-type').innerText = document.getElementById('m-car-type').value || '';
             document.getElementById('pt-car').innerText = document.getElementById('m-car').value || '';
-            document.getElementById('pt-driver').innerText = document.getElementById('m-driver').value || '';
+            
+            document.getElementById('pt-driver1').innerText = document.getElementById('m-driver1').value || '';
+            document.getElementById('pt-driver2').innerText = document.getElementById('m-driver2').value || '';
+            
             document.getElementById('pt-time-start').innerText = document.getElementById('m-time-start').value || '';
             document.getElementById('pt-time-end').innerText = document.getElementById('m-time-end').value || '';
             document.getElementById('pt-km-start').innerText = document.getElementById('m-km-start').value || '';
@@ -192,18 +501,21 @@
             document.getElementById('pt-pax-n').innerText = document.getElementById('m-pax-n').value || '';
             document.getElementById('pt-cust-name').innerText = document.getElementById('m-cust-name').value || '';
 
-            const dSignData = dPad.cvs.toDataURL('image/png');
-            const cSignData = cPad.cvs.toDataURL('image/png');
+            const d1Sign = pads['driver1-sign-pad'].cvs.toDataURL('image/png');
+            const d2Sign = pads['driver2-sign-pad'].cvs.toDataURL('image/png');
+            const cSign = pads['cust-sign-pad'].cvs.toDataURL('image/png');
             
-            // 🔥 용량 제한 1300으로 대폭 하향 (인쇄할 때도 표시되도록) 🔥
-            const ptDriverSign = document.getElementById('pt-driver-sign');
-            if(dSignData.length > 1300) { ptDriverSign.src = dSignData; ptDriverSign.style.display = 'block'; } 
-            else { ptDriverSign.style.display = 'none'; }
+            const ptD1 = document.getElementById('pt-driver1-sign');
+            if(d1Sign.length > 1300) { ptD1.src = d1Sign; ptD1.style.display = 'block'; } else { ptD1.style.display = 'none'; }
 
-            const ptCustSign = document.getElementById('pt-cust-sign');
-            if(cSignData.length > 1300) { ptCustSign.src = cSignData; ptCustSign.style.display = 'block'; } 
-            else { ptCustSign.style.display = 'none'; }
+            const ptD2 = document.getElementById('pt-driver2-sign');
+            if(d2Sign.length > 1300) { ptD2.src = d2Sign; ptD2.style.display = 'block'; } else { ptD2.style.display = 'none'; }
+
+            const ptCust = document.getElementById('pt-cust-sign');
+            if(cSign.length > 1300) { ptCust.src = cSign; ptCust.style.display = 'block'; } else { ptCust.style.display = 'none'; }
 
             setTimeout(() => { window.print(); }, 500);
         }
     </script>
+</body>
+</html>
