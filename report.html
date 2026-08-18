@@ -71,7 +71,7 @@
             .type-general #pt-driver1 { top: 18%; left: 75%; font-size: 18px; } 
             .type-general #pt-driver2 { top: 20.7%; left: 75%; font-size: 18px; } 
             .type-general #pt-driver1-sign { top: 17%; left: 85%; } 
-            .type-general #pt-driver2-sign { top: 19.7%; left: 85%; } 
+            .type-general #pt-driver2-sign { top: 20%; left: 85%; } 
 
             .type-general #pt-chk-1 { top: 24.5%; left: 48%; } 
             .type-general #pt-chk-2 { top: 22.5%; left: 36%; }   
@@ -81,29 +81,28 @@
             
             /* 기존 차고지 출/도착 및 누계 거리 */
             .type-general #pt-time-start { top: 28%; left: 32%; font-size: 18px; }
-            .type-general #pt-time-end { top: 49%; left: 28%; }
-            .type-general #pt-time-total { top: 52%; left: 28%; font-size: 16px; color: #0056b3; } 
+            .type-general #pt-time-end { top: 30.8%; left: 32%; font-size: 18px; }
+            .type-general #pt-time-total { top: 33.6%; left: 32%; font-size: 18px; } 
             
-            .type-general #pt-km-start { top: 46%; left: 65%; }
-            .type-general #pt-km-end { top: 49%; left: 65%; }
-            .type-general #pt-km-total { top: 52%; left: 65%; font-size: 18px; color: #0056b3; }
+            .type-general #pt-km-start { top: 28%; left: 78%; font-size: 18px; }
+            .type-general #pt-km-end { top: 30.8%; left: 78%; font-size: 18px;}
+            .type-general #pt-km-total { top: 33.6%; left: 79%; font-size: 18px;}
 
             /* 🔥 [새로운 기능] 고객 탑승/하차 시간 및 거리 인쇄 좌표 */
-            .type-general #pt-time-board { top: 55%; left: 28%; }  /* 탑승시간 자리 */
-            .type-general #pt-time-alight { top: 58%; left: 28%; } /* 하차시간 자리 */
-            .type-general #pt-time-board-total { top: 61%; left: 28%; font-size: 16px; color: #155724; } /* 뺀 시간 자리 */
+            .type-general #pt-time-board { top: 42.2%; left: 32%; font-size: 18px;}  /* 탑승시간 자리 */
+            .type-general #pt-time-alight { top: 47.8%; left: 32%; font-size: 18px;} /* 하차시간 자리 */
+            .type-general #pt-time-board-total { top: 50.3%; left: 32%; font-size: 18px; } /* 뺀 시간 자리 */
 
-            .type-general #pt-km-board { top: 55%; left: 65%; }  /* 탑승 시 누계 자리 */
-            .type-general #pt-km-alight { top: 58%; left: 65%; } /* 하차 시 누계 자리 */
-            .type-general #pt-km-board-total { top: 61%; left: 65%; font-size: 18px; color: #155724; } /* 탑승 총 거리 자리 */
+            .type-general #pt-km-board { top: 42.2%; left: 78%; font-size: 18px;}  /* 탑승 시 누계 자리 */
+            .type-general #pt-km-alight { top: 47.8%; left: 78%; font-size: 18px;} /* 하차 시 누계 자리 */
+            .type-general #pt-km-board-total { top: 50.3%; left: 79%; font-size: 18px;} /* 탑승 총 거리 자리 */
 
-            .type-general #pt-loc-start { top: 61%; left: 25%; }
-            .type-general #pt-loc-end { top: 64%; left: 25%; }
-            .type-general #pt-pax-w { top: 73%; left: 25%; }
-            .type-general #pt-pax-n { top: 73%; left: 38%; }
-            .type-general #pt-cust-name { top: 73%; left: 70%; }
-            .type-general #pt-cust-sign { top: 71.5%; left: 82%; } 
-
+            .type-general #pt-loc-start { top: 40.1%; left: 25%; font-size: 18px; }
+            .type-general #pt-loc-end { top: 45.5%; left: 25%; font-size: 18px;}
+            .type-general #pt-pax-w { top: 53.5%; left: 26.7%; font-size: 18px; }
+            .type-general #pt-pax-n { top: 53.5%; left: 37.5%; font-size: 18px; }
+            .type-general #pt-cust-name { top: 53.5%; left: 78%; font-size: 18px; }
+            .type-general #pt-cust-sign { top: 63.5%; left: 80%; } 
             /* 시티투어 좌표 생략 (동일) */
             .type-citytour #pt-year, .type-citytour #pt-month, .type-citytour #pt-weekday { display: none; }
             .type-citytour #pt-chk-trip-1, .type-citytour #pt-chk-trip-2, .type-citytour #pt-chk-trip-3 { display: none; }
@@ -330,7 +329,7 @@
             const ctx = cvs.getContext('2d');
             let drawing = false;
             cvs.width = cvs.parentElement.clientWidth || 300; 
-            cvs.height = 120; ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.strokeStyle = '#000'; 
+            cvs.height = 120; ctx.lineWidth = 12; ctx.lineCap = 'round'; ctx.strokeStyle = '#000'; 
             
             function getPos(e) {
                 const rect = cvs.getBoundingClientRect();
