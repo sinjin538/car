@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>배차관리 시스템 (기사 전용)</title>
-     
+    
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -166,14 +166,22 @@
             </div>
         </div>
 
+        <!-- 🔥 모바일 상단바 (이름표 + 우측 버튼 3개) -->
         <div style="max-width: 1600px; margin: 10px auto 0; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; gap: 6px;">
-            <span id="welcome-msg" style="font-weight: bold; color: #333; font-size: 1.15rem;"></span>
+            
+            <!-- 👇 1. 왼쪽 이름표 (여기를 누르면 비번변경 팝업이 뜹니다!) -->
+            <div onclick="openPwModal()" style="cursor: pointer; display: flex; align-items: center; gap: 5px;" title="비밀번호 변경">
+                <span id="welcome-msg" style="font-weight: bold; color: #333; font-size: 1.15rem;"></span>
+                <span style="font-size: 1.2rem; opacity: 0.8;">⚙️</span>
+            </div>
+
+            <!-- 👇 2. 오른쪽 버튼들 (비번변경 버튼은 사라지고 딱 3개만 남음!) -->
             <div style="display: flex; gap: 6px; align-items: center;">
-                <button onclick="openPwModal()" style="background: #6c757d; color: white; border: none; padding: 4px 10px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 0.6rem;">비번변경</button>
                 <button onclick="window.open('stats.html', '_blank')" style="background: #6f42c1; color: white; border: none; padding: 4px 10px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 0.6rem;">집계</button>
                 <button onclick="goToAdmin()" style="background: #007bff; color: white; border: none; padding: 4px 10px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 0.6rem;">메인창</button>
                 <button onclick="logout()" style="background: #dc3545; color: white; border: none; padding: 4px 10px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 0.6rem;">로그아웃</button>
             </div>
+            
         </div>
 
         <div class="dispatch-container">
