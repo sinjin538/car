@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>배차 데이터 집계 관리</title>
+    
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Pretendard', sans-serif; background-color: #f4f6f9; color: #333; letter-spacing: -0.3px; }
+        
+        .header { background: #007bff; color: #fff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .header h1 { font-size: 1.3rem; margin: 0; }
+        .btn-close { background: #dc3545; color: white; border: none; padding: 6px 15px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+
+        .container { max-width: 1200px; margin: 20px auto; padding: 0 15px; }
+        
+        /* 🔥 월별/연간 스위치 디자인 */
+        .view-tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
+        .view-tabs button { padding: 10px 20px; font-size: 1.1rem; border: 2px solid #007bff; background: #fff; color: #007bff; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .view-tabs button.active { background: #007bff; color: #fff; box-shadow: 0 4px 6px rgba(0,123,255,0.3); }
+
+        .time-nav { display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 20px; font-size: 1.5rem; font-weight: bold; }
+        .time-nav button { padding: 5px 15px; font-size: 1.2rem; cursor: pointer; border: 1px solid #ccc; background: #fff; border-radius: 6px; }
+
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 15px; margin-bottom: 30px; }
+        .stat-card { background: #fff; padding: 20px 10px; border-radius: 8px; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.05); border-top: 4px solid #007bff; }
+        .stat-card.total { border-top-color: #28a745; background: #f0fdf4; }
+        .stat-card.cancel { border-top-color: #dc3545; background: #fff5f5; }
+        .stat-card h4 { font-size: 0.9rem; color: #555; margin-bottom: 10px; }
+        .stat-card .num { font-size: 2rem; font-weight: 900; color: #333; }
+        .stat-card.total .num { color: #28a745; }
+        .stat-card.cancel .num { color: #dc3545; }
+
+        .table-section { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); margin-bottom: 30px; overflow-x: auto; }
+        .table-section h3 { margin-bottom: 15px; font-size: 1.2rem; border-left: 4px solid #007bff; padding-left: 10px; }
+        
+        table { width: 100%; border-collapse: collapse; min-width: 700px; }
+        th, td { padding: 12px 10px; border: 1px solid #dee2e6; text-align: center; font-size: 0.95rem; }
+        th { background: #f8f9fa; font-weight: 700; color: #495057; white-space: nowrap; }
+        td.highlight { font-weight: bold; color: #007bff; background: #f8f9fa; }
+        td.cancel-cell { color: #dc3545; font-weight: bold; background: #fff5f5; }
+
+        #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); z-index: 9999; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; font-weight: 700; color: #007bff; }
+    </style>
+</head>
+<body>
+
+    <div id="loading-overlay">데이터를 집계 중입니다...</div>
+
+    <header class="header">
+        <h1>📊 배차 데이터 집계 관리</h1>
+        <button class="btn-close" onclick="window.close()">창 닫기</button>
+    </header>
+
+    <div class="container">
+        <!-- 🔥 스위치 버튼 구역 -->
+        <div class="view-tabs">
+            <button id="tab-month" class="active" onclick="setViewMode('month')">📅 월별 보기</button>
+            <button id="tab-year" onclick="setViewMode('year')">📈 연간 보기</button>
+        </div>
+
+        <div class="time-nav">
+            <button onclick="changeTime(-1)">◀</button>
+            <span id="time-display">2026년 8월</span>
+            <button onclick="changeTime(1)">▶</button>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="stat-card total"><h4>총 배차 (유효)</h4><div class="num" id="s-total">0</div></div>
+            <div class="stat-card"><h4>공공예약</h4><div class="num" id="s-pub">0</div></div>
+            <div class="stat-card"><h4>1박</h4><div class="num" id="s-stay1">0</div></div>
+            <div class="stat-card"><h4>2박</h4><div class="num" id="s-stay2">0</div></div>
+            <div class="stat-card"><h4>시티투어</h4><div class="num" id="s-city">0</div></div>
+            <div class="stat-card"><h4>성묘지원</h4><div class="num" id="s-grave">0</div></div>
+            <div class="stat-card"><h4>기타</h4><div class="num" id="s-etc">0</div></div>
+            <div class="stat-card cancel"><h4>4일전 취소</h4><div class="num" id="s-cancel">0</div></div>
+        </div>
+
+        <div class="table-section">
+            <h3>🚗 호차별 집계</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>차량번호</th>
+                        <th style="background:#e8f0fe;">유효 합계</th>
+                        <th>공공</th>
+                        <th>1박</th>
+                        <th>2박</th>
+                        <th>시티</th>
+                        <th>성묘</th>
+                        <th>기타</th>
+                        <th style="background:#fff5f5; color:#dc3545;">취소건</th>
+                    </tr>
+                </thead>
+                <tbody id="vehicle-tbody"></tbody>
+            </table>
+        </div>
+
+        <div class="table-section">
+            <h3>🧑‍✈️ 운전원별 집계</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>운전원 성함</th>
+                        <th style="background:#e8f0fe;">유효 합계</th>
+                        <th>공공</th>
+                        <th>1박</th>
+                        <th>2박</th>
+                        <th>시티</th>
+                        <th>성묘</th>
+                        <th>기타</th>
+                        <th style="background:#fff5f5; color:#dc3545;">취소건</th>
+                    </tr>
+                </thead>
+                <tbody id="driver-tbody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCipeqfmU03bZQozFt8MdToxxuDyFIUd-g",
+            authDomain: "park-fc66f.firebaseapp.com",
+            projectId: "park-fc66f",
+            storageBucket: "park-fc66f.firebasestorage.app",
+            messagingSenderId: "93011031366",
+            appId: "1:93011031366:web:72438cb8d71dd5a7902147"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        let currentYear = new Date().getFullYear();
+        let currentMonth = new Date().getMonth();
+        let allReservations = [];
+        let viewMode = 'month'; // 'month' 또는 'year'
+
+        const allVehicles = ['1호차', '2호차', '3호차', '11호차', '12호차', '13호차', '14호차'];
+        const baseDrivers = ['박기준', '변석현', '이명순', '김탁', '한상훈', '문인식', '황덕일', '강철규', '이상헌', '함동한'];
+
+        function getShortType(type) {
+            if (!type) return '기타';
+            if (type.includes('공공')) return '공공';
+            if (type.includes('1박')) return '1박';
+            if (type.includes('2박')) return '2박';
+            if (type.includes('서울')) return '서울';
+            if (type.includes('시티')) return '시티';
+            if (type.includes('성묘')) return '성묘';
+            return '기타';
+        }
+
+        async function loadData() {
+            document.getElementById('loading-overlay').style.display = 'flex';
+            try {
+                const snap = await db.collection('reservations').get();
+                allReservations = snap.docs.map(doc => doc.data());
+                processStats();
+            } catch (error) {
+                alert("데이터를 불러오는데 실패했습니다.");
+            }
+            document.getElementById('loading-overlay').style.display = 'none';
+        }
+
+        function setViewMode(mode) {
+            viewMode = mode;
+            document.getElementById('tab-month').classList.toggle('active', mode === 'month');
+            document.getElementById('tab-year').classList.toggle('active', mode === 'year');
+            processStats();
+        }
+
+        function changeTime(offset) {
+            if (viewMode === 'month') {
+                currentMonth += offset;
+                if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+                else if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+            } else {
+                currentYear += offset; // 연도만 바꿈
+            }
+            processStats();
+        }
+
+        function processStats() {
+            // 화면 텍스트 변경
+            if (viewMode === 'month') {
+                document.getElementById('time-display').innerText = `${currentYear}년 ${currentMonth + 1}월`;
+            } else {
+                document.getElementById('time-display').innerText = `🔥 ${currentYear}년 전체 결산 🔥`;
+            }
+            
+            // 필터링 규칙 (월별이면 '2026-08', 연간이면 '2026')
+            const timePrefix = viewMode === 'month' 
+                ? `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}` 
+                : `${currentYear}`;
+            
+            const targetRes = allReservations.filter(r => r.startDate && r.startDate.startsWith(timePrefix));
+
+            let t_tot=0, t_pub=0, t_stay1=0, t_stay2=0, t_city=0, t_grave=0, t_etc=0, t_cancel=0;
+            let vStats = {}; allVehicles.forEach(v => vStats[v] = {tot:0, pub:0, stay1:0, stay2:0, city:0, grave:0, etc:0, cancel:0});
+            let dStats = {}; baseDrivers.forEach(d => dStats[d] = {tot:0, pub:0, stay1:0, stay2:0, city:0, grave:0, etc:0, cancel:0});
+
+            targetRes.forEach(r => {
+                const typeStr = getShortType(r.type);
+                const isCanceled = r.isCanceled || false;
+                const v = r.vehicle;
+                let drivers = r.assigned || [];
+
+                drivers.forEach(d => { if(d !== '미지정' && !dStats[d]) dStats[d] = {tot:0, pub:0, stay1:0, stay2:0, city:0, grave:0, etc:0, cancel:0}; });
+
+                if (isCanceled) {
+                    t_cancel++;
+                    if (v && vStats[v]) vStats[v].cancel++;
+                    drivers.forEach(d => { if(d !== '미지정') dStats[d].cancel++; });
+                } else {
+                    t_tot++;
+                    if(typeStr==='공공') t_pub++; else if(typeStr==='1박') t_stay1++; else if(typeStr==='2박') t_stay2++; 
+                    else if(typeStr==='시티') t_city++; else if(typeStr==='성묘') t_grave++; else t_etc++;
+
+                    if (v && vStats[v]) {
+                        vStats[v].tot++;
+                        if(typeStr==='공공') vStats[v].pub++; else if(typeStr==='1박') vStats[v].stay1++; 
+                        else if(typeStr==='2박') vStats[v].stay2++; else if(typeStr==='시티') vStats[v].city++; 
+                        else if(typeStr==='성묘') vStats[v].grave++; else vStats[v].etc++;
+                    }
+
+                    drivers.forEach(d => {
+                        if(d !== '미지정') {
+                            dStats[d].tot++;
+                            if(typeStr==='공공') dStats[d].pub++; else if(typeStr==='1박') dStats[d].stay1++; 
+                            else if(typeStr==='2박') dStats[d].stay2++; else if(typeStr==='시티') dStats[d].city++; 
+                            else if(typeStr==='성묘') dStats[d].grave++; else dStats[d].etc++;
+                        }
+                    });
+                }
+            });
+
+            document.getElementById('s-total').innerText = t_tot;
+            document.getElementById('s-pub').innerText = t_pub;
+            document.getElementById('s-stay1').innerText = t_stay1;
+            document.getElementById('s-stay2').innerText = t_stay2;
+            document.getElementById('s-city').innerText = t_city;
+            document.getElementById('s-grave').innerText = t_grave;
+            document.getElementById('s-etc').innerText = t_etc;
+            document.getElementById('s-cancel').innerText = t_cancel;
+
+            let vHtml = '';
+            allVehicles.forEach(v => {
+                const s = vStats[v];
+                vHtml += `<tr>
+                    <td style="font-weight:bold; background:#f8f9fa;">${v}</td>
+                    <td class="highlight">${s.tot}</td>
+                    <td>${s.pub}</td><td>${s.stay1}</td><td>${s.stay2}</td>
+                    <td>${s.city}</td><td>${s.grave}</td><td>${s.etc}</td>
+                    <td class="cancel-cell">${s.cancel}</td>
+                </tr>`;
+            });
+            document.getElementById('vehicle-tbody').innerHTML = vHtml;
+
+            let dHtml = '';
+            Object.keys(dStats).sort().forEach(d => {
+                const s = dStats[d];
+                dHtml += `<tr>
+                    <td style="font-weight:bold; background:#f8f9fa;">${d}</td>
+                    <td class="highlight">${s.tot}</td>
+                    <td>${s.pub}</td><td>${s.stay1}</td><td>${s.stay2}</td>
+                    <td>${s.city}</td><td>${s.grave}</td><td>${s.etc}</td>
+                    <td class="cancel-cell">${s.cancel}</td>
+                </tr>`;
+            });
+            document.getElementById('driver-tbody').innerHTML = dHtml;
+        }
+
+        window.onload = loadData;
+    </script>
+</body>
+</html>
