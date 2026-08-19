@@ -44,7 +44,7 @@
             #mobile-view { display: none !important; }
             #print-view { display: block !important; position: relative; width: 210mm; height: 297mm; overflow: hidden; page-break-after: avoid; }
             #print-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; object-fit: fill; }
-            .print-data { position: absolute; font-size: 15px; font-weight: bold; color: #000; z-index: 10; font-family: 'Malgun Gothic', sans-serif; white-space: nowrap; }
+            .print-data { position: absolute; font-size: 15px; font-weight: 500px; color: #000; z-index: 10; font-family: 'Malgun Gothic', sans-serif; white-space: nowrap; }
             
             .print-sign { position: absolute; z-index: 10; width: 100px; height: 50px; }
             .chk-mark { font-size: 16px; color: #d9534f; font-weight: bold; }
@@ -57,9 +57,9 @@
             .type-general #pt-day { top: 8.9%; left: 46%; font-size:18px; }
             .type-general #pt-weekday { top: 8.9%; left: 54.8%; font-size:18px; }
             
-            .type-general #pt-chk-trip-1 { top: 24.5%; left: 48.5%; } 
-            .type-general #pt-chk-trip-2 { top: 24.5%; left: 65.7%; } 
-            .type-general #pt-chk-trip-3 { top: 24.5%; left: 65.7%; }
+            .type-general #pt-chk-trip-1 { top: 24.7%; left: 48.5%; } 
+            .type-general #pt-chk-trip-2 { top: 24.7%; left: 65.7%; } 
+            .type-general #pt-chk-trip-3 { top: 24.7%; left: 65.7%; }
             
             .type-general #pt-trip-night { top: 25%; left: 70%; } 
             .type-general #pt-trip-days { top: 25%; left: 77.5%; }  
@@ -86,7 +86,7 @@
             
             .type-general #pt-time-board { top: 42.2%; left: 32%; font-size: 18px;}  
             .type-general #pt-time-alight { top: 47.8%; left: 32%; font-size: 18px;} 
-            .type-general #pt-time-board-total { top: 50.3%; left: 32%; font-size: 18px; } 
+            .type-general #pt-time-board-total { top: 50.7%; left: 32%; font-size: 18px; } 
 
             .type-general #pt-km-start { top: 28%; left: 78%; font-size: 18px; }
             .type-general #pt-km-end { top: 30.8%; left: 78%; font-size: 18px;}
@@ -94,16 +94,16 @@
 
             .type-general #pt-km-board { top: 42.2%; left: 78%; font-size: 18px;}  
             .type-general #pt-km-alight { top: 47.8%; left: 78%; font-size: 18px;} 
-            .type-general #pt-km-board-total { top: 50.3%; left: 79%; font-size: 18px;} 
+            .type-general #pt-km-board-total { top: 50.7%; left: 79%; font-size: 18px;} 
 
-            .type-general #pt-loc-start { top: 40.1%; left: 25%; font-size: 18px; }
-            .type-general #pt-loc-end { top: 45.5%; left: 25%; font-size: 18px;}
-            .type-general #pt-pax-w { top: 53.5%; left: 26.7%; font-size: 18px; }
-            .type-general #pt-pax-n { top: 53.5%; left: 37.5%; font-size: 18px; }
+            .type-general #pt-loc-start { top: 40%; left: 25%; font-size: 18px; }
+            .type-general #pt-loc-end { top: 45.3%; left: 25%; font-size: 18px;}
+            .type-general #pt-pax-w { top: 53.4%; left: 26.7%; font-size: 18px; }
+            .type-general #pt-pax-n { top: 53.4%; left: 37.5%; font-size: 18px; }
             
-            .type-general #pt-pax-disabled { top: 53.5%; left: 48%; font-size: 18px; } 
-            .type-general #pt-pax-non-disabled { top: 53.5%; left: 60%; font-size: 18px; } 
-            .type-general #pt-note { top: 79%; left: 25%; font-size: 14px; width: 50%; white-space: normal; word-break: keep-all; } 
+            .type-general #pt-pax-disabled { top: 53.4%; left: 48%; font-size: 18px; } 
+            .type-general #pt-pax-non-disabled { top: 53.4%; left: 60%; font-size: 18px; } 
+            .type-general #pt-note { top: 79%; left: 9%; font-size: 18px; width: 640px; white-space: normal !important; word-break: break-all; line-height: 1.5; }
             
             .type-general #pt-cust-name { top: 53.5%; left: 78%; font-size: 18px; }
             .type-general #pt-cust-sign { top: 65.6%; left: 80%; } 
@@ -211,7 +211,7 @@
                     <div class="form-group"><label class="form-label">탑승 시 거리(km)</label><input type="number" id="m-km-board" class="form-input" oninput="calcKm()"></div>
                     <div class="form-group"><label class="form-label">하차 시 거리(km)</label><input type="number" id="m-km-alight" class="form-input" oninput="calcKm()"></div>
                 </div>
-                <div class="calc-result" style="background:#e8f5e9; border-color:#28a745; color:#155724;">고객 탑승 총 거리: <span id="m-km-board-total">0</span> km</div>
+                <div class="calc-result" style="background:#e8f5e9; border-color:#28a745; color:#155724;">고객 탑승 총 거리: <span id="m-km-board-total"></span> km</div>
             </div>
 
             <div class="card">
@@ -243,11 +243,12 @@
                 <p style="font-size:0.8rem; color:#007bff; margin-top:5px; text-align:center;">※ 한 번만 서명하시면 인쇄 시 지정된 2곳에 자동으로 찍힙니다!</p>
             </div>
 
+            <!-- 🔥 버튼들에 ID 추가 -->
             <div class="btn-group">
-                <button class="save-btn" onclick="saveDraft()">☁️ 클라우드 중간 저장</button>
-                <button class="print-btn" onclick="doPrint()">🖨️ 인쇄 (최종 완료)</button>
+                <button id="btn-save" class="save-btn" onclick="saveDraft()">☁️ 클라우드 중간 저장</button>
+                <button id="btn-print" class="print-btn" onclick="doPrint()">🖨️ 인쇄 (최종 완료)</button>
             </div>
-            <button class="reset-btn" onclick="clearDraft()">🗑️ 서버에 저장된 내역 삭제</button>
+            <button id="btn-delete" class="reset-btn" onclick="clearDraft()">🗑️ 서버에 저장된 내역 삭제</button>
         </div>
     </div>
 
@@ -321,7 +322,7 @@
             let drawing = false;
             cvs.width = cvs.parentElement.clientWidth || 300; 
             
-            cvs.height = 120; ctx.lineWidth = 8; ctx.lineCap = 'round'; ctx.strokeStyle = '#000'; 
+            cvs.height = 120; ctx.lineWidth = 6; ctx.lineCap = 'round'; ctx.strokeStyle = '#000'; 
             
             function getPos(e) {
                 const rect = cvs.getBoundingClientRect();
@@ -360,7 +361,6 @@
             "14호차": { type: "쏠라티", num: "732무8376" }
         };
 
-        // 🔥 과거 제일 컸던 KM 땡겨오는 엔진
         async function autoFillCarInfo() {
             let carName = document.getElementById('m-car-name').value;
             if(carMap[carName]) {
@@ -400,12 +400,11 @@
             initPad('driver2-sign-pad');
             initPad('cust-sign-pad');
 
-            // 🔥 [숫자 4개 치면 시간으로 바꾸는 마법 엔진]
             document.querySelectorAll('.time-input').forEach(input => {
                 input.addEventListener('blur', function() {
-                    let val = this.value.replace(/[^0-9]/g, ''); // 숫자만 남기기
+                    let val = this.value.replace(/[^0-9]/g, ''); 
                     if(val.length >= 3 && val.length <= 4) {
-                        if(val.length === 3) val = '0' + val; // 900 -> 0900
+                        if(val.length === 3) val = '0' + val; 
                         let h = parseInt(val.substring(0,2));
                         let m = parseInt(val.substring(2,4));
                         if(h > 23) h = 23;
@@ -438,6 +437,10 @@
                 
                 document.getElementById('m-date').value = pDate || new Date().toISOString().substring(0, 10);
                 document.getElementById('m-driver1').value = urlParams.get('driver') || '';
+                
+                // 🔥 수시 일보 모드일 때 저장, 삭제 버튼 숨기기!
+                document.getElementById('btn-save').style.display = 'none';
+                document.getElementById('btn-delete').style.display = 'none';
                 
             } else {
                 if(!resId || !pDate) return;
@@ -506,7 +509,6 @@
 
                     document.getElementById('m-cust-name').value = data.c_name || '';
                     
-                    // 🔥 창 켜질 때 마지막 누계 강제 소환 (비어있으면 채움)
                     await autoFillCarInfo();
                     calcKm();
 
@@ -530,12 +532,14 @@
                     setRadioValue('m-trip', initialTrip); 
                     document.getElementById('m-loc-end').value = urlParams.get('dest') || '';
                     
-                    // 🔥 새 일보일 때도 소환!
                     await autoFillCarInfo();
                 }
             } catch(e) { console.error("DB Load Error", e); }
             
-            setTimeout(() => { saveDraft(true); }, 500);
+            // 🔥 수시 일보 모드일 때는 켜질 때 자동 저장 생략!
+            if(!isManual) {
+                setTimeout(() => { saveDraft(true); }, 500);
+            }
         };
 
         async function saveDraft(isSilent = false) {
@@ -590,7 +594,7 @@
             let s = parseFloat(document.getElementById('m-km-start').value) || 0;
             let e = parseFloat(document.getElementById('m-km-end').value) || 0;
             let total1 = Math.max(0, e - s);
-            document.getElementById('m-km-total').innerText = total1.toLocaleString(); 
+            document.getElementById('m-km-total').innerText = total1 > 0 ? total1.toLocaleString() : ''; 
 
             let bs = parseFloat(document.getElementById('m-km-board').value) || 0;
             let be = parseFloat(document.getElementById('m-km-alight').value) || 0;
@@ -610,7 +614,10 @@
         }
 
         function doPrint() {
-            saveDraft(true); 
+            // 🔥 수시 일보 모드가 아닐 때만 저장하고, 수시 일보는 바로 냅다 인쇄!
+            if(!globalDocId.startsWith("MANUAL")) {
+                saveDraft(true); 
+            }
 
             document.getElementById('print-view').className = 'type-general';
             document.getElementById('print-bg').src = '공공일보.png';
