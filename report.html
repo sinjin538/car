@@ -44,28 +44,27 @@
             #mobile-view { display: none !important; }
             #print-view { display: block !important; position: relative; width: 210mm; height: 297mm; overflow: hidden; page-break-after: avoid; }
             #print-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; object-fit: fill; }
-            .print-data { position: absolute; font-size: 15px; font-weight: bold; color: #000; z-index: 10; font-family: 'Malgun Gothic', sans-serif; white-space: nowrap; }
+            .print-data { position: absolute; font-size: 15px; font-weight: 520; color: #000; z-index: 10; font-family: 'Malgun Gothic', sans-serif; white-space: nowrap; }
             
-            /* 🔥 서명 크기를 시원하게 100x50으로 키웠습니다! */
             .print-sign { position: absolute; z-index: 10; width: 100px; height: 50px; }
             .chk-mark { font-size: 16px; color: #d9534f; font-weight: bold; }
 
             /* ========================================================
-               🎯 영점 조절 구역 (인쇄 화면 보시고 % 숫자를 수정하세요!)
+               🎯 영점 조절 구역 (대표님 설정 100% 적용 완료!)
                ======================================================== */
             .type-general #pt-year { top: 8.9%; left: 22.8%; font-size:18px;}
             .type-general #pt-month { top: 8.9%; left: 36%; font-size:18px; }
             .type-general #pt-day { top: 8.9%; left: 46%; font-size:18px; }
-            .type-general #pt-weekday { top: 8.9%; left: 54.8%; font-size:18px; }
-            /*당일 일박 영점*/
-            .type-general #pt-chk-trip-1 { top: 24.5%; left: 48.5%; } 
-            .type-general #pt-chk-trip-2 { top: 24.5%; left: 65.7%; } 
-            .type-general #pt-chk-trip-3 { top: 24.5%; left: 65.7%; }
-            /*1박2일1일차*/
+            .type-general #pt-weekday { top: 8.9%; left: 55%; font-size:18px; }
+            
+            .type-general #pt-chk-trip-1 { top: 24.8%; left: 48.5%; } 
+            .type-general #pt-chk-trip-2 { top: 24.8%; left: 65.7%; } 
+            .type-general #pt-chk-trip-3 { top: 24.8%; left: 65.7%; }
+            
             .type-general #pt-trip-night { top: 25%; left: 70%; } 
             .type-general #pt-trip-days { top: 25%; left: 77.5%; }  
             .type-general #pt-trip-day-num { top: 25%; left: 86.5%; font-size: 16px;} 
-            /*유니버스3호차번호*/
+            
             .type-general #pt-car-type { top: 20.7%; left: 9%; font-size: 18px;} 
             .type-general #pt-car-name { top: 20.7%; left: 25%; font-size: 18px;} 
             .type-general #pt-car { top: 20.7%; left: 41.5%; font-size: 18px;} 
@@ -81,68 +80,35 @@
             .type-general #pt-chk-4 { top: 15%; left: 59%; }   
             .type-general #pt-chk-5 { top: 15%; left: 69%; } 
             
-            /* 기존 차고지 출/도착 및 누계 거리 */
             .type-general #pt-time-start { top: 28%; left: 32%; font-size: 18px; }
             .type-general #pt-time-end { top: 30.8%; left: 32%; font-size: 18px; }
             .type-general #pt-time-total { top: 33.6%; left: 32%; font-size: 18px; } 
             
+            .type-general #pt-time-board { top: 42.5%; left: 32%; font-size: 18px;}  
+            .type-general #pt-time-alight { top: 47.9%; left: 32%; font-size: 18px;} 
+            .type-general #pt-time-board-total { top: 50.8%; left: 32%; font-size: 18px; } 
+
             .type-general #pt-km-start { top: 28%; left: 78%; font-size: 18px; }
             .type-general #pt-km-end { top: 30.8%; left: 78%; font-size: 18px;}
-            .type-general #pt-km-total { top: 33.6%; left: 79%; font-size: 18px;} 
-            
-            /* 🔥 [새로운 기능] 고객 탑승/하차 시간 및 거리 인쇄 좌표 */
-            .type-general #pt-time-board { top: 42.2%; left: 32%; font-size: 18px;}  /* 탑승시간 자리 */
-            .type-general #pt-time-alight { top: 47.8%; left: 32%; font-size: 18px;} /* 하차시간 자리 */
-            .type-general #pt-time-board-total { top: 50.3%; left: 32%; font-size: 18px; } /* 뺀 시간 자리 */
+            .type-general #pt-km-total { top: 33.6%; left: 80%; font-size: 18px;} 
 
-            .type-general #pt-km-board { top: 42.2%; left: 78%; font-size: 18px;}  /* 탑승 시 누계 자리 */
-            .type-general #pt-km-alight { top: 47.8%; left: 78%; font-size: 18px;} /* 하차 시 누계 자리 */
-            .type-general #pt-km-board-total { top: 50.3%; left: 79%; font-size: 18px;} /* 탑승 총 거리 자리 */ 
+            .type-general #pt-km-board { top: 42.5%; left: 78%; font-size: 18px;}  
+            .type-general #pt-km-alight { top: 47.9%; left: 78%; font-size: 18px;} 
+            .type-general #pt-km-board-total { top: 50.8%; left: 80%; font-size: 18px;} 
 
-            .type-general #pt-loc-start { top: 40.1%; left: 25%; font-size: 18px; }
-            .type-general #pt-loc-end { top: 45.5%; left: 25%; font-size: 18px;}
-            .type-general #pt-pax-w { top: 53.5%; left: 26.7%; font-size: 18px; }
-            .type-general #pt-pax-n { top: 53.5%; left: 37.5%; font-size: 18px; }
+            .type-general #pt-loc-start { top: 39.8%; left: 25%; font-size: 18px; }
+            .type-general #pt-loc-end { top: 45.3%; left: 25%; font-size: 18px;}
+            .type-general #pt-pax-w { top: 53.4%; left: 26.7%; font-size: 18px; }
+            .type-general #pt-pax-n { top: 53.4%; left: 37.5%; font-size: 18px; }
             
-            /* 🔥 [새로 추가된 영점 조절 구역] 장애인/비장애인, 기타사항, 두번째 서명 */
-            .type-general #pt-pax-disabled { top: 53.5%; left: 48%; font-size: 18px; } /* 장애인(명) 위치 */
-            .type-general #pt-pax-non-disabled { top: 53.5%; left: 60%; font-size: 18px; } /* 비장애인(명) 위치 */
-            .type-general #pt-note { top: 79%; left: 25%; font-size: 14px; } /* 기타사항 위치 */
+            .type-general #pt-pax-disabled { top: 53.4%; left: 48%; font-size: 18px; } 
+            .type-general #pt-pax-non-disabled { top: 53.4%; left: 60%; font-size: 18px; } 
+            .type-general #pt-note { top: 79%; left: 10%; font-size: 18px; width: 630px; white-space: normal; } 
             
             .type-general #pt-cust-name { top: 53.5%; left: 78%; font-size: 18px; }
-            .type-general #pt-cust-sign { top: 65.6%; left: 80%; } /* 1번째 고객 서명 위치 */
-            .type-general #pt-cust-sign2 { top: 52.2%; left: 84.7%; } /* 🔥 2번째 고객 서명 복사본 위치 */
-
-            /* 시티투어 좌표 생략 (동일) */
-            .type-citytour #pt-year, .type-citytour #pt-month, .type-citytour #pt-weekday { display: none; }
-            .type-citytour #pt-chk-trip-1, .type-citytour #pt-chk-trip-2, .type-citytour #pt-chk-trip-3 { display: none; }
-            .type-citytour #pt-trip-night, .type-citytour #pt-trip-days, .type-citytour #pt-trip-day-num { display: none; }
-            .type-citytour #pt-day { top: 33%; left: 30%; font-size: 14px; } 
-            .type-citytour #pt-car-type, .type-citytour #pt-car-name, .type-citytour #pt-car { display: none; }
-            .type-citytour #pt-driver1 { top: 49%; left: 25%; font-size: 13px;}
-            .type-citytour #pt-driver2 { top: 52%; left: 25%; font-size: 13px;}
-            .type-citytour #pt-driver1-sign { top: 47%; left: 40%; }
-            .type-citytour #pt-driver2-sign { top: 51%; left: 40%; }
-            
-            .type-citytour #pt-time-start { top: 53.5%; left: 25%; }
-            .type-citytour #pt-time-end { top: 53.5%; left: 55%; }
-            .type-citytour #pt-time-total { display: none; }
-            
-            .type-citytour #pt-km-start { top: 56.5%; left: 25%; }
-            .type-citytour #pt-km-end { top: 56.5%; left: 55%; }
-            .type-citytour #pt-km-total { top: 56.5%; left: 85%; font-size: 18px; color: #0056b3; }
-            
-            .type-citytour #pt-time-board, .type-citytour #pt-time-alight, .type-citytour #pt-time-board-total,
-            .type-citytour #pt-km-board, .type-citytour #pt-km-alight, .type-citytour #pt-km-board-total { display: none; }
-
-            .type-citytour #pt-loc-start { top: 38.5%; left: 25%; }
-            .type-citytour #pt-loc-end { top: 41.5%; left: 25%; }
-            .type-citytour #pt-pax-w { top: 44.5%; left: 25%; }
-            .type-citytour #pt-pax-n { top: 44.5%; left: 45%; }
-            .type-citytour #pt-pax-disabled, .type-citytour #pt-pax-non-disabled, .type-citytour #pt-note, .type-citytour #pt-cust-sign2 { display: none; }
-
-            .type-citytour #pt-cust-name { top: 75%; left: 70%; }
-            .type-citytour #pt-cust-sign { top: 73%; left: 83%; }
+            .type-general #pt-cust-sign { top: 66%; left: 80%; } 
+            .type-general #pt-cust-sign2 { top: 52.7%; left: 84.7%; } 
+            /* ======================================================== */
         }
     </style>
 </head>
@@ -156,13 +122,7 @@
         </header>
 
         <div class="container">
-            <div class="card" style="background: #fff3cd; border: 1px solid #ffe69c;">
-                <div class="form-label">⚙️ 양식 종류</div>
-                <select id="m-type" class="form-select">
-                    <option value="general">일반/공공 운행 (공공일보.png)</option>
-                    <option value="citytour">서울시티투어 (시티일보.png)</option>
-                </select>
-            </div>
+            <!-- 🔥 양식 종류 선택칸 삭제됨 (공공일보 전용 고정) -->
 
             <div class="card">
                 <div class="card-title">🗓️ 운행 일정</div>
@@ -253,12 +213,10 @@
                     <div class="form-group"><label class="form-label">휠체어 (명)</label><input type="number" id="m-pax-w" class="form-input"></div>
                     <div class="form-group"><label class="form-label">일반 (명)</label><input type="number" id="m-pax-n" class="form-input"></div>
                     
-                    <!-- 🔥 장애인 / 비장애인 추가 -->
                     <div class="form-group"><label class="form-label">장애인 (명)</label><input type="number" id="m-pax-disabled" class="form-input"></div>
                     <div class="form-group"><label class="form-label">비장애인 (명)</label><input type="number" id="m-pax-non-disabled" class="form-input"></div>
                 </div>
                 
-                <!-- 🔥 기타사항(메모) 추가 -->
                 <div class="form-group" style="margin-top: 10px;">
                     <label class="form-label">기타사항 (메모)</label>
                     <input type="text" id="m-note" class="form-input" placeholder="특이사항을 자유롭게 적어주세요">
@@ -285,6 +243,7 @@
 
     <!-- 🖨️ 인쇄 전용 화면 -->
     <div id="print-view" class="type-general">
+        <!-- 🔥 무조건 공공일보로 박아둡니다 -->
         <img id="print-bg" src="공공일보.png" alt="배경양식">
         
         <div class="print-data" id="pt-year"></div><div class="print-data" id="pt-month"></div>
@@ -323,13 +282,11 @@
         <div class="print-data" id="pt-loc-start"></div><div class="print-data" id="pt-loc-end"></div>
         <div class="print-data" id="pt-pax-w"></div><div class="print-data" id="pt-pax-n"></div>
         
-        <!-- 🔥 새로 추가된 인쇄 항목들 -->
         <div class="print-data" id="pt-pax-disabled"></div>
         <div class="print-data" id="pt-pax-non-disabled"></div>
         <div class="print-data" id="pt-note"></div>
 
         <div class="print-data" id="pt-cust-name"></div>
-        <!-- 🔥 고객서명 1번, 2번 복사본 태그 -->
         <img class="print-sign" id="pt-cust-sign" style="display:none;">
         <img class="print-sign" id="pt-cust-sign2" style="display:none;">
     </div>
@@ -355,8 +312,7 @@
             let drawing = false;
             cvs.width = cvs.parentElement.clientWidth || 300; 
             
-            // 🔥 사인 굵기를 8로 키워서 선명하고 두껍게 나옵니다!
-            cvs.height = 120; ctx.lineWidth = 8; ctx.lineCap = 'round'; ctx.strokeStyle = '#000'; 
+            cvs.height = 120; ctx.lineWidth = 6; ctx.lineCap = 'round'; ctx.strokeStyle = '#000'; 
             
             function getPos(e) {
                 const rect = cvs.getBoundingClientRect();
@@ -431,10 +387,8 @@
             let d2 = drivers[1] || '';
 
             const reasonRaw = urlParams.get('reason') || '';
-            const finalType = reasonRaw.includes('시티') ? 'citytour' : 'general';
             const finalReason = reasonRaw.includes('공공') ? '공공예약' : '기타';
 
-            // 🔥 1박/2박 주소창 자동 인식 로직 추가
             let initialTrip = '당일';
             if(reasonRaw.includes('1박')) initialTrip = '1박2일';
             else if(reasonRaw.includes('2박')) initialTrip = '2박3일';
@@ -462,9 +416,8 @@
                     document.getElementById('m-km-board').value = data.k_board || '';
                     document.getElementById('m-km-alight').value = data.k_alight || '';
 
-                    document.getElementById('m-type').value = data.type || finalType;
                     setRadioValue('m-reason', data.reason || finalReason);
-                    setRadioValue('m-trip', data.trip || initialTrip); // 🔥 자동인식 적용
+                    setRadioValue('m-trip', data.trip || initialTrip); 
                     
                     document.getElementById('m-trip-day').value = data.tripDay || '';
                     document.getElementById('m-loc-start').value = data.l_start || '';
@@ -472,12 +425,12 @@
                     document.getElementById('m-pax-w').value = data.p_w || '';
                     document.getElementById('m-pax-n').value = data.p_n || '';
                     
-                    // 🔥 추가 항목 로드
                     document.getElementById('m-pax-disabled').value = data.p_disabled || '';
                     document.getElementById('m-pax-non-disabled').value = data.p_non_disabled || '';
                     document.getElementById('m-note').value = data.note || '';
 
                     document.getElementById('m-cust-name').value = data.c_name || '';
+                    
                     calcKm();
 
                     setTimeout(() => {
@@ -494,9 +447,8 @@
                     document.getElementById('m-driver2').value = d2;
                     document.getElementById('m-time-start').value = tIn;
                     document.getElementById('m-time-end').value = tOut;
-                    document.getElementById('m-type').value = finalType;
                     setRadioValue('m-reason', finalReason);
-                    setRadioValue('m-trip', initialTrip); // 🔥 자동인식 적용
+                    setRadioValue('m-trip', initialTrip); 
                     document.getElementById('m-loc-end').value = urlParams.get('dest') || '';
                 }
             } catch(e) { console.error("DB Load Error", e); }
@@ -514,7 +466,6 @@
                     car: document.getElementById('m-car').value,
                     driver1: document.getElementById('m-driver1').value,
                     driver2: document.getElementById('m-driver2').value,
-                    type: document.getElementById('m-type').value,
                     trip: getRadioValue('m-trip'),
                     tripDay: document.getElementById('m-trip-day').value,
                     reason: getRadioValue('m-reason'),
@@ -530,9 +481,9 @@
                     l_end: document.getElementById('m-loc-end').value,
                     p_w: document.getElementById('m-pax-w').value,
                     p_n: document.getElementById('m-pax-n').value,
-                    p_disabled: document.getElementById('m-pax-disabled').value, // 🔥
-                    p_non_disabled: document.getElementById('m-pax-non-disabled').value, // 🔥
-                    note: document.getElementById('m-note').value, // 🔥
+                    p_disabled: document.getElementById('m-pax-disabled').value, 
+                    p_non_disabled: document.getElementById('m-pax-non-disabled').value, 
+                    note: document.getElementById('m-note').value, 
                     c_name: document.getElementById('m-cust-name').value,
                     driver1Sign: pads['driver1-sign-pad'].cvs.toDataURL('image/png'),
                     driver2Sign: pads['driver2-sign-pad'].cvs.toDataURL('image/png'),
@@ -578,9 +529,9 @@
         function doPrint() {
             saveDraft(true); 
 
-            const type = document.getElementById('m-type').value;
-            document.getElementById('print-view').className = type === 'general' ? 'type-general' : 'type-citytour';
-            document.getElementById('print-bg').src = type === 'general' ? '공공일보.png' : '시티일보.png';
+            // 🔥 공공일보로 완벽 고정 (시티일보 로직 완전 삭제)
+            document.getElementById('print-view').className = 'type-general';
+            document.getElementById('print-bg').src = '공공일보.png';
 
             const dStr = document.getElementById('m-date').value;
             if(dStr) {
@@ -667,7 +618,6 @@
             document.getElementById('pt-pax-w').innerText = document.getElementById('m-pax-w').value || '';
             document.getElementById('pt-pax-n').innerText = document.getElementById('m-pax-n').value || '';
             
-            // 🔥 추가된 항목들 인쇄 매핑
             document.getElementById('pt-pax-disabled').innerText = document.getElementById('m-pax-disabled').value || '';
             document.getElementById('pt-pax-non-disabled').innerText = document.getElementById('m-pax-non-disabled').value || '';
             document.getElementById('pt-note').innerText = document.getElementById('m-note').value || '';
@@ -684,7 +634,6 @@
             const ptD2 = document.getElementById('pt-driver2-sign');
             if(d2Sign.length > 1300) { ptD2.src = d2Sign; ptD2.style.display = 'block'; } else { ptD2.style.display = 'none'; }
 
-            // 🔥 고객 서명 2개 동시 출력 (분신술)
             const ptCust = document.getElementById('pt-cust-sign');
             const ptCust2 = document.getElementById('pt-cust-sign2');
             if(cSign.length > 1300) { 
@@ -695,7 +644,7 @@
                 ptCust2.style.display = 'none'; 
             }
 
-            // 🔥 딜레이(setTimeout) 삭제! 누르자마자 바로 인쇄창 뜸!
+            // 🔥 스마트폰 먹통 방지: 즉시 인쇄 실행
             window.print();
         }
     </script>
