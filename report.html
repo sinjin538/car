@@ -21,7 +21,7 @@
         .form-group { margin-bottom: 15px; }
         .form-label { display: block; font-size: 0.9rem; font-weight: 600; color: #555; margin-bottom: 5px; }
         .form-input, .form-select { width: 100%; padding: 12px; border: 1px solid #ced4da; border-radius: 6px; font-size: 1rem; font-family: inherit; }
-        .form-input[readonly] { background-color: #e9ecef; font-weight: bold; color: #0056b3; border: none;}
+        .form-input[readonly], .form-select[disabled] { background-color: #e9ecef; font-weight: bold; color: #0056b3; border: none; pointer-events: none;}
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .calc-result { background: #e8f0fe; padding: 12px; border-radius: 6px; text-align: center; margin-top: 10px; border: 1px dashed #007bff; font-weight: bold;}
         .signature-area { border: 2px solid #ccc; border-radius: 8px; background: #fafbfc; position: relative; margin-top: 10px; }
@@ -44,22 +44,22 @@
             #mobile-view { display: none !important; }
             #print-view { display: block !important; position: relative; width: 210mm; height: 297mm; overflow: hidden; page-break-after: avoid; }
             #print-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; object-fit: fill; }
-            .print-data { position: absolute; font-size: 15px; font-weight: 520; color: #000; z-index: 10; font-family: 'Malgun Gothic', sans-serif; white-space: nowrap; }
+            .print-data { position: absolute; font-size: 15px; font-weight: bold; color: #000; z-index: 10; font-family: 'Malgun Gothic', sans-serif; white-space: nowrap; }
             
             .print-sign { position: absolute; z-index: 10; width: 100px; height: 50px; }
             .chk-mark { font-size: 16px; color: #d9534f; font-weight: bold; }
 
             /* ========================================================
-               🎯 영점 조절 구역 (대표님 설정 100% 적용 완료!)
+               🎯 영점 조절 구역 (대표님 설정 완벽 복원)
                ======================================================== */
             .type-general #pt-year { top: 8.9%; left: 22.8%; font-size:18px;}
             .type-general #pt-month { top: 8.9%; left: 36%; font-size:18px; }
             .type-general #pt-day { top: 8.9%; left: 46%; font-size:18px; }
-            .type-general #pt-weekday { top: 8.9%; left: 55%; font-size:18px; }
+            .type-general #pt-weekday { top: 8.9%; left: 54.8%; font-size:18px; }
             
-            .type-general #pt-chk-trip-1 { top: 24.8%; left: 48.5%; } 
-            .type-general #pt-chk-trip-2 { top: 24.8%; left: 65.7%; } 
-            .type-general #pt-chk-trip-3 { top: 24.8%; left: 65.7%; }
+            .type-general #pt-chk-trip-1 { top: 24.5%; left: 48.5%; } 
+            .type-general #pt-chk-trip-2 { top: 24.5%; left: 65.7%; } 
+            .type-general #pt-chk-trip-3 { top: 24.5%; left: 65.7%; }
             
             .type-general #pt-trip-night { top: 25%; left: 70%; } 
             .type-general #pt-trip-days { top: 25%; left: 77.5%; }  
@@ -84,31 +84,30 @@
             .type-general #pt-time-end { top: 30.8%; left: 32%; font-size: 18px; }
             .type-general #pt-time-total { top: 33.6%; left: 32%; font-size: 18px; } 
             
-            .type-general #pt-time-board { top: 42.5%; left: 32%; font-size: 18px;}  
-            .type-general #pt-time-alight { top: 47.9%; left: 32%; font-size: 18px;} 
-            .type-general #pt-time-board-total { top: 50.8%; left: 32%; font-size: 18px; } 
+            .type-general #pt-time-board { top: 42.2%; left: 32%; font-size: 18px;}  
+            .type-general #pt-time-alight { top: 47.8%; left: 32%; font-size: 18px;} 
+            .type-general #pt-time-board-total { top: 50.3%; left: 32%; font-size: 18px; } 
 
             .type-general #pt-km-start { top: 28%; left: 78%; font-size: 18px; }
             .type-general #pt-km-end { top: 30.8%; left: 78%; font-size: 18px;}
-            .type-general #pt-km-total { top: 33.6%; left: 80%; font-size: 18px;} 
+            .type-general #pt-km-total { top: 33.6%; left: 79%; font-size: 18px;} 
 
-            .type-general #pt-km-board { top: 42.5%; left: 78%; font-size: 18px;}  
-            .type-general #pt-km-alight { top: 47.9%; left: 78%; font-size: 18px;} 
-            .type-general #pt-km-board-total { top: 50.8%; left: 80%; font-size: 18px;} 
+            .type-general #pt-km-board { top: 42.2%; left: 78%; font-size: 18px;}  
+            .type-general #pt-km-alight { top: 47.8%; left: 78%; font-size: 18px;} 
+            .type-general #pt-km-board-total { top: 50.3%; left: 79%; font-size: 18px;} 
 
-            .type-general #pt-loc-start { top: 39.8%; left: 25%; font-size: 18px; }
-            .type-general #pt-loc-end { top: 45.3%; left: 25%; font-size: 18px;}
-            .type-general #pt-pax-w { top: 53.4%; left: 26.7%; font-size: 18px; }
-            .type-general #pt-pax-n { top: 53.4%; left: 37.5%; font-size: 18px; }
+            .type-general #pt-loc-start { top: 40.1%; left: 25%; font-size: 18px; }
+            .type-general #pt-loc-end { top: 45.5%; left: 25%; font-size: 18px;}
+            .type-general #pt-pax-w { top: 53.5%; left: 26.7%; font-size: 18px; }
+            .type-general #pt-pax-n { top: 53.5%; left: 37.5%; font-size: 18px; }
             
-            .type-general #pt-pax-disabled { top: 53.4%; left: 48%; font-size: 18px; } 
-            .type-general #pt-pax-non-disabled { top: 53.4%; left: 60%; font-size: 18px; } 
-            .type-general #pt-note { top: 79%; left: 10%; font-size: 18px; width: 630px; white-space: normal; } 
+            .type-general #pt-pax-disabled { top: 53.5%; left: 48%; font-size: 18px; } 
+            .type-general #pt-pax-non-disabled { top: 53.5%; left: 60%; font-size: 18px; } 
+            .type-general #pt-note { top: 79%; left: 25%; font-size: 14px; width: 50%; white-space: normal; word-break: keep-all; } 
             
             .type-general #pt-cust-name { top: 53.5%; left: 78%; font-size: 18px; }
-            .type-general #pt-cust-sign { top: 66%; left: 80%; } 
-            .type-general #pt-cust-sign2 { top: 52.7%; left: 84.7%; } 
-            /* ======================================================== */
+            .type-general #pt-cust-sign { top: 65.6%; left: 80%; } 
+            .type-general #pt-cust-sign2 { top: 52.2%; left: 84.7%; } 
         }
     </style>
 </head>
@@ -122,7 +121,7 @@
         </header>
 
         <div class="container">
-            <!-- 🔥 양식 종류 선택칸 삭제됨 (공공일보 전용 고정) -->
+            <!-- 시티투어 선택 삭제됨 -->
 
             <div class="card">
                 <div class="card-title">🗓️ 운행 일정</div>
@@ -153,18 +152,31 @@
                 <div class="grid-2">
                     <div class="form-group"><label class="form-label">운행일자</label><input type="date" id="m-date" class="form-input" readonly></div>
                     <div class="form-group">
+                        <label class="form-label">호차 선택</label>
+                        <!-- 🔥 텍스트 입력창을 삭제하고 셀렉트 박스로 변경 (이전 기록 자동 로드 엔진) -->
+                        <select id="m-car-name" class="form-select" disabled onchange="autoFillCarInfo()">
+                            <option value="">차량 선택</option>
+                            <option value="1호차">1호차</option>
+                            <option value="2호차">2호차</option>
+                            <option value="3호차">3호차</option>
+                            <option value="11호차">11호차</option>
+                            <option value="12호차">12호차</option>
+                            <option value="13호차">13호차</option>
+                            <option value="14호차">14호차</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <label class="form-label">차종</label>
-                        <select id="m-car-type" class="form-select" readonly style="background-color: #e9ecef; pointer-events: none;">
+                        <select id="m-car-type" class="form-select" readonly disabled>
                             <option value="유니버스">유니버스</option>
                             <option value="쏠라티">쏠라티</option>
                             <option value="기타">기타</option>
                         </select>
                     </div>
-                    <div class="form-group"><label class="form-label">호차</label><input type="text" id="m-car-name" class="form-input" readonly></div>
                     <div class="form-group"><label class="form-label">차량번호</label><input type="text" id="m-car" class="form-input" readonly></div>
                     
-                    <div class="form-group"><label class="form-label">운전원 (정)</label><input type="text" id="m-driver1" class="form-input" readonly></div>
-                    <div class="form-group"><label class="form-label">부운전원 (부)</label><input type="text" id="m-driver2" class="form-input" readonly></div>
+                    <div class="form-group"><label class="form-label">운전원 (정)</label><input type="text" id="m-driver1" class="form-input" readonly placeholder="예: 박기준"></div>
+                    <div class="form-group"><label class="form-label">부운전원 (부)</label><input type="text" id="m-driver2" class="form-input" readonly placeholder="예: 변석현"></div>
                 </div>
             </div>
 
@@ -185,19 +197,21 @@
 
             <div class="card">
                 <div class="card-title">2. 운행 기록 및 거리</div>
-                <p style="font-size:0.8rem; color:#888; margin-bottom:10px;">※ 숫자만 입력하면 콤마(,)는 알아서 계산됩니다!</p>
+                <p style="font-size:0.8rem; color:#888; margin-bottom:10px;">※ 시간에 <b>0900</b> 처럼 숫자 4개만 치면 알아서 <b>09:00</b>으로 바뀝니다!</p>
+                <p style="font-size:0.8rem; color:#888; margin-bottom:10px;">※ 거리에 숫자만 치면 콤마(,)는 알아서 계산됩니다!</p>
                 
                 <div class="grid-2">
-                    <div class="form-group"><label class="form-label">차고지 출발시간</label><input type="time" id="m-time-start" class="form-input"></div>
-                    <div class="form-group"><label class="form-label">차고지 도착시간</label><input type="time" id="m-time-end" class="form-input"></div>
+                    <!-- 🔥 type="time"을 텍스트로 바꾸고 자동 변환 클래스 추가 -->
+                    <div class="form-group"><label class="form-label">차고지 출발시간</label><input type="text" id="m-time-start" class="form-input time-input" placeholder="0900" inputmode="numeric" maxlength="4"></div>
+                    <div class="form-group"><label class="form-label">차고지 도착시간</label><input type="text" id="m-time-end" class="form-input time-input" placeholder="1800" inputmode="numeric" maxlength="4"></div>
                     <div class="form-group"><label class="form-label">출발 누계(km)</label><input type="number" id="m-km-start" class="form-input" oninput="calcKm()"></div>
                     <div class="form-group"><label class="form-label">도착 누계(km)</label><input type="number" id="m-km-end" class="form-input" oninput="calcKm()"></div>
                 </div>
                 <div class="calc-result" style="margin-bottom: 15px;">차고지 총 운행 거리: <span id="m-km-total">0</span> km</div>
 
                 <div class="grid-2" style="border-top: 2px dashed #eee; padding-top: 15px;">
-                    <div class="form-group"><label class="form-label">고객 탑승시간</label><input type="time" id="m-time-board" class="form-input"></div>
-                    <div class="form-group"><label class="form-label">고객 하차시간</label><input type="time" id="m-time-alight" class="form-input"></div>
+                    <div class="form-group"><label class="form-label">고객 탑승시간</label><input type="text" id="m-time-board" class="form-input time-input" placeholder="1000" inputmode="numeric" maxlength="4"></div>
+                    <div class="form-group"><label class="form-label">고객 하차시간</label><input type="text" id="m-time-alight" class="form-input time-input" placeholder="1730" inputmode="numeric" maxlength="4"></div>
                     <div class="form-group"><label class="form-label">탑승 시 거리(km)</label><input type="number" id="m-km-board" class="form-input" oninput="calcKm()"></div>
                     <div class="form-group"><label class="form-label">하차 시 거리(km)</label><input type="number" id="m-km-alight" class="form-input" oninput="calcKm()"></div>
                 </div>
@@ -243,7 +257,6 @@
 
     <!-- 🖨️ 인쇄 전용 화면 -->
     <div id="print-view" class="type-general">
-        <!-- 🔥 무조건 공공일보로 박아둡니다 -->
         <img id="print-bg" src="공공일보.png" alt="배경양식">
         
         <div class="print-data" id="pt-year"></div><div class="print-data" id="pt-month"></div>
@@ -312,7 +325,7 @@
             let drawing = false;
             cvs.width = cvs.parentElement.clientWidth || 300; 
             
-            cvs.height = 120; ctx.lineWidth = 6; ctx.lineCap = 'round'; ctx.strokeStyle = '#000'; 
+            cvs.height = 120; ctx.lineWidth = 8; ctx.lineCap = 'round'; ctx.strokeStyle = '#000'; 
             
             function getPos(e) {
                 const rect = cvs.getBoundingClientRect();
@@ -351,6 +364,31 @@
             "14호차": { type: "쏠라티", num: "732무8376" }
         };
 
+        // 🔥 호차 선택 시 차종, 차량번호 자동 입력 & 과거 제일 컸던 KM 땡겨오기
+        async function autoFillCarInfo() {
+            let carName = document.getElementById('m-car-name').value;
+            if(carMap[carName]) {
+                document.getElementById('m-car-type').value = carMap[carName].type;
+                document.getElementById('m-car').value = carMap[carName].num;
+            }
+            
+            if(carName && !document.getElementById('m-km-start').value) {
+                try {
+                    const snap = await db.collection('reports').where('carName', '==', carName).get();
+                    let lastKm = 0;
+                    snap.forEach(doc => {
+                        let d = doc.data();
+                        let endKm = parseFloat(d.k_end) || 0;
+                        if(endKm > lastKm) lastKm = endKm;
+                    });
+                    if(lastKm > 0) {
+                        document.getElementById('m-km-start').value = lastKm;
+                        calcKm();
+                    }
+                } catch(e) { console.log(e); }
+            }
+        }
+
         function parseTimeParam(t) {
             if (!t) return '';
             if (t.includes(':')) return t; 
@@ -366,12 +404,53 @@
             initPad('driver2-sign-pad');
             initPad('cust-sign-pad');
 
+            // 🔥 [숫자 4개 치면 시간으로 바꾸는 마법 엔진]
+            document.querySelectorAll('.time-input').forEach(input => {
+                input.addEventListener('blur', function() {
+                    let val = this.value.replace(/[^0-9]/g, ''); // 숫자만 남기기
+                    if(val.length >= 3 && val.length <= 4) {
+                        if(val.length === 3) val = '0' + val; // 900 -> 0900
+                        let h = parseInt(val.substring(0,2));
+                        let m = parseInt(val.substring(2,4));
+                        if(h > 23) h = 23;
+                        if(m > 59) m = 59;
+                        this.value = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0');
+                    }
+                });
+            });
+
             const urlParams = new URLSearchParams(window.location.search);
             const resId = urlParams.get('resId'); 
             const pDate = urlParams.get('date');
             
-            if(!resId || !pDate) return;
-            globalDocId = resId + "_" + pDate; 
+            // 🔥 수시 운행일보 (isManual) 체크
+            let isManual = urlParams.get('isManual') === 'true';
+
+            if(isManual) {
+                globalDocId = "MANUAL_" + Date.now(); // 중복 안되는 임의 아이디 생성
+                
+                // 잠금 싹 다 풀기
+                document.getElementById('m-date').readOnly = false;
+                document.getElementById('m-car-name').disabled = false;
+                document.getElementById('m-car').readOnly = false;
+                document.getElementById('m-driver1').readOnly = false;
+                document.getElementById('m-driver2').readOnly = false;
+                
+                // 회색 배경 없애고 하얗게 만들기
+                const inputs = ['m-date', 'm-car-type', 'm-car-name', 'm-car', 'm-driver1', 'm-driver2'];
+                inputs.forEach(id => {
+                    let el = document.getElementById(id);
+                    if(el) { el.style.backgroundColor = '#fff'; el.style.pointerEvents = 'auto'; }
+                });
+                
+                // 현재 날짜 기본 세팅
+                document.getElementById('m-date').value = pDate || new Date().toISOString().substring(0, 10);
+                document.getElementById('m-driver1').value = urlParams.get('driver') || '';
+                
+            } else {
+                if(!resId || !pDate) return;
+                globalDocId = resId + "_" + pDate; 
+            }
 
             let tIn = parseTimeParam(urlParams.get('in'));
             let tOut = parseTimeParam(urlParams.get('out'));
@@ -401,7 +480,11 @@
                     document.getElementById('m-date').value = data.date || pDate;
                     
                     document.getElementById('m-car-type').value = data.carType || finalCarType;
-                    document.getElementById('m-car-name').value = data.carName || finalCarName; 
+                    
+                    if(document.getElementById('m-car-name').tagName === 'SELECT') {
+                        document.getElementById('m-car-name').value = data.carName || finalCarName;
+                    }
+                    
                     document.getElementById('m-car').value = data.car || finalCarNum;
                     document.getElementById('m-driver1').value = data.driver1 || d1;
                     document.getElementById('m-driver2').value = data.driver2 || d2;
@@ -438,10 +521,12 @@
                         if (data.driver2Sign && data.driver2Sign.length > 1300) { const img = new Image(); img.onload = () => pads['driver2-sign-pad'].ctx.drawImage(img, 0, 0); img.src = data.driver2Sign; }
                         if (data.custSign && data.custSign.length > 1300) { const img = new Image(); img.onload = () => pads['cust-sign-pad'].ctx.drawImage(img, 0, 0); img.src = data.custSign; }
                     }, 100);
-                } else {
+                } else if(!isManual) {
                     document.getElementById('m-date').value = pDate;
                     document.getElementById('m-car-type').value = finalCarType;
-                    document.getElementById('m-car-name').value = finalCarName; 
+                    if(document.getElementById('m-car-name').tagName === 'SELECT') {
+                        document.getElementById('m-car-name').value = finalCarName;
+                    }
                     document.getElementById('m-car').value = finalCarNum;
                     document.getElementById('m-driver1').value = d1;
                     document.getElementById('m-driver2').value = d2;
@@ -499,7 +584,9 @@
             if(!globalDocId) return;
             if(confirm('서버에 저장된 이 배차의 일보를 완전히 삭제하시겠습니까?')) {
                 await db.collection('reports').doc(globalDocId).delete();
-                window.location.reload();
+                // 수동 모드면 창 닫기, 배차 모드면 새로고침
+                if(globalDocId.startsWith("MANUAL")) window.location.href='driver.html';
+                else window.location.reload();
             }
         }
 
@@ -529,7 +616,7 @@
         function doPrint() {
             saveDraft(true); 
 
-            // 🔥 공공일보로 완벽 고정 (시티일보 로직 완전 삭제)
+            // 공공일보 고정
             document.getElementById('print-view').className = 'type-general';
             document.getElementById('print-bg').src = '공공일보.png';
 
@@ -644,7 +731,6 @@
                 ptCust2.style.display = 'none'; 
             }
 
-            // 🔥 스마트폰 먹통 방지: 즉시 인쇄 실행
             window.print();
         }
     </script>
