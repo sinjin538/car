@@ -232,7 +232,6 @@
                                     <button style="flex: 1.2; background: #6c757d; color: white; border: none; padding: 6px 2px; border-radius: 4px; font-weight: 700; cursor: pointer; font-size: 0.7rem; letter-spacing: -0.5px;" onclick="cancelBefore4Days('${v}')">4일전 취소</button>
                                 </div>
 
-                                <!-- 🔥 운행 형태 -> 거리 -> 내용 순으로 배치 순서 변경 -->
                                 <div class="form-group">
                                     <label>운행 형태</label>
                                     <select id="type_${v}">
@@ -299,8 +298,7 @@
                 </script>
             </div>
         </div>
-    </div> 
-
+    </div>
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyCipeqfmU03bZQozFt8MdToxxuDyFIUd-g",
@@ -389,7 +387,6 @@
             localStorage.setItem('userRole', systemUsers[id].role);
             localStorage.setItem('loggedInPw', realPw); 
             
-            // 🔥 접속 무한로딩 해결: 로그인 완료 후 화면 새로고침!
             window.location.reload(); 
         }
 
@@ -712,7 +709,6 @@
             if (!dailyDriverStatus[currentDate]) dailyDriverStatus[currentDate] = {};
             dailyDriverStatus[currentDate][driver] = newStatus;
             
-            // 🔥 recalculateAll(true)로 변경하여 재계산된 배차 명단을 서버에 즉시 저장합니다!
             recalculateAll(true); 
             renderStatusPanel(currentDate);
             db.collection('daily_status').doc(currentDate).set(dailyDriverStatus[currentDate]).catch(e=>{});
@@ -1044,7 +1040,6 @@
             const dutyDrivers = Object.keys(statusData).filter(d => statusData[d] === '당직');
 
             let statusHTML = '';
-            // 🔥 당직 전체 글자색 노란색 적용
             if (dutyDrivers.length > 0) {
                 statusHTML += `<div class="cal-status duty"><span style="color:#f29900; font-weight:700;">당직: ${dutyDrivers.join(', ')}</span></div>`;
             }
@@ -1063,7 +1058,6 @@
             }
         }
 
-        // 🔥 사진 터치 시 확대(새 탭 열기) 기능 적용 완료
         function showDispatchDetail(event, id, clickedDate) {
             event.stopPropagation(); 
             const d = allReservations.find(r => r.id === id);
@@ -1144,21 +1138,9 @@
                     
                     if ((d.assigned || []).length === 0) assignedNamesHTML = '인원 부족';
 
-                    let reportText = '';
-                    if (d.settlement && Object.keys(d.settlement).length > 0) {
-                        Object.keys(d.settlement).forEach(drv => {
-                            if (d.settlement[drv][date]) {
-                                const s = d.settlement[drv][date];
-                                reportText += `<div style="margin-top:8px; font-size:0.85rem; color:#155724; background:#d4edda; padding:6px 10px; border-radius:4px; border: 1px solid #c3e6cb;">
-                                    <b>[${drv}]</b> ${s.isEarly ? '[선운행] ' : ''}근무: ${s.clockIn || '-'} ~ ${s.clockOut || '-'} <br>
-                                    보상: <b>${Number(s.overtime || 0).toFixed(2)}</b>시간 | 일비: <b>${Number(s.allowance || 0).toLocaleString()}</b>원
-                                </div>`;
-                            }
-                        });
-                    }
-
                     let attachIcon = d.photoUrl ? ' <span style="font-size:0.9rem;">📎</span>' : '';
 
+                    // 🔥 개인 정산(근무시간, 보상금 등)을 출력하는 코드(reportText)를 완벽하게 삭제했습니다!
                     html += `
                         <li style="${canceledLiStyle}">
                             <b>[${d.vehicle}]</b>${attachIcon} 
@@ -1167,7 +1149,6 @@
                             ${d.isCanceled ? '<span style="color:#d9534f; font-weight:bold; margin-left:5px; text-decoration:none;">[취소됨]</span>' : ''}<br>
                             내용: ${d.dest} <br>
                             운전원: <b style="${d.isCanceled ? 'color:#adb5bd;' : 'color:#28a745;'}">${assignedNamesHTML}</b>
-                            ${reportText}
                         </li>`;
                 });
             }
@@ -1178,7 +1159,6 @@
 
             if (dutyDrivers.length > 0 || offDrivers.length > 0) {
                 html += `<li style="background-color: #fff; border: 2px dashed #007bff; margin-top: 10px; border-radius: 6px;">`;
-                // 🔥 당직 전체 글자색 노란색 적용
                 if (dutyDrivers.length > 0) {
                     html += `<div style="margin-bottom: ${offDrivers.length > 0 ? '8px' : '0'};"><span style="color:#f29900; font-weight:700;">당직: ${dutyDrivers.join(', ')}</span></div>`;
                 }
