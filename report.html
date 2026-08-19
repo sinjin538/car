@@ -368,20 +368,29 @@
                 document.getElementById('m-car').value = carMap[carName].num;
             }
             
+            // 🚀 [마법의 서랍장 로직 1] 내 차 전용 서랍장부터 열어보기!
             if(carName && !document.getElementById('m-km-start').value) {
-                try {
-                    const snap = await db.collection('reports').where('carName', '==', carName).get();
-                    let lastKm = 0;
-                    snap.forEach(doc => {
-                        let d = doc.data();
-                        let endKm = parseFloat(d.k_end) || 0;
-                        if(endKm > lastKm) lastKm = endKm;
-                    });
-                    if(lastKm > 0) {
-                        document.getElementById('m-km-start').value = lastKm;
-                        calcKm();
-                    }
-                } catch(e) { console.log(e); }
+                const savedMileage = localStorage.getItem('lastMileage_' + carName);
+                
+                if (savedMileage) {
+                    document.getElementById('m-km-start').value = savedMileage;
+                    calcKm();
+                } else {
+                    // (만약 서랍이 비어있으면 기존처럼 서버에서 긁어오기)
+                    try {
+                        const snap = await db.collection('reports').where('carName', '==', carName).get();
+                        let lastKm = 0;
+                        snap.forEach(doc => {
+                            let d = doc.data();
+                            let endKm = parseFloat(d.k_end) || 0;
+                            if(endKm > lastKm) lastKm = endKm;
+                        });
+                        if(lastKm > 0) {
+                            document.getElementById('m-km-start').value = lastKm;
+                            calcKm();
+                        }
+                    } catch(e) { console.log(e); }
+                }
             }
         }
 
@@ -438,7 +447,6 @@
                 document.getElementById('m-date').value = pDate || new Date().toISOString().substring(0, 10);
                 document.getElementById('m-driver1').value = urlParams.get('driver') || '';
                 
-                // 🔥 수시 일보 모드일 때 저장, 삭제 버튼 숨기기!
                 document.getElementById('btn-save').style.display = 'none';
                 document.getElementById('btn-delete').style.display = 'none';
                 
@@ -536,7 +544,6 @@
                 }
             } catch(e) { console.error("DB Load Error", e); }
             
-            // 🔥 수시 일보 모드일 때는 켜질 때 자동 저장 생략!
             if(!isManual) {
                 setTimeout(() => { saveDraft(true); }, 500);
             }
@@ -577,6 +584,14 @@
                 };
                 
                 await db.collection('reports').doc(globalDocId).set(reportData);
+                
+                // 🚀 [마법의 서랍장 로직 2] 방금 적은 도착 누계 키로수를 내 차 전용 서랍에 쏙 덮어쓰기!
+                const currentCarName = document.getElementById('m-car-name').value;
+                const finalKm = document.getElementById('m-km-end').value;
+                if(currentCarName && finalKm) {
+                    localStorage.setItem('lastMileage_' + currentCarName, finalKm);
+                }
+
                 if(!isSilent) alert('☁️ 파이어베이스 클라우드에 완벽하게 저장되었습니다!');
             } catch(e) { if(!isSilent) alert('저장 중 오류 발생: ' + e.message); }
         }
@@ -614,7 +629,6 @@
         }
 
         function doPrint() {
-            // 🔥 수시 일보 모드가 아닐 때만 저장하고, 수시 일보는 바로 냅다 인쇄!
             if(!globalDocId.startsWith("MANUAL")) {
                 saveDraft(true); 
             }
