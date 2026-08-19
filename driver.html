@@ -190,6 +190,11 @@
             </div>
 
             <div class="sidebar-section">
+                <!-- 🔥 수시 운행일보 버튼 추가 -->
+                <button onclick="goToAdhocReport()" style="width:100%; padding:14px; background:#6f42c1; color:white; border:none; border-radius:8px; font-weight:bold; font-size:1.1rem; margin-bottom:20px; box-shadow:0 4px 6px rgba(0,0,0,0.1); cursor:pointer;">
+                    📝 배차 없는 수시 일보 작성
+                </button>
+
                 <div class="my-status-box">
                     <h4 id="status-date-title">상태 변경</h4>
                     <div class="radio-group" id="my-status-radios"></div>
@@ -451,14 +456,11 @@
             hideLoading();
         }
 
-        // 🔥 수정된 로그아웃 엔진 (로그인 기록만 쏙 지우기) 🔥
         function logout() { 
             localStorage.removeItem('loggedInUser'); 
             window.location.reload(); 
         }
-        // 🔥 모듈 3으로 데이터를 싸서 던져주는 엔진 🔥
-        // 🔥 클라우드 시대에 맞게 진화한 모듈 3 연결 엔진 🔥
-        // 🔥 클라우드 시대에 맞게 진화한 모듈 3 연결 엔진 🔥
+
         function goToReport() {
             const resId = document.getElementById('settle-res-id').value;
             const clickedDate = document.getElementById('settle-date').value;
@@ -466,14 +468,13 @@
             const d = allReservations.find(r => r.id === resId);
             
             if (d) {
-                // 🔥 범인 검거 완료! (d.assigned 바구니에 있는 명단을 쉼표로 묶어서 보냅니다)
                 const driversStr = (d.assigned && d.assigned.length > 0) ? d.assigned.join(',') : currentUser;
 
                 const params = new URLSearchParams({
                     resId: resId,
                     date: clickedDate,
                     car: d.vehicle || '',
-                    driver: driversStr,   // 👈 드디어 '박기준,변석현' 통째로 날아갑니다!
+                    driver: driversStr,   
                     reason: d.type || '',
                     dest: d.dest || '',
                     in: document.getElementById('settle-in').value,
@@ -484,6 +485,16 @@
             } else {
                 alert('배차 정보를 찾을 수 없습니다.');
             }
+        }
+
+        // 🔥 수시 운행일보 (배차 없음) 접속 엔진
+        function goToAdhocReport() {
+            const params = new URLSearchParams({
+                date: currentDate,
+                driver: currentUser,
+                isManual: 'true' // 이 표시가 있어야 락을 풀어줍니다!
+            });
+            window.location.href = 'report.html?' + params.toString();
         }
 
         function goToAdmin() { window.location.href = 'index.html'; }
