@@ -190,7 +190,6 @@
             </div>
 
             <div class="sidebar-section">
-                <!-- 🔥 수시 운행일보 버튼 추가 -->
                 <button onclick="goToAdhocReport()" style="width:100%; padding:14px; background:#6f42c1; color:white; border:none; border-radius:8px; font-weight:bold; font-size:1.1rem; margin-bottom:20px; box-shadow:0 4px 6px rgba(0,0,0,0.1); cursor:pointer;">
                     📝 배차 없는 수시 일보 작성
                 </button>
@@ -487,12 +486,11 @@
             }
         }
 
-        // 🔥 수시 운행일보 (배차 없음) 접속 엔진
         function goToAdhocReport() {
             const params = new URLSearchParams({
                 date: currentDate,
                 driver: currentUser,
-                isManual: 'true' // 이 표시가 있어야 락을 풀어줍니다!
+                isManual: 'true' 
             });
             window.location.href = 'report.html?' + params.toString();
         }
@@ -780,6 +778,7 @@
             });
         }
 
+        // 🔥 클라우드(DB) 영구 삭제 폭탄 장착 완료!
         function deleteSettlement() {
             const resId = document.getElementById('settle-res-id').value;
             const clickedDate = document.getElementById('settle-date').value;
@@ -796,10 +795,14 @@
 
             showLoading('삭제 중...');
             
-            delete d.settlement[currentUser][clickedDate];
+            // 파이어베이스 전용 '이 데이터만 쏙 빼서 영구 삭제해라!' 명령어
+            const fieldPath = `settlement.${currentUser}.${clickedDate}`;
             
-            db.collection('reservations').doc(resId).set({ settlement: d.settlement }, { merge: true })
+            db.collection('reservations').doc(resId).update({
+                [fieldPath]: firebase.firestore.FieldValue.delete()
+            })
             .then(() => {
+                delete d.settlement[currentUser][clickedDate]; // 폰 화면에서도 즉시 지움
                 alert('깔끔하게 삭제되었습니다!');
                 renderDispatchResult(currentDate); 
                 updateCalendarCellUI(currentDate); 
@@ -808,8 +811,13 @@
                 hideLoading();
             })
             .catch(error => {
-                alert('오류가 발생했습니다.');
-                hideLoading();
+                // 혹시 모를 대비책 (문서가 없을 경우 등)
+                delete d.settlement[currentUser][clickedDate];
+                db.collection('reservations').doc(resId).set({ settlement: d.settlement }, { merge: true })
+                .then(() => {
+                    alert('깔끔하게 삭제되었습니다!');
+                    renderDispatchResult(currentDate); updateCalendarCellUI(currentDate); renderMonthlySummary(); closeDetailModal(); hideLoading();
+                }).catch(e => { alert('오류가 발생했습니다.'); hideLoading(); });
             });
         }
 
