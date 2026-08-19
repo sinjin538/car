@@ -1,4 +1,16 @@
-<style>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>배차 데이터 집계 보고서</title>
+    
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Pretendard', sans-serif; background-color: #f4f6f9; color: #333; letter-spacing: -0.3px; }
         
@@ -74,3 +86,332 @@
             .driver-section-start { page-break-before: always; padding-top: 20px; margin-top: 0; }
         }
     </style>
+</head>
+<body>
+
+    <div id="loading-overlay">데이터를 집계 중입니다...</div>
+
+    <header class="header">
+        <h1>📊 배차 데이터 집계 관리</h1>
+        <div class="header-btns">
+            <button class="btn-print" onclick="window.print()">🖨️ 보고서 인쇄</button>
+            <button class="btn-close" onclick="window.close()">창 닫기</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="view-tabs">
+            <button id="tab-month" class="active" onclick="setViewMode('month')">📅 월별 보기</button>
+            <button id="tab-year" onclick="setViewMode('year')">📈 연간 보기</button>
+        </div>
+
+        <div class="time-nav">
+            <button onclick="changeTime(-1)">◀</button>
+            <span id="time-display">2026년 8월 결산 보고서</span>
+            <button onclick="changeTime(1)">▶</button>
+        </div>
+
+        <!-- 공통 상단: 합계 박스 -->
+        <div class="dashboard-grid">
+            <div class="stat-card total"><h4>총 배차(유효)</h4><div class="num" id="s-total">0</div></div>
+            <div class="stat-card"><h4>공공예약</h4><div class="num" id="s-pub">0</div></div>
+            <div class="stat-card"><h4>1박</h4><div class="num" id="s-stay1">0</div></div>
+            <div class="stat-card"><h4>2박</h4><div class="num" id="s-stay2">0</div></div>
+            <div class="stat-card"><h4>시티투어</h4><div class="num" id="s-city">0</div></div>
+            <div class="stat-card"><h4>성묘지원</h4><div class="num" id="s-grave">0</div></div>
+            <div class="stat-card" style="border-top-color:#17a2b8;"><h4>서울운행</h4><div class="num" id="s-seoul" style="color:#17a2b8;">0</div></div>
+            <div class="stat-card" style="border-top-color:#fd7e14;"><h4>나들이</h4><div class="num" id="s-outing" style="color:#fd7e14;">0</div></div>
+            <div class="stat-card" style="border-top-color:#6c757d;"><h4>기타</h4><div class="num" id="s-etc" style="color:#6c757d;">0</div></div>
+            <div class="stat-card cancel"><h4>4일전 취소</h4><div class="num" id="s-cancel">0</div></div>
+        </div>
+
+        <!-- ============================== -->
+        <!-- 🚙 [차량별 세트 구역] -->
+        <!-- ============================== -->
+        
+        <div class="chart-box">
+            <canvas id="vehicleChart"></canvas>
+        </div>
+
+        <div class="table-section">
+            <h3>🚗 호차별 집계</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>차량번호</th>
+                        <th style="background:#e8f0fe;">유효 합계</th>
+                        <th>공공</th>
+                        <th>1박</th>
+                        <th>2박</th>
+                        <th>시티</th>
+                        <th>성묘</th>
+                        <th>서울</th>
+                        <th>나들이</th>
+                        <th>기타</th>
+                        <th style="background:#fff5f5; color:#dc3545;">취소건</th>
+                    </tr>
+                </thead>
+                <tbody id="vehicle-tbody"></tbody>
+            </table>
+        </div>
+
+        <!-- ============================== -->
+        <!-- 🧑‍✈️ [운전원별 세트 구역] (인쇄 시 여기서부터 2장째로!) -->
+        <!-- ============================== -->
+
+        <div class="chart-box driver-section-start">
+            <canvas id="driverChart"></canvas>
+        </div>
+
+        <div class="table-section">
+            <h3>🧑‍✈️ 운전원별 집계</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>운전원 성함</th>
+                        <th style="background:#e8f0fe;">유효 합계</th>
+                        <th>공공</th>
+                        <th>1박</th>
+                        <th>2박</th>
+                        <th>시티</th>
+                        <th>성묘</th>
+                        <th>서울</th>
+                        <th>나들이</th>
+                        <th>기타</th>
+                        <th style="background:#fff5f5; color:#dc3545;">취소건</th>
+                    </tr>
+                </thead>
+                <tbody id="driver-tbody"></tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCipeqfmU03bZQozFt8MdToxxuDyFIUd-g",
+            authDomain: "park-fc66f.firebaseapp.com",
+            projectId: "park-fc66f",
+            storageBucket: "park-fc66f.firebasestorage.app",
+            messagingSenderId: "93011031366",
+            appId: "1:93011031366:web:72438cb8d71dd5a7902147"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        let currentYear = new Date().getFullYear();
+        let currentMonth = new Date().getMonth();
+        let allReservations = [];
+        let viewMode = 'month'; 
+        
+        let vehicleChartInstance = null;
+        let driverChartInstance = null;
+
+        const allVehicles = ['1호차', '2호차', '3호차', '11호차', '12호차', '13호차', '14호차'];
+        const baseDrivers = ['박기준', '변석현', '이명순', '김탁', '한상훈', '문인식', '황덕일', '강철규', '이상헌', '함동한'];
+
+        function getShortType(type) {
+            if (!type) return '기타';
+            if (type.includes('공공')) return '공공';
+            if (type.includes('1박')) return '1박';
+            if (type.includes('2박')) return '2박';
+            if (type.includes('서울')) return '서울';
+            if (type.includes('시티')) return '시티';
+            if (type.includes('성묘')) return '성묘';
+            if (type.includes('나들이')) return '나들이'; 
+            return '기타';
+        }
+
+        async function loadData() {
+            document.getElementById('loading-overlay').style.display = 'flex';
+            try {
+                const snap = await db.collection('reservations').get();
+                allReservations = snap.docs.map(doc => doc.data());
+                processStats();
+            } catch (error) {
+                alert("데이터를 불러오는데 실패했습니다.");
+            }
+            document.getElementById('loading-overlay').style.display = 'none';
+        }
+
+        function setViewMode(mode) {
+            viewMode = mode;
+            document.getElementById('tab-month').classList.toggle('active', mode === 'month');
+            document.getElementById('tab-year').classList.toggle('active', mode === 'year');
+            processStats();
+        }
+
+        function changeTime(offset) {
+            if (viewMode === 'month') {
+                currentMonth += offset;
+                if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+                else if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+            } else {
+                currentYear += offset; 
+            }
+            processStats();
+        }
+
+        function processStats() {
+            if (viewMode === 'month') {
+                document.getElementById('time-display').innerText = `${currentYear}년 ${currentMonth + 1}월 결산 보고서`;
+            } else {
+                document.getElementById('time-display').innerText = `🔥 ${currentYear}년 전체 결산 보고서 🔥`;
+            }
+            
+            const timePrefix = viewMode === 'month' 
+                ? `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}` 
+                : `${currentYear}`;
+            
+            const targetRes = allReservations.filter(r => r.startDate && r.startDate.startsWith(timePrefix));
+
+            let t_tot=0, t_pub=0, t_stay1=0, t_stay2=0, t_city=0, t_grave=0, t_seoul=0, t_outing=0, t_etc=0, t_cancel=0;
+            let vStats = {}; allVehicles.forEach(v => vStats[v] = {tot:0, pub:0, stay1:0, stay2:0, city:0, grave:0, seoul:0, outing:0, etc:0, cancel:0});
+            let dStats = {}; baseDrivers.forEach(d => dStats[d] = {tot:0, pub:0, stay1:0, stay2:0, city:0, grave:0, seoul:0, outing:0, etc:0, cancel:0});
+
+            targetRes.forEach(r => {
+                const typeStr = getShortType(r.type);
+                const isCanceled = r.isCanceled || false;
+                const v = r.vehicle;
+                let drivers = r.assigned || [];
+
+                drivers.forEach(d => { if(d !== '미지정' && !dStats[d]) dStats[d] = {tot:0, pub:0, stay1:0, stay2:0, city:0, grave:0, seoul:0, outing:0, etc:0, cancel:0}; });
+
+                if (isCanceled) {
+                    t_cancel++;
+                    if (v && vStats[v]) vStats[v].cancel++;
+                    drivers.forEach(d => { if(d !== '미지정') dStats[d].cancel++; });
+                } else {
+                    t_tot++;
+                    if(typeStr==='공공') t_pub++; else if(typeStr==='1박') t_stay1++; else if(typeStr==='2박') t_stay2++; 
+                    else if(typeStr==='시티') t_city++; else if(typeStr==='성묘') t_grave++; 
+                    else if(typeStr==='서울') t_seoul++; else if(typeStr==='나들이') t_outing++; 
+                    else t_etc++;
+
+                    if (v && vStats[v]) {
+                        vStats[v].tot++;
+                        if(typeStr==='공공') vStats[v].pub++; else if(typeStr==='1박') vStats[v].stay1++; 
+                        else if(typeStr==='2박') vStats[v].stay2++; else if(typeStr==='시티') vStats[v].city++; 
+                        else if(typeStr==='성묘') vStats[v].grave++; 
+                        else if(typeStr==='서울') vStats[v].seoul++; else if(typeStr==='나들이') vStats[v].outing++; 
+                        else vStats[v].etc++;
+                    }
+
+                    drivers.forEach(d => {
+                        if(d !== '미지정') {
+                            dStats[d].tot++;
+                            if(typeStr==='공공') dStats[d].pub++; else if(typeStr==='1박') dStats[d].stay1++; 
+                            else if(typeStr==='2박') dStats[d].stay2++; else if(typeStr==='시티') dStats[d].city++; 
+                            else if(typeStr==='성묘') dStats[d].grave++; 
+                            else if(typeStr==='서울') dStats[d].seoul++; else if(typeStr==='나들이') dStats[d].outing++; 
+                            else dStats[d].etc++;
+                        }
+                    });
+                }
+            });
+
+            document.getElementById('s-total').innerText = t_tot;
+            document.getElementById('s-pub').innerText = t_pub;
+            document.getElementById('s-stay1').innerText = t_stay1;
+            document.getElementById('s-stay2').innerText = t_stay2;
+            document.getElementById('s-city').innerText = t_city;
+            document.getElementById('s-grave').innerText = t_grave;
+            document.getElementById('s-seoul').innerText = t_seoul; 
+            document.getElementById('s-outing').innerText = t_outing; 
+            document.getElementById('s-etc').innerText = t_etc;
+            document.getElementById('s-cancel').innerText = t_cancel;
+
+            let vHtml = '';
+            allVehicles.forEach(v => {
+                const s = vStats[v];
+                vHtml += `<tr>
+                    <td style="font-weight:bold; background:#f8f9fa;">${v}</td>
+                    <td class="highlight">${s.tot}</td>
+                    <td>${s.pub}</td><td>${s.stay1}</td><td>${s.stay2}</td>
+                    <td>${s.city}</td><td>${s.grave}</td><td>${s.seoul}</td><td>${s.outing}</td>
+                    <td>${s.etc}</td><td class="cancel-cell">${s.cancel}</td>
+                </tr>`;
+            });
+            document.getElementById('vehicle-tbody').innerHTML = vHtml;
+
+            let dHtml = '';
+            Object.keys(dStats).sort().forEach(d => {
+                const s = dStats[d];
+                dHtml += `<tr>
+                    <td style="font-weight:bold; background:#f8f9fa;">${d}</td>
+                    <td class="highlight">${s.tot}</td>
+                    <td>${s.pub}</td><td>${s.stay1}</td><td>${s.stay2}</td>
+                    <td>${s.city}</td><td>${s.grave}</td><td>${s.seoul}</td><td>${s.outing}</td>
+                    <td>${s.etc}</td><td class="cancel-cell">${s.cancel}</td>
+                </tr>`;
+            });
+            document.getElementById('driver-tbody').innerHTML = dHtml;
+
+            drawCharts(vStats, dStats);
+        }
+
+        function drawCharts(vStats, dStats) {
+            const vLabels = Object.keys(vStats);
+            const vData = vLabels.map(v => vStats[v].tot);
+
+            const dLabels = Object.keys(dStats).sort();
+            const dData = dLabels.map(d => dStats[d].tot);
+
+            if (vehicleChartInstance) vehicleChartInstance.destroy();
+            if (driverChartInstance) driverChartInstance.destroy();
+
+            const vCtx = document.getElementById('vehicleChart').getContext('2d');
+            vehicleChartInstance = new Chart(vCtx, {
+                type: 'bar',
+                data: {
+                    labels: vLabels,
+                    datasets: [{
+                        label: '차량별 유효 배차 건수',
+                        data: vData,
+                        backgroundColor: 'rgba(0, 123, 255, 0.7)',
+                        borderColor: '#007bff',
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    animation: { duration: 0 },
+                    plugins: { 
+                        legend: { display: false },
+                        title: { display: true, text: '📊 차량별 배차 현황', font: { size: 16 } }
+                    },
+                    scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+                }
+            });
+
+            const dCtx = document.getElementById('driverChart').getContext('2d');
+            driverChartInstance = new Chart(dCtx, {
+                type: 'bar',
+                data: {
+                    labels: dLabels,
+                    datasets: [{
+                        label: '운전원별 유효 배차 건수',
+                        data: dData,
+                        backgroundColor: 'rgba(40, 167, 69, 0.7)',
+                        borderColor: '#28a745',
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    animation: { duration: 0 },
+                    plugins: { 
+                        legend: { display: false },
+                        title: { display: true, text: '🧑‍✈️ 운전원별 배차 현황', font: { size: 16 } }
+                    },
+                    scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+                }
+            });
+        }
+
+        window.onload = loadData;
+    </script>
+</body>
+</html>
