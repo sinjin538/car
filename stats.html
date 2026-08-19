@@ -8,7 +8,6 @@
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -32,7 +31,7 @@
         .time-nav { display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 20px; font-size: 1.6rem; font-weight: 900; color: #2c3e50; }
         .time-nav button { padding: 5px 15px; font-size: 1.2rem; cursor: pointer; border: 1px solid #ccc; background: #fff; border-radius: 6px; }
 
-        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; margin-bottom: 20px; }
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; margin-bottom: 40px; }
         .stat-card { background: #fff; padding: 15px 5px; border-radius: 8px; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.05); border-top: 4px solid #007bff; }
         .stat-card.total { border-top-color: #28a745; background: #f0fdf4; }
         .stat-card.cancel { border-top-color: #dc3545; background: #fff5f5; }
@@ -41,48 +40,43 @@
         .stat-card.total .num { color: #28a745; }
         .stat-card.cancel .num { color: #dc3545; }
 
-        /* 🔥 일반 화면: 차트 높이 키우고, 아래쪽 여백(margin-bottom)을 60px로 시원하게 뻥 뚫었습니다! */
-        .chart-box { width: 100%; height: 320px; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); margin-bottom: 60px; position: relative; }
-
-        /* 🔥 일반 화면: 표 아래쪽 여백도 60px로 확보! */
-        .table-section { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); margin-bottom: 60px; overflow-x: auto; }
-        .table-section h3 { margin-bottom: 15px; font-size: 1.2rem; border-left: 4px solid #007bff; padding-left: 10px; color: #333; }
+        /* 🔥 표 구역 큼직하게 확대 (여백, 폰트 사이즈 업) */
+        .table-section { background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 50px; overflow-x: auto; }
+        .table-section h3 { margin-bottom: 45px; font-size: 1.5rem; border-left: 5px solid #007bff; padding-left: 15px; color: #333; }
         
         table { width: 100%; border-collapse: collapse; min-width: 800px; }
-        th, td { padding: 12px 8px; border: 1px solid #dee2e6; text-align: center; font-size: 0.95rem; }
-        th { background: #f8f9fa; font-weight: 700; color: #495057; white-space: nowrap; }
-        td.highlight { font-weight: bold; color: #007bff; background: #f8f9fa; }
+        th, td { padding: 18px 10px; border: 1px solid #dee2e6; text-align: center; font-size: 1.15rem; }
+        th { background: #f8f9fa; font-weight: 700; color: #495057; white-space: nowrap; font-size: 1.2rem; }
+        td.highlight { font-weight: 900; color: #007bff; background: #f8f9fa; font-size: 1.25rem; }
         td.cancel-cell { color: #dc3545; font-weight: bold; background: #fff5f5; }
 
         #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); z-index: 9999; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; font-weight: 700; color: #007bff; }
 
-        /* 🖨️ 인쇄 전용 마법의 주문 (스마트폰 3장 밀림 완벽 방지) */
+        /* 🖨️ 인쇄 전용 마법의 주문 */
         @media print {
             @page { size: A4 landscape; margin: 10mm; }
             body { background-color: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             .header, .view-tabs, .time-nav button { display: none !important; }
             
-            /* 인쇄 시 중앙 정렬 및 여백 압축 */
             .container { margin: 0 auto; padding-top: 10px; max-width: 100%; box-shadow: none; }
-            .time-nav { margin: 0 0 15px 0; font-size: 1.8rem; color: #000; border-bottom: 2px solid #000; padding-bottom: 5px; }
+            .time-nav { margin: 0 0 20px 0; font-size: 2.2rem; color: #000; border-bottom: 2px solid #000; padding-bottom: 10px; }
             
-            .dashboard-grid { display: flex; justify-content: space-between; gap: 4px; margin-bottom: 15px; }
-            .stat-card { flex: 1; border: 1px solid #aaa; box-shadow: none; padding: 4px 2px; }
-            .stat-card h4 { font-size: 0.7rem; margin-bottom: 2px; letter-spacing: -1px; }
-            .stat-card .num { font-size: 1.1rem; }
+            .dashboard-grid { display: flex; justify-content: space-between; gap: 4px; margin-bottom: 30px; }
+            .stat-card { flex: 1; border: 1px solid #aaa; box-shadow: none; padding: 8px 2px; }
+            .stat-card h4 { font-size: 0.8rem; margin-bottom: 4px; letter-spacing: -1px; font-weight: bold; }
+            .stat-card .num { font-size: 1.4rem; font-weight: 900; }
             
-            /* 🔥 인쇄 시 3장으로 밀리지 않도록 차트 높이를 강제로 줄임 (핵심!) */
-            .chart-box { height: 180px !important; border: 1px solid #aaa; box-shadow: none; padding: 10px; margin-bottom: 20px !important; break-inside: avoid; }
-            .table-section { padding: 0; margin-bottom: 20px !important; box-shadow: none; break-inside: avoid; }
+            .table-section { padding: 0; margin-bottom: 40px !important; box-shadow: none; break-inside: avoid; }
+            .table-section h3 { margin-bottom: 35px; font-size: 1.6rem; color: #000; border-left: 6px solid #000; }
             
-            table { min-width: 100%; border: 2px solid #333; }
-            /* 🔥 스마트폰 세로 모드에서도 글씨가 안 깨지게 크기 약간 축소 */
-            th, td { border: 1px solid #555; padding: 4px 2px !important; font-size: 0.75rem !important; color: #000; }
-            th { background-color: #e9ecef !important; }
+            table { min-width: 100%; border: 2px solid #000; }
+            /* 🔥 인쇄 시에도 표 글씨를 큼직하고 시원하게! */
+            th, td { border: 1px solid #444; padding: 12px 6px !important; font-size: 1.1rem !important; color: #000; }
+            th { background-color: #e9ecef !important; font-weight: 900; }
             td.highlight { background-color: #f8f9fa !important; color: #000 !important; font-weight: 900; }
             td.cancel-cell { color: #d9534f !important; font-weight: bold; }
 
-            /* 🔥 운전원별 세트는 무조건 2페이지 첫 줄에서 시작! */
+            /* 🔥 운전원별 세트는 여전히 2페이지 첫 줄에서 시작! */
             .driver-section-start { page-break-before: always; padding-top: 20px; margin-top: 0; }
         }
     </style>
@@ -111,7 +105,7 @@
             <button onclick="changeTime(1)">▶</button>
         </div>
 
-        <!-- 공통 상단: 합계 박스 -->
+        <!-- 1. 공통 상단: 합계 박스 -->
         <div class="dashboard-grid">
             <div class="stat-card total"><h4>총 배차(유효)</h4><div class="num" id="s-total">0</div></div>
             <div class="stat-card"><h4>공공예약</h4><div class="num" id="s-pub">0</div></div>
@@ -126,13 +120,8 @@
         </div>
 
         <!-- ============================== -->
-        <!-- 🚙 [차량별 세트 구역] -->
+        <!-- 2. 🚙 [차량별 집계표] (크게 확대됨) -->
         <!-- ============================== -->
-        
-        <div class="chart-box">
-            <canvas id="vehicleChart"></canvas>
-        </div>
-
         <div class="table-section">
             <h3>🚗 호차별 집계</h3>
             <table>
@@ -156,14 +145,9 @@
         </div>
 
         <!-- ============================== -->
-        <!-- 🧑‍✈️ [운전원별 세트 구역] (인쇄 시 여기서부터 2장째로!) -->
+        <!-- 3. 🧑‍✈️ [운전원별 집계표] (인쇄 시 여기서부터 2장째로!) -->
         <!-- ============================== -->
-
-        <div class="chart-box driver-section-start">
-            <canvas id="driverChart"></canvas>
-        </div>
-
-        <div class="table-section">
+        <div class="table-section driver-section-start">
             <h3>🧑‍✈️ 운전원별 집계</h3>
             <table>
                 <thead>
@@ -203,9 +187,6 @@
         let currentMonth = new Date().getMonth();
         let allReservations = [];
         let viewMode = 'month'; 
-        
-        let vehicleChartInstance = null;
-        let driverChartInstance = null;
 
         const allVehicles = ['1호차', '2호차', '3호차', '11호차', '12호차', '13호차', '14호차'];
         const baseDrivers = ['박기준', '변석현', '이명순', '김탁', '한상훈', '문인식', '황덕일', '강철규', '이상헌', '함동한'];
@@ -346,69 +327,6 @@
                 </tr>`;
             });
             document.getElementById('driver-tbody').innerHTML = dHtml;
-
-            drawCharts(vStats, dStats);
-        }
-
-        function drawCharts(vStats, dStats) {
-            const vLabels = Object.keys(vStats);
-            const vData = vLabels.map(v => vStats[v].tot);
-
-            const dLabels = Object.keys(dStats).sort();
-            const dData = dLabels.map(d => dStats[d].tot);
-
-            if (vehicleChartInstance) vehicleChartInstance.destroy();
-            if (driverChartInstance) driverChartInstance.destroy();
-
-            const vCtx = document.getElementById('vehicleChart').getContext('2d');
-            vehicleChartInstance = new Chart(vCtx, {
-                type: 'bar',
-                data: {
-                    labels: vLabels,
-                    datasets: [{
-                        label: '차량별 유효 배차 건수',
-                        data: vData,
-                        backgroundColor: 'rgba(0, 123, 255, 0.7)',
-                        borderColor: '#007bff',
-                        borderWidth: 1,
-                        borderRadius: 4
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    animation: { duration: 0 },
-                    plugins: { 
-                        legend: { display: false },
-                        title: { display: true, text: '📊 차량별 배차 현황', font: { size: 16 } }
-                    },
-                    scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
-                }
-            });
-
-            const dCtx = document.getElementById('driverChart').getContext('2d');
-            driverChartInstance = new Chart(dCtx, {
-                type: 'bar',
-                data: {
-                    labels: dLabels,
-                    datasets: [{
-                        label: '운전원별 유효 배차 건수',
-                        data: dData,
-                        backgroundColor: 'rgba(40, 167, 69, 0.7)',
-                        borderColor: '#28a745',
-                        borderWidth: 1,
-                        borderRadius: 4
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    animation: { duration: 0 },
-                    plugins: { 
-                        legend: { display: false },
-                        title: { display: true, text: '🧑‍✈️ 운전원별 배차 현황', font: { size: 16 } }
-                    },
-                    scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
-                }
-            });
         }
 
         window.onload = loadData;
