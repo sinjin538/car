@@ -121,8 +121,6 @@
         </header>
 
         <div class="container">
-            <!-- 시티투어 선택 삭제됨 -->
-
             <div class="card">
                 <div class="card-title">🗓️ 운행 일정</div>
                 <div class="radio-group">
@@ -153,7 +151,6 @@
                     <div class="form-group"><label class="form-label">운행일자</label><input type="date" id="m-date" class="form-input" readonly></div>
                     <div class="form-group">
                         <label class="form-label">호차 선택</label>
-                        <!-- 🔥 텍스트 입력창을 삭제하고 셀렉트 박스로 변경 (이전 기록 자동 로드 엔진) -->
                         <select id="m-car-name" class="form-select" disabled onchange="autoFillCarInfo()">
                             <option value="">차량 선택</option>
                             <option value="1호차">1호차</option>
@@ -201,7 +198,6 @@
                 <p style="font-size:0.8rem; color:#888; margin-bottom:10px;">※ 거리에 숫자만 치면 콤마(,)는 알아서 계산됩니다!</p>
                 
                 <div class="grid-2">
-                    <!-- 🔥 type="time"을 텍스트로 바꾸고 자동 변환 클래스 추가 -->
                     <div class="form-group"><label class="form-label">차고지 출발시간</label><input type="text" id="m-time-start" class="form-input time-input" placeholder="0900" inputmode="numeric" maxlength="4"></div>
                     <div class="form-group"><label class="form-label">차고지 도착시간</label><input type="text" id="m-time-end" class="form-input time-input" placeholder="1800" inputmode="numeric" maxlength="4"></div>
                     <div class="form-group"><label class="form-label">출발 누계(km)</label><input type="number" id="m-km-start" class="form-input" oninput="calcKm()"></div>
@@ -364,7 +360,7 @@
             "14호차": { type: "쏠라티", num: "732무8376" }
         };
 
-        // 🔥 호차 선택 시 차종, 차량번호 자동 입력 & 과거 제일 컸던 KM 땡겨오기
+        // 🔥 과거 제일 컸던 KM 땡겨오는 엔진
         async function autoFillCarInfo() {
             let carName = document.getElementById('m-car-name').value;
             if(carMap[carName]) {
@@ -423,27 +419,23 @@
             const resId = urlParams.get('resId'); 
             const pDate = urlParams.get('date');
             
-            // 🔥 수시 운행일보 (isManual) 체크
             let isManual = urlParams.get('isManual') === 'true';
 
             if(isManual) {
-                globalDocId = "MANUAL_" + Date.now(); // 중복 안되는 임의 아이디 생성
+                globalDocId = "MANUAL_" + Date.now(); 
                 
-                // 잠금 싹 다 풀기
                 document.getElementById('m-date').readOnly = false;
                 document.getElementById('m-car-name').disabled = false;
                 document.getElementById('m-car').readOnly = false;
                 document.getElementById('m-driver1').readOnly = false;
                 document.getElementById('m-driver2').readOnly = false;
                 
-                // 회색 배경 없애고 하얗게 만들기
                 const inputs = ['m-date', 'm-car-type', 'm-car-name', 'm-car', 'm-driver1', 'm-driver2'];
                 inputs.forEach(id => {
                     let el = document.getElementById(id);
                     if(el) { el.style.backgroundColor = '#fff'; el.style.pointerEvents = 'auto'; }
                 });
                 
-                // 현재 날짜 기본 세팅
                 document.getElementById('m-date').value = pDate || new Date().toISOString().substring(0, 10);
                 document.getElementById('m-driver1').value = urlParams.get('driver') || '';
                 
@@ -514,6 +506,8 @@
 
                     document.getElementById('m-cust-name').value = data.c_name || '';
                     
+                    // 🔥 창 켜질 때 마지막 누계 강제 소환 (비어있으면 채움)
+                    await autoFillCarInfo();
                     calcKm();
 
                     setTimeout(() => {
@@ -535,6 +529,9 @@
                     setRadioValue('m-reason', finalReason);
                     setRadioValue('m-trip', initialTrip); 
                     document.getElementById('m-loc-end').value = urlParams.get('dest') || '';
+                    
+                    // 🔥 새 일보일 때도 소환!
+                    await autoFillCarInfo();
                 }
             } catch(e) { console.error("DB Load Error", e); }
             
@@ -584,7 +581,6 @@
             if(!globalDocId) return;
             if(confirm('서버에 저장된 이 배차의 일보를 완전히 삭제하시겠습니까?')) {
                 await db.collection('reports').doc(globalDocId).delete();
-                // 수동 모드면 창 닫기, 배차 모드면 새로고침
                 if(globalDocId.startsWith("MANUAL")) window.location.href='driver.html';
                 else window.location.reload();
             }
@@ -616,7 +612,6 @@
         function doPrint() {
             saveDraft(true); 
 
-            // 공공일보 고정
             document.getElementById('print-view').className = 'type-general';
             document.getElementById('print-bg').src = '공공일보.png';
 
