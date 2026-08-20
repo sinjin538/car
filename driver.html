@@ -988,11 +988,23 @@
                 let sType = item.type.replace('예약','').replace('지원','').replace('운행','').replace('투어','').replace('동행','');
                 
                 listHtml += `<li style="padding: 10px; border-bottom: 1px solid #eee;">
-                                <span style="color:#333; font-weight:bold; font-size:0.95rem;">${currentMonth + 1}/${item.day} </span>
-                                <span style="color:#555; font-size:0.85rem;">보상: <b style="color:#007bff;">${Number(item.overtime || 0).toFixed(2)}</b> <span style="color:#ccc; margin:0 4px;">:</span> 일비: <b style="color:#007bff;">${Number(item.allowance || 0).toLocaleString()}</b>원</span>
-                             </li>`;
-                totalOvertime += (item.overtime || 0);
-                totalAllowance += (item.allowance || 0);
+                <!-- 1. 날짜 방 (30px) -->
+                <span style="color:#333; font-weight:bold; font-size:0.85rem; display:inline-block; width:39px;">${currentMonth + 1}/${item.day}</span>
+                
+                <span style="color:#555; font-size:0.80rem;">보상: 
+                    <!-- 2. 보상 숫자 방 (30px 우측정렬) -->
+                    <b style="color:#007bff; display:inline-block; width:39px; text-align:right;">${Number(item.overtime || 0).toFixed(2)}</b> 
+                    
+                    <!-- ❌ 점(:)에는 투명 상자를 씌우면 안 됩니다! 원상복구! -->
+                    <span style="color:#ccc; margin:0 4px;">:</span> 
+                    
+                    일비: 
+                    <!-- 👇 3. 진짜 일비 숫자 방 (50px 우측정렬) 씌우기! -->
+                    <b style="color:#007bff; display:inline-block; width:50px; text-align:right;">${Number(item.allowance || 0).toLocaleString()}</b>원
+                </span>
+             </li>`;
+totalOvertime += (item.overtime || 0);
+totalAllowance += (item.allowance || 0);
             });
 
             if (!hasData) { listHtml += `<li style="color:#666; padding:10px; font-size: 0.8rem; text-align:center;">이번 달 정산 내역이 없습니다.</li>`; }
