@@ -99,7 +99,6 @@
             <button onclick="changeTime(1)">▶</button>
         </div>
 
-        <!-- 1인 배차 항목이 추가된 요약 박스 -->
         <div class="dashboard-grid">
             <div class="stat-card total"><h4>총 배차(유효)</h4><div class="num" id="s-total">0</div></div>
             <div class="stat-card single"><h4>1인 배차<br><span style="font-size:0.65rem; color:#888;">(버스 한정)</span></h4><div class="num" id="s-single">0</div></div>
@@ -114,7 +113,6 @@
             <div class="stat-card cancel"><h4>4일전 취소</h4><div class="num" id="s-cancel">0</div></div>
         </div>
 
-        <!-- 🔥 운전원별 집계표 (+ 1인 배차 열 추가) -->
         <div class="table-section">
             <h3>🧑 운전원별 집계</h3>
             <table>
@@ -138,7 +136,6 @@
             </table>
         </div>
 
-        <!-- 🔥 차량별 집계표 (+ 1인 배차 열 추가) -->
         <div class="table-section driver-section-start">
             <h3>🚗 차량별 집계</h3>
             <table>
@@ -162,11 +159,9 @@
             </table>
         </div>
 
-        <!-- 출발지 / 도착지 통계 랭킹 테이블 -->
         <div class="table-section" style="margin-top: 15px; page-break-inside: avoid;">
             <h3 style="margin-bottom: 10px;">📍 주요 출발지 & 🚩 도착지 통계 <span style="font-size:0.85rem; color:#666; font-weight:normal;">(가장 많이 간 곳 TOP 5)</span></h3>
             <div style="display: flex; gap: 15px;">
-                <!-- 출발지 랭킹 -->
                 <table style="flex: 1; border-top: 3px solid #17a2b8;">
                     <thead>
                         <tr>
@@ -177,7 +172,6 @@
                     </thead>
                     <tbody id="start-loc-tbody"></tbody>
                 </table>
-                <!-- 도착지 랭킹 -->
                 <table style="flex: 1; border-top: 3px solid #fd7e14;">
                     <thead>
                         <tr>
@@ -211,7 +205,7 @@
         let viewMode = 'month'; 
 
         const allVehicles = ['1호차', '2호차', '3호차', '11호차', '12호차', '13호차', '14호차'];
-        const busList = ['1호차', '2호차', '3호차']; // 🔥 버스 목록 (1인 배차 판별용)
+        const busList = ['1호차', '2호차', '3호차'];
         const baseDrivers = ['박기준', '변석현', '이명순', '김탁', '한상훈', '문인식', '황덕일', '강철규', '이상헌', '함동한', '조병준'];
 
         function getShortType(type) {
@@ -282,8 +276,12 @@
                 const v = r.vehicle;
                 let drivers = r.assigned || [];
                 
-                // 🔥 버스인지 확인하는 조건 추가!
+                // 🔥 버스인지 확인
                 const isBus = busList.includes(v); 
+                
+                // 🔥 진짜 핵심! DB 설정값(reqCount) 무시하고, '실제 탑승한 기사'가 딱 1명인지 셉니다. ('미지정'은 사람 취급 안함)
+                // 🔥 오직 '1인 배차' 체크박스를 누른 정식 배차 건만 카운트! (수동배차 제외)
+                const isSingleBus = (isBus && r.reqCount === 1 && !r.isManual);
 
                 drivers.forEach(d => { if(d !== '미지정' && !dStats[d]) dStats[d] = {tot:0, single:0, pub:0, stay1:0, stay2:0, city:0, grave:0, seoul:0, outing:0, etc:0, cancel:0}; });
 
@@ -294,12 +292,11 @@
                 } else {
                     t_tot++;
                     
-                    // 🔥 '버스'이면서 '필요인원(reqCount)이 1'일 때만 카운트!!!
-                    if (isBus && r.reqCount === 1) {
+                    // 🔥 설정 오류 완전 차단! 버스이면서 실제 탑승 기사가 1명일 때만 통계에 올립니다.
+                    if (isSingleBus) {
                         t_single++; 
                     }
                     
-                    // '미상', '미입력' 데이터는 차단해서 필터링
                     if (r.start && r.start.trim() !== '' && r.start.trim() !== '미상' && r.start.trim() !== '미입력') {
                         startCounts[r.start.trim()] = (startCounts[r.start.trim()] || 0) + 1;
                     }
@@ -315,8 +312,7 @@
                     if (v && vStats[v]) {
                         vStats[v].tot++;
                         
-                        // 🔥 차량별 1인 배차 카운트 (버스 한정)
-                        if (isBus && r.reqCount === 1) vStats[v].single++; 
+                        if (isSingleBus) vStats[v].single++; 
                         
                         if(typeStr==='공공') vStats[v].pub++; else if(typeStr==='1박') vStats[v].stay1++; 
                         else if(typeStr==='2박') vStats[v].stay2++; else if(typeStr==='시티') vStats[v].city++; 
@@ -329,8 +325,7 @@
                         if(d !== '미지정') {
                             dStats[d].tot++;
                             
-                            // 🔥 운전원별 1인 배차 카운트 (버스 한정)
-                            if (isBus && r.reqCount === 1) dStats[d].single++; 
+                            if (isSingleBus) dStats[d].single++; 
                             
                             if(typeStr==='공공') dStats[d].pub++; else if(typeStr==='1박') dStats[d].stay1++; 
                             else if(typeStr==='2박') dStats[d].stay2++; else if(typeStr==='시티') dStats[d].city++; 
@@ -357,7 +352,6 @@
             let vHtml = '';
             allVehicles.forEach(v => {
                 const s = vStats[v];
-                // 쏠라티 차량은 아예 1인 배차 칸에 '-' (하이픈) 표시해서 안 헷갈리게 처리
                 const singleDisplay = busList.includes(v) ? s.single : '<span style="color:#ccc;">-</span>';
                 
                 vHtml += `<tr>
