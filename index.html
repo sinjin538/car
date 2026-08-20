@@ -117,6 +117,7 @@
     </style>
 </head>
 <body>
+    <datalist id="place-list"></datalist>
 
     <div id="login-container">
         <div class="login-card">
@@ -253,11 +254,11 @@
                                 <div style="display: flex; gap: 10px; margin-bottom: 12px;">
                                     <div class="form-group" style="flex: 1; margin-bottom: 0;">
                                         <label>출발지</label>
-                                        <input type="text" id="start_${v}">
+                                        <input type="text" id="start_${v}" list="place-list" autocomplete="off">
                                     </div>
                                     <div class="form-group" style="flex: 1; margin-bottom: 0;">
                                         <label>도착지</label>
-                                        <input type="text" id="end_${v}">
+                                        <input type="text" id="end_${v}" list="place-list" autocomplete="off">
                                     </div>
                                 </div>
                                 <!-- 🔥 출발지/도착지 추가 구역 끝 -->
@@ -583,6 +584,16 @@
                 resSnapshot.forEach(doc => allReservations.push(doc.data()));
 
                 await cleanUpOldFiles(allReservations);
+                // 🔥 자동완성 주머니에 출발지/도착지 데이터 꽉꽉 채워넣기
+                const placeSet = new Set();
+                allReservations.forEach(r => {
+                    if (r.start) placeSet.add(r.start.trim());
+                    if (r.end) placeSet.add(r.end.trim());
+                });
+                const datalist = document.getElementById('place-list');
+                if (datalist) {
+                    datalist.innerHTML = [...placeSet].map(val => `<option value="${val}">`).join('');
+                }
 
                 const statusSnapshot = await db.collection('daily_status').get();
                 statusSnapshot.forEach(doc => { dailyDriverStatus[doc.id] = doc.data(); });
