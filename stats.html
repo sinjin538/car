@@ -120,35 +120,10 @@
         </div>
 
         <!-- ============================== -->
-        <!-- 2. 🚙 [차량별 집계표] (크게 확대됨) -->
+        <!-- 1. 🧑‍✈️ [운전원별 집계표] (위로 올라옴!) -->
         <!-- ============================== -->
         <div class="table-section">
-            <h3>🚗 호차별 집계</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>차량번호</th>
-                        <th style="background:#e8f0fe;">유효 합계</th>
-                        <th>공공</th>
-                        <th>1박</th>
-                        <th>2박</th>
-                        <th>시티</th>
-                        <th>성묘</th>
-                        <th>서울</th>
-                        <th>나들이</th>
-                        <th>기타</th>
-                        <th style="background:#fff5f5; color:#dc3545;">취소건</th>
-                    </tr>
-                </thead>
-                <tbody id="vehicle-tbody"></tbody>
-            </table>
-        </div>
-
-        <!-- ============================== -->
-        <!-- 3. 🧑‍✈️ [운전원별 집계표] (인쇄 시 여기서부터 2장째로!) -->
-        <!-- ============================== -->
-        <div class="table-section driver-section-start">
-            <h3>🧑‍✈️ 운전원별 집계</h3>
+            <h3>🧑 운전원별 집계</h3>
             <table>
                 <thead>
                     <tr>
@@ -166,6 +141,31 @@
                     </tr>
                 </thead>
                 <tbody id="driver-tbody"></tbody>
+            </table>
+        </div>
+
+        <!-- ============================== -->
+        <!-- 2. 🚙 [차량별 집계표] (아래로 내려가고, 인쇄 시 여기서부터 2페이지!) -->
+        <!-- ============================== -->
+        <div class="table-section driver-section-start">
+            <h3>🚗 차량별 집계</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>차량번호</th>
+                        <th style="background:#e8f0fe;">유효 합계</th>
+                        <th>공공</th>
+                        <th>1박</th>
+                        <th>2박</th>
+                        <th>시티</th>
+                        <th>성묘</th>
+                        <th>서울</th>
+                        <th>나들이</th>
+                        <th>기타</th>
+                        <th style="background:#fff5f5; color:#dc3545;">취소건</th>
+                    </tr>
+                </thead>
+                <tbody id="vehicle-tbody"></tbody>
             </table>
         </div>
 
