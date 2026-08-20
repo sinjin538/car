@@ -34,12 +34,10 @@
         .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; margin-bottom: 5px; }
         .stat-card { background: #fff; padding: 4px 2px; border-radius: 8px; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.05); border-top: 4px solid #007bff; }
         .stat-card.total { border-top-color: #28a745; background: #f0fdf4; }
-        .stat-card.single { border-top-color: #6f42c1; background: #f8f5ff; }
         .stat-card.cancel { border-top-color: #dc3545; background: #fff5f5; }
         .stat-card h4 { font-size: 0.85rem; color: #555; margin-bottom: 8px; font-weight: 700; letter-spacing: -0.5px; }
         .stat-card .num { font-size: 1.8rem; font-weight: 900; color: #333; }
         .stat-card.total .num { color: #28a745; }
-        .stat-card.single .num { color: #6f42c1; }
         .stat-card.cancel .num { color: #dc3545; }
 
         .table-section { padding: 0; margin-bottom: 10px !important; box-shadow: none; break-inside: avoid; }
@@ -101,7 +99,6 @@
 
         <div class="dashboard-grid">
             <div class="stat-card total"><h4>총 배차(유효)</h4><div class="num" id="s-total">0</div></div>
-            <div class="stat-card single"><h4>1인 배차<br><span style="font-size:0.65rem; color:#888;">(버스 한정)</span></h4><div class="num" id="s-single">0</div></div>
             <div class="stat-card"><h4>공공예약</h4><div class="num" id="s-pub">0</div></div>
             <div class="stat-card"><h4>1박</h4><div class="num" id="s-stay1">0</div></div>
             <div class="stat-card"><h4>2박</h4><div class="num" id="s-stay2">0</div></div>
@@ -120,7 +117,6 @@
                     <tr>
                         <th>운전원 성함</th>
                         <th style="background:#e8f0fe;">유효 합계</th>
-                        <th style="background:#f8f5ff; color:#6f42c1;">1인 배차</th>
                         <th>공공</th>
                         <th>1박</th>
                         <th>2박</th>
@@ -143,7 +139,6 @@
                     <tr>
                         <th>차량번호</th>
                         <th style="background:#e8f0fe;">유효 합계</th>
-                        <th style="background:#f8f5ff; color:#6f42c1;">1인 배차</th>
                         <th>공공</th>
                         <th>1박</th>
                         <th>2박</th>
@@ -205,7 +200,6 @@
         let viewMode = 'month'; 
 
         const allVehicles = ['1호차', '2호차', '3호차', '11호차', '12호차', '13호차', '14호차'];
-        const busList = ['1호차', '2호차', '3호차'];
         const baseDrivers = ['박기준', '변석현', '이명순', '김탁', '한상훈', '문인식', '황덕일', '강철규', '이상헌', '함동한', '조병준'];
 
         function getShortType(type) {
@@ -263,9 +257,9 @@
             
             const targetRes = allReservations.filter(r => r.startDate && r.startDate.startsWith(timePrefix));
 
-            let t_tot=0, t_single=0, t_pub=0, t_stay1=0, t_stay2=0, t_city=0, t_grave=0, t_seoul=0, t_outing=0, t_etc=0, t_cancel=0;
-            let vStats = {}; allVehicles.forEach(v => vStats[v] = {tot:0, single:0, pub:0, stay1:0, stay2:0, city:0, grave:0, seoul:0, outing:0, etc:0, cancel:0});
-            let dStats = {}; baseDrivers.forEach(d => dStats[d] = {tot:0, single:0, pub:0, stay1:0, stay2:0, city:0, grave:0, seoul:0, outing:0, etc:0, cancel:0});
+            let t_tot=0, t_pub=0, t_stay1=0, t_stay2=0, t_city=0, t_grave=0, t_seoul=0, t_outing=0, t_etc=0, t_cancel=0;
+            let vStats = {}; allVehicles.forEach(v => vStats[v] = {tot:0, pub:0, stay1:0, stay2:0, city:0, grave:0, seoul:0, outing:0, etc:0, cancel:0});
+            let dStats = {}; baseDrivers.forEach(d => dStats[d] = {tot:0, pub:0, stay1:0, stay2:0, city:0, grave:0, seoul:0, outing:0, etc:0, cancel:0});
             
             let startCounts = {};
             let endCounts = {};
@@ -275,15 +269,8 @@
                 const isCanceled = r.isCanceled || false;
                 const v = r.vehicle;
                 let drivers = r.assigned || [];
-                
-                // 🔥 버스인지 확인
-                const isBus = busList.includes(v); 
-                
-                // 🔥 진짜 핵심! DB 설정값(reqCount) 무시하고, '실제 탑승한 기사'가 딱 1명인지 셉니다. ('미지정'은 사람 취급 안함)
-                // 🔥 오직 '1인 배차' 체크박스를 누른 정식 배차 건만 카운트! (수동배차 제외)
-                const isSingleBus = (isBus && r.reqCount === 1 && !r.isManual);
 
-                drivers.forEach(d => { if(d !== '미지정' && !dStats[d]) dStats[d] = {tot:0, single:0, pub:0, stay1:0, stay2:0, city:0, grave:0, seoul:0, outing:0, etc:0, cancel:0}; });
+                drivers.forEach(d => { if(d !== '미지정' && !dStats[d]) dStats[d] = {tot:0, pub:0, stay1:0, stay2:0, city:0, grave:0, seoul:0, outing:0, etc:0, cancel:0}; });
 
                 if (isCanceled) {
                     t_cancel++;
@@ -291,11 +278,6 @@
                     drivers.forEach(d => { if(d !== '미지정') dStats[d].cancel++; });
                 } else {
                     t_tot++;
-                    
-                    // 🔥 설정 오류 완전 차단! 버스이면서 실제 탑승 기사가 1명일 때만 통계에 올립니다.
-                    if (isSingleBus) {
-                        t_single++; 
-                    }
                     
                     if (r.start && r.start.trim() !== '' && r.start.trim() !== '미상' && r.start.trim() !== '미입력') {
                         startCounts[r.start.trim()] = (startCounts[r.start.trim()] || 0) + 1;
@@ -312,8 +294,6 @@
                     if (v && vStats[v]) {
                         vStats[v].tot++;
                         
-                        if (isSingleBus) vStats[v].single++; 
-                        
                         if(typeStr==='공공') vStats[v].pub++; else if(typeStr==='1박') vStats[v].stay1++; 
                         else if(typeStr==='2박') vStats[v].stay2++; else if(typeStr==='시티') vStats[v].city++; 
                         else if(typeStr==='성묘') vStats[v].grave++; 
@@ -324,8 +304,6 @@
                     drivers.forEach(d => {
                         if(d !== '미지정') {
                             dStats[d].tot++;
-                            
-                            if (isSingleBus) dStats[d].single++; 
                             
                             if(typeStr==='공공') dStats[d].pub++; else if(typeStr==='1박') dStats[d].stay1++; 
                             else if(typeStr==='2박') dStats[d].stay2++; else if(typeStr==='시티') dStats[d].city++; 
@@ -338,7 +316,6 @@
             });
 
             document.getElementById('s-total').innerText = t_tot;
-            document.getElementById('s-single').innerText = t_single; 
             document.getElementById('s-pub').innerText = t_pub;
             document.getElementById('s-stay1').innerText = t_stay1;
             document.getElementById('s-stay2').innerText = t_stay2;
@@ -352,12 +329,9 @@
             let vHtml = '';
             allVehicles.forEach(v => {
                 const s = vStats[v];
-                const singleDisplay = busList.includes(v) ? s.single : '<span style="color:#ccc;">-</span>';
-                
                 vHtml += `<tr>
                     <td style="font-weight:bold; background:#f8f9fa;">${v}</td>
                     <td class="highlight">${s.tot}</td>
-                    <td style="color:#6f42c1; font-weight:bold;">${singleDisplay}</td>
                     <td>${s.pub}</td><td>${s.stay1}</td><td>${s.stay2}</td>
                     <td>${s.city}</td><td>${s.grave}</td><td>${s.seoul}</td><td>${s.outing}</td>
                     <td>${s.etc}</td><td class="cancel-cell">${s.cancel}</td>
@@ -371,7 +345,6 @@
                 dHtml += `<tr>
                     <td style="font-weight:bold; background:#f8f9fa;">${d}</td>
                     <td class="highlight">${s.tot}</td>
-                    <td style="color:#6f42c1; font-weight:bold;">${s.single}</td> 
                     <td>${s.pub}</td><td>${s.stay1}</td><td>${s.stay2}</td>
                     <td>${s.city}</td><td>${s.grave}</td><td>${s.seoul}</td><td>${s.outing}</td>
                     <td>${s.etc}</td><td class="cancel-cell">${s.cancel}</td>
