@@ -176,13 +176,11 @@
         </div>
 
         <div style="max-width: 1600px; margin: 10px auto 0; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; gap: 6px;">
-            <!-- 👇 기존 welcome-msg 줄을 지우고, 이 코드로 덮어쓰기! -->
-<div onclick="openPwModal()" style="cursor: pointer; display: flex; align-items: center; gap: 5px;" title="비밀번호 변경">
-    <span id="welcome-msg" style="font-weight: bold; color: #333; font-size: 1.15rem;"></span>
-    <span style="font-size: 1.2rem; opacity: 0.8;">⚙️</span>
-</div>
+            <div onclick="openPwModal()" style="cursor: pointer; display: flex; align-items: center; gap: 5px;" title="비밀번호 변경">
+                <span id="welcome-msg" style="font-weight: bold; color: #333; font-size: 1.15rem;"></span>
+                <span style="font-size: 1.2rem; opacity: 0.8;">⚙️</span>
+            </div>
             <div style="display: flex; gap: 6px; align-items: center;">
-                
                 <button onclick="window.open('stats.html', '_blank')" style="background: #6f42c1; color: white; border: none; padding: 4px 10px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 0.75rem;">집계</button>
                 <button id="btn-go-driver" onclick="goToModule2()" style="background: #28a745; color: white; border: none; padding: 4px 10px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 0.75rem;">내배차</button>
                 <button onclick="logout()" style="background: #dc3545; color: white; border: none; padding: 4px 10px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 0.75rem;">로그아웃</button>
@@ -250,6 +248,20 @@
                                         <option value="기타">기타</option>
                                     </select>
                                 </div>
+                                
+                                <!-- 🔥 출발지/도착지 추가 구역 -->
+                                <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+                                    <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                                        <label>출발지</label>
+                                        <input type="text" id="start_${v}">
+                                    </div>
+                                    <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                                        <label>도착지</label>
+                                        <input type="text" id="end_${v}">
+                                    </div>
+                                </div>
+                                <!-- 🔥 출발지/도착지 추가 구역 끝 -->
+
                                 <div class="form-group"><label>운행 거리 (km)</label><input type="number" id="km_${v}" value="0"></div>
                                 <div class="form-group"><label>내용</label><input type="text" id="dest_${v}"></div>
                                 
@@ -490,7 +502,7 @@
             return koreaHolidays[`${year}-${mmdd}`] || koreaHolidays[mmdd] || null;
         }
 
-        const defaultDrivers = ['박기준', '변석현', '이명순', '김탁', '한상훈', '문인식', '황덕일', '강철규', '이상헌', '함동한'];
+        const defaultDrivers = ['박기준', '변석현', '이명순', '김탁', '한상훈', '문인식', '황덕일', '강철규', '이상헌', '함동한', '조병준'];
         let driverListModifiers = {}; 
         
         const _now = new Date();
@@ -654,6 +666,11 @@
                     document.getElementById(`dest_${vehicleName}`).value = existing.dest || '';
                     document.getElementById(`type_${vehicleName}`).value = existing.type || '공공예약';
                     document.getElementById(`km_${vehicleName}`).value = existing.km || 0;
+                    
+                    // 🔥 기존 예약정보 불러올 때 출발지/도착지 값도 칸에 넣기
+                    document.getElementById(`start_${vehicleName}`).value = existing.start || '';
+                    document.getElementById(`end_${vehicleName}`).value = existing.end || '';
+
                     if(isBus) document.getElementById(`single_${vehicleName}`).checked = (existing.reqCount === 1);
                     
                     document.getElementById(`manual_${vehicleName}`).checked = existing.isManual || false;
@@ -680,6 +697,11 @@
                     document.getElementById(`dest_${vehicleName}`).value = '';
                     document.getElementById(`type_${vehicleName}`).value = '공공예약';
                     document.getElementById(`km_${vehicleName}`).value = '0';
+                    
+                    // 🔥 새 예약일 때는 칸 비우기
+                    document.getElementById(`start_${vehicleName}`).value = '';
+                    document.getElementById(`end_${vehicleName}`).value = '';
+
                     if(isBus) document.getElementById(`single_${vehicleName}`).checked = false;
                     
                     document.getElementById(`manual_${vehicleName}`).checked = false;
@@ -919,7 +941,9 @@
 
             allReservations.push({
                 id: docId, startDate: currentDate, dates: dates, vehicle: vehicleName,
-                start: '', 
+                // 🔥 저장할 때 출발지, 도착지 값도 같이 저장!
+                start: document.getElementById(`start_${vehicleName}`).value || '', 
+                end: document.getElementById(`end_${vehicleName}`).value || '', 
                 dest: document.getElementById(`dest_${vehicleName}`).value || '내용 없음',
                 type: type, km: parseInt(document.getElementById(`km_${vehicleName}`).value) || 0,
                 reqCount: reqCount, assigned: [],
@@ -1079,7 +1103,10 @@
             let assigned = (d.assigned && d.assigned.length > 0) ? d.assigned.join(', ') : '미정';
             document.getElementById('detail-modal-title').innerText = `[${d.vehicle}] ${d.type} (${clickedDate})`;
             document.getElementById('detail-modal-drivers').innerText = assigned;
-            document.getElementById('detail-modal-dest').innerText = d.dest || '내용 없음'; 
+            
+            // 🔥 모달 창에도 출발지-도착지 띄우기
+            let routeText = `[${d.start || '미입력'} ➔ ${d.end || '미입력'}]<br>${d.dest || '내용 없음'}`;
+            document.getElementById('detail-modal-dest').innerHTML = routeText; 
 
             const imgContainer = document.getElementById('detail-modal-img-container');
             
@@ -1151,13 +1178,14 @@
 
                     let attachIcon = d.photoUrl ? ' <span style="font-size:0.9rem;">📎</span>' : '';
 
-                    // 🔥 개인 정산(근무시간, 보상금 등)을 출력하는 코드(reportText)를 완벽하게 삭제했습니다!
+                    // 🔥 최종 배차 결과 화면에 [출발지 ➔ 도착지] 예쁘게 띄우기
                     html += `
                         <li style="${canceledLiStyle}">
                             <b>[${d.vehicle}]</b>${attachIcon} 
                             <span class="badge ${badgeClass}" style="${canceledBadgeStyle}">${shortTypeStr}</span> 
                             <span class="badge default" style="margin-right:0; ${canceledBadgeStyle}">${d.km}km</span>
                             ${d.isCanceled ? '<span style="color:#d9534f; font-weight:bold; margin-left:5px; text-decoration:none;">[취소됨]</span>' : ''}<br>
+                            <span style="color: #007bff; font-weight: bold; font-size: 0.95rem; margin: 4px 0; display: inline-block;">[${d.start || '미입력'} ➔ ${d.end || '미입력'}]</span><br>
                             내용: ${d.dest} <br>
                             운전원: <b style="${d.isCanceled ? 'color:#adb5bd;' : 'color:#28a745;'}">${assignedNamesHTML}</b>
                         </li>`;
