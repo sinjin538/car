@@ -31,28 +31,27 @@
         .time-nav { display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 20px; font-size: 1.6rem; font-weight: 900; color: #2c3e50; }
         .time-nav button { padding: 5px 15px; font-size: 1.2rem; cursor: pointer; border: 1px solid #ccc; background: #fff; border-radius: 6px; }
 
-        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; margin-bottom: 5px; }
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; margin-bottom: 5px; }
         .stat-card { background: #fff; padding: 4px 2px; border-radius: 8px; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.05); border-top: 4px solid #007bff; }
         .stat-card.total { border-top-color: #28a745; background: #f0fdf4; }
+        .stat-card.single { border-top-color: #6f42c1; background: #f8f5ff; }
         .stat-card.cancel { border-top-color: #dc3545; background: #fff5f5; }
         .stat-card h4 { font-size: 0.85rem; color: #555; margin-bottom: 8px; font-weight: 700; letter-spacing: -0.5px; }
         .stat-card .num { font-size: 1.8rem; font-weight: 900; color: #333; }
         .stat-card.total .num { color: #28a745; }
+        .stat-card.single .num { color: #6f42c1; }
         .stat-card.cancel .num { color: #dc3545; }
 
-        /* 🔥 표 구역 큼직하게 확대 (여백, 폰트 사이즈 업) */
         .table-section { padding: 0; margin-bottom: 10px !important; box-shadow: none; break-inside: avoid; }
         .table-section h3 { margin-bottom: 5px; font-size: 1.1rem; color: #000; border-left: 6px solid #000; padding-left: 8px; }
             
-         /* 🎨 2026년형 세련된 대시보드 표 디자인 (90년대 안녕!) */
-table { width: 100%; border-collapse: collapse; border-top: 3px solid #007bff; border-bottom: 2px solid #ced4da; font-size: 0.85rem; text-align: center; background-color: #fff; }
-th, td { border: 1px solid #e2e8f0; padding: 7px 6px; white-space: nowrap; color: #333; }
-th { background-color: #f1f5f9; font-weight: bold; color: #1e293b; border-bottom: 1px solid #cbd5e1; }
-tr:nth-child(even) { background-color: #f8fafc; } /* 얼룩말 패턴으로 읽기 편하게 */
+        table { width: 100%; border-collapse: collapse; border-top: 3px solid #007bff; border-bottom: 2px solid #ced4da; font-size: 0.85rem; text-align: center; background-color: #fff; }
+        th, td { border: 1px solid #e2e8f0; padding: 7px 6px; white-space: nowrap; color: #333; }
+        th { background-color: #f1f5f9; font-weight: bold; color: #1e293b; border-bottom: 1px solid #cbd5e1; }
+        tr:nth-child(even) { background-color: #f8fafc; } 
 
         #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); z-index: 9999; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; font-weight: 700; color: #007bff; }
 
-        /* 🖨️ 인쇄 전용 마법의 주문 */
         @media print {
             @page { size: A4 landscape; margin: 10mm; }
             body { background-color: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -61,23 +60,18 @@ tr:nth-child(even) { background-color: #f8fafc; } /* 얼룩말 패턴으로 읽�
             .container { margin: 0 auto; padding-top: 10px; max-width: 100%; box-shadow: none; }
             .time-nav { margin: 0 0 20px 0; font-size: 2.2rem; color: #000; border-bottom: 2px solid #000; padding-bottom: 10px; }
             
-            .dashboard-grid { display: flex; justify-content: space-between; gap: 4px; margin-bottom: 30px; }
+            .dashboard-grid { display: flex; justify-content: space-between; gap: 4px; margin-bottom: 20px; }
             .stat-card { flex: 1; border: 1px solid #aaa; box-shadow: none; padding: 8px 2px; }
             .stat-card h4 { font-size: 0.8rem; margin-bottom: 4px; letter-spacing: -1px; font-weight: bold; }
             .stat-card .num { font-size: 1.4rem; font-weight: 900; }
             
-            .table-section { padding: 0; margin-bottom: 40px !important; box-shadow: none; break-inside: avoid; }
-            .table-section h3 { margin-bottom: 35px; font-size: 1.6rem; color: #000; border-left: 6px solid #000; }
+            .table-section { padding: 0; margin-bottom: 20px !important; box-shadow: none; break-inside: avoid; }
+            .table-section h3 { margin-bottom: 10px; font-size: 1.2rem; color: #000; border-left: 6px solid #000; }
             
-           /* 🔥 1. 모던하고 세련된 표 디자인으로 환골탈태! */
-            /* 🎨 모니터 화면용 세련된 표 디자인 */
-table { width: 100%; border-collapse: collapse; border-top: 2px solid #333; border-bottom: 2px solid #333; font-size: 0.85rem; text-align: center; }
-th, td { border: 1px solid #e2e8f0; padding: 6px 8px; white-space: nowrap; color: #222; }
-th { background-color: #f1f5f9; font-weight: bold; color: #1e293b; border-bottom: 1px solid #cbd5e1; }
-tr:nth-child(even) { background-color: #f8fafc; } /* 얼룩말 패턴으로 읽기 편하게 */
-
-            /* 🔥 2. 무조건 2페이지로 넘기던 기능 해제! (한 장에 이어지게 유지) */
-            
+            table { width: 100%; border-collapse: collapse; border-top: 2px solid #333; border-bottom: 2px solid #333; font-size: 0.85rem; text-align: center; }
+            th, td { border: 1px solid #e2e8f0; padding: 5px 6px; white-space: nowrap; color: #222; }
+            th { background-color: #f1f5f9; font-weight: bold; color: #1e293b; border-bottom: 1px solid #cbd5e1; }
+            tr:nth-child(even) { background-color: #f8fafc; }
         }
     </style>
 </head>
@@ -105,9 +99,10 @@ tr:nth-child(even) { background-color: #f8fafc; } /* 얼룩말 패턴으로 읽�
             <button onclick="changeTime(1)">▶</button>
         </div>
 
-        <!-- 1. 공통 상단: 합계 박스 -->
+        <!-- 1인 배차 항목이 추가된 요약 박스 -->
         <div class="dashboard-grid">
             <div class="stat-card total"><h4>총 배차(유효)</h4><div class="num" id="s-total">0</div></div>
+            <div class="stat-card single"><h4>1인 배차<br><span style="font-size:0.65rem; color:#888;">(버스 한정)</span></h4><div class="num" id="s-single">0</div></div>
             <div class="stat-card"><h4>공공예약</h4><div class="num" id="s-pub">0</div></div>
             <div class="stat-card"><h4>1박</h4><div class="num" id="s-stay1">0</div></div>
             <div class="stat-card"><h4>2박</h4><div class="num" id="s-stay2">0</div></div>
@@ -119,9 +114,7 @@ tr:nth-child(even) { background-color: #f8fafc; } /* 얼룩말 패턴으로 읽�
             <div class="stat-card cancel"><h4>4일전 취소</h4><div class="num" id="s-cancel">0</div></div>
         </div>
 
-        <!-- ============================== -->
-        <!-- 1. 🧑‍✈️ [운전원별 집계표] (위로 올라옴!) -->
-        <!-- ============================== -->
+        <!-- 🔥 운전원별 집계표 (+ 1인 배차 열 추가) -->
         <div class="table-section">
             <h3>🧑 운전원별 집계</h3>
             <table>
@@ -129,6 +122,7 @@ tr:nth-child(even) { background-color: #f8fafc; } /* 얼룩말 패턴으로 읽�
                     <tr>
                         <th>운전원 성함</th>
                         <th style="background:#e8f0fe;">유효 합계</th>
+                        <th style="background:#f8f5ff; color:#6f42c1;">1인 배차</th>
                         <th>공공</th>
                         <th>1박</th>
                         <th>2박</th>
@@ -144,9 +138,7 @@ tr:nth-child(even) { background-color: #f8fafc; } /* 얼룩말 패턴으로 읽�
             </table>
         </div>
 
-        <!-- ============================== -->
-        <!-- 2. 🚙 [차량별 집계표] (아래로 내려가고, 인쇄 시 여기서부터 2페이지!) -->
-        <!-- ============================== -->
+        <!-- 🔥 차량별 집계표 (+ 1인 배차 열 추가) -->
         <div class="table-section driver-section-start">
             <h3>🚗 차량별 집계</h3>
             <table>
@@ -154,6 +146,7 @@ tr:nth-child(even) { background-color: #f8fafc; } /* 얼룩말 패턴으로 읽�
                     <tr>
                         <th>차량번호</th>
                         <th style="background:#e8f0fe;">유효 합계</th>
+                        <th style="background:#f8f5ff; color:#6f42c1;">1인 배차</th>
                         <th>공공</th>
                         <th>1박</th>
                         <th>2박</th>
@@ -167,6 +160,35 @@ tr:nth-child(even) { background-color: #f8fafc; } /* 얼룩말 패턴으로 읽�
                 </thead>
                 <tbody id="vehicle-tbody"></tbody>
             </table>
+        </div>
+
+        <!-- 출발지 / 도착지 통계 랭킹 테이블 -->
+        <div class="table-section" style="margin-top: 15px; page-break-inside: avoid;">
+            <h3 style="margin-bottom: 10px;">📍 주요 출발지 & 🚩 도착지 통계 <span style="font-size:0.85rem; color:#666; font-weight:normal;">(가장 많이 간 곳 TOP 5)</span></h3>
+            <div style="display: flex; gap: 15px;">
+                <!-- 출발지 랭킹 -->
+                <table style="flex: 1; border-top: 3px solid #17a2b8;">
+                    <thead>
+                        <tr>
+                            <th style="width:50px;">순위</th>
+                            <th style="background:#e0f7fa;">📍 출발지</th>
+                            <th style="width:60px;">건수</th>
+                        </tr>
+                    </thead>
+                    <tbody id="start-loc-tbody"></tbody>
+                </table>
+                <!-- 도착지 랭킹 -->
+                <table style="flex: 1; border-top: 3px solid #fd7e14;">
+                    <thead>
+                        <tr>
+                            <th style="width:50px;">순위</th>
+                            <th style="background:#fff3cd;">🚩 도착지</th>
+                            <th style="width:60px;">건수</th>
+                        </tr>
+                    </thead>
+                    <tbody id="end-loc-tbody"></tbody>
+                </table>
+            </div>
         </div>
 
     </div>
@@ -189,6 +211,7 @@ tr:nth-child(even) { background-color: #f8fafc; } /* 얼룩말 패턴으로 읽�
         let viewMode = 'month'; 
 
         const allVehicles = ['1호차', '2호차', '3호차', '11호차', '12호차', '13호차', '14호차'];
+        const busList = ['1호차', '2호차', '3호차']; // 🔥 버스 목록 (1인 배차 판별용)
         const baseDrivers = ['박기준', '변석현', '이명순', '김탁', '한상훈', '문인식', '황덕일', '강철규', '이상헌', '함동한', '조병준'];
 
         function getShortType(type) {
@@ -246,17 +269,23 @@ tr:nth-child(even) { background-color: #f8fafc; } /* 얼룩말 패턴으로 읽�
             
             const targetRes = allReservations.filter(r => r.startDate && r.startDate.startsWith(timePrefix));
 
-            let t_tot=0, t_pub=0, t_stay1=0, t_stay2=0, t_city=0, t_grave=0, t_seoul=0, t_outing=0, t_etc=0, t_cancel=0;
-            let vStats = {}; allVehicles.forEach(v => vStats[v] = {tot:0, pub:0, stay1:0, stay2:0, city:0, grave:0, seoul:0, outing:0, etc:0, cancel:0});
-            let dStats = {}; baseDrivers.forEach(d => dStats[d] = {tot:0, pub:0, stay1:0, stay2:0, city:0, grave:0, seoul:0, outing:0, etc:0, cancel:0});
+            let t_tot=0, t_single=0, t_pub=0, t_stay1=0, t_stay2=0, t_city=0, t_grave=0, t_seoul=0, t_outing=0, t_etc=0, t_cancel=0;
+            let vStats = {}; allVehicles.forEach(v => vStats[v] = {tot:0, single:0, pub:0, stay1:0, stay2:0, city:0, grave:0, seoul:0, outing:0, etc:0, cancel:0});
+            let dStats = {}; baseDrivers.forEach(d => dStats[d] = {tot:0, single:0, pub:0, stay1:0, stay2:0, city:0, grave:0, seoul:0, outing:0, etc:0, cancel:0});
+            
+            let startCounts = {};
+            let endCounts = {};
 
             targetRes.forEach(r => {
                 const typeStr = getShortType(r.type);
                 const isCanceled = r.isCanceled || false;
                 const v = r.vehicle;
                 let drivers = r.assigned || [];
+                
+                // 🔥 버스인지 확인하는 조건 추가!
+                const isBus = busList.includes(v); 
 
-                drivers.forEach(d => { if(d !== '미지정' && !dStats[d]) dStats[d] = {tot:0, pub:0, stay1:0, stay2:0, city:0, grave:0, seoul:0, outing:0, etc:0, cancel:0}; });
+                drivers.forEach(d => { if(d !== '미지정' && !dStats[d]) dStats[d] = {tot:0, single:0, pub:0, stay1:0, stay2:0, city:0, grave:0, seoul:0, outing:0, etc:0, cancel:0}; });
 
                 if (isCanceled) {
                     t_cancel++;
@@ -264,6 +293,20 @@ tr:nth-child(even) { background-color: #f8fafc; } /* 얼룩말 패턴으로 읽�
                     drivers.forEach(d => { if(d !== '미지정') dStats[d].cancel++; });
                 } else {
                     t_tot++;
+                    
+                    // 🔥 '버스'이면서 '필요인원(reqCount)이 1'일 때만 카운트!!!
+                    if (isBus && r.reqCount === 1) {
+                        t_single++; 
+                    }
+                    
+                    // '미상', '미입력' 데이터는 차단해서 필터링
+                    if (r.start && r.start.trim() !== '' && r.start.trim() !== '미상' && r.start.trim() !== '미입력') {
+                        startCounts[r.start.trim()] = (startCounts[r.start.trim()] || 0) + 1;
+                    }
+                    if (r.end && r.end.trim() !== '' && r.end.trim() !== '미상' && r.end.trim() !== '미입력') {
+                        endCounts[r.end.trim()] = (endCounts[r.end.trim()] || 0) + 1;
+                    }
+
                     if(typeStr==='공공') t_pub++; else if(typeStr==='1박') t_stay1++; else if(typeStr==='2박') t_stay2++; 
                     else if(typeStr==='시티') t_city++; else if(typeStr==='성묘') t_grave++; 
                     else if(typeStr==='서울') t_seoul++; else if(typeStr==='나들이') t_outing++; 
@@ -271,6 +314,10 @@ tr:nth-child(even) { background-color: #f8fafc; } /* 얼룩말 패턴으로 읽�
 
                     if (v && vStats[v]) {
                         vStats[v].tot++;
+                        
+                        // 🔥 차량별 1인 배차 카운트 (버스 한정)
+                        if (isBus && r.reqCount === 1) vStats[v].single++; 
+                        
                         if(typeStr==='공공') vStats[v].pub++; else if(typeStr==='1박') vStats[v].stay1++; 
                         else if(typeStr==='2박') vStats[v].stay2++; else if(typeStr==='시티') vStats[v].city++; 
                         else if(typeStr==='성묘') vStats[v].grave++; 
@@ -281,6 +328,10 @@ tr:nth-child(even) { background-color: #f8fafc; } /* 얼룩말 패턴으로 읽�
                     drivers.forEach(d => {
                         if(d !== '미지정') {
                             dStats[d].tot++;
+                            
+                            // 🔥 운전원별 1인 배차 카운트 (버스 한정)
+                            if (isBus && r.reqCount === 1) dStats[d].single++; 
+                            
                             if(typeStr==='공공') dStats[d].pub++; else if(typeStr==='1박') dStats[d].stay1++; 
                             else if(typeStr==='2박') dStats[d].stay2++; else if(typeStr==='시티') dStats[d].city++; 
                             else if(typeStr==='성묘') dStats[d].grave++; 
@@ -292,6 +343,7 @@ tr:nth-child(even) { background-color: #f8fafc; } /* 얼룩말 패턴으로 읽�
             });
 
             document.getElementById('s-total').innerText = t_tot;
+            document.getElementById('s-single').innerText = t_single; 
             document.getElementById('s-pub').innerText = t_pub;
             document.getElementById('s-stay1').innerText = t_stay1;
             document.getElementById('s-stay2').innerText = t_stay2;
@@ -305,9 +357,13 @@ tr:nth-child(even) { background-color: #f8fafc; } /* 얼룩말 패턴으로 읽�
             let vHtml = '';
             allVehicles.forEach(v => {
                 const s = vStats[v];
+                // 쏠라티 차량은 아예 1인 배차 칸에 '-' (하이픈) 표시해서 안 헷갈리게 처리
+                const singleDisplay = busList.includes(v) ? s.single : '<span style="color:#ccc;">-</span>';
+                
                 vHtml += `<tr>
                     <td style="font-weight:bold; background:#f8f9fa;">${v}</td>
                     <td class="highlight">${s.tot}</td>
+                    <td style="color:#6f42c1; font-weight:bold;">${singleDisplay}</td>
                     <td>${s.pub}</td><td>${s.stay1}</td><td>${s.stay2}</td>
                     <td>${s.city}</td><td>${s.grave}</td><td>${s.seoul}</td><td>${s.outing}</td>
                     <td>${s.etc}</td><td class="cancel-cell">${s.cancel}</td>
@@ -321,12 +377,30 @@ tr:nth-child(even) { background-color: #f8fafc; } /* 얼룩말 패턴으로 읽�
                 dHtml += `<tr>
                     <td style="font-weight:bold; background:#f8f9fa;">${d}</td>
                     <td class="highlight">${s.tot}</td>
+                    <td style="color:#6f42c1; font-weight:bold;">${s.single}</td> 
                     <td>${s.pub}</td><td>${s.stay1}</td><td>${s.stay2}</td>
                     <td>${s.city}</td><td>${s.grave}</td><td>${s.seoul}</td><td>${s.outing}</td>
                     <td>${s.etc}</td><td class="cancel-cell">${s.cancel}</td>
                 </tr>`;
             });
             document.getElementById('driver-tbody').innerHTML = dHtml;
+
+            const sortedStarts = Object.entries(startCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
+            const sortedEnds = Object.entries(endCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
+
+            const renderRankRow = (arr) => {
+                if (arr.length === 0) return `<tr><td colspan="3" style="color:#888;">입력된 데이터가 없습니다.</td></tr>`;
+                return arr.map((item, idx) => `
+                    <tr>
+                        <td style="font-weight:bold; color:#777;">${idx + 1}위</td>
+                        <td style="font-weight:bold; color:#222;">${item[0]}</td>
+                        <td style="color:#007bff; font-weight:bold;">${item[1]}건</td>
+                    </tr>
+                `).join('');
+            };
+
+            document.getElementById('start-loc-tbody').innerHTML = renderRankRow(sortedStarts);
+            document.getElementById('end-loc-tbody').innerHTML = renderRankRow(sortedEnds);
         }
 
         window.onload = loadData;
