@@ -587,8 +587,9 @@
                 // 🔥 자동완성 주머니에 출발지/도착지 데이터 꽉꽉 채워넣기
                 const placeSet = new Set();
                 allReservations.forEach(r => {
-                    if (r.start) placeSet.add(r.start.trim());
-                    if (r.end) placeSet.add(r.end.trim());
+                    // 🔥 자동완성 주머니에 넣을 때 '미상'이나 '미입력'은 버리고 넣기!
+                    if (r.start && r.start.trim() !== '미상' && r.start.trim() !== '미입력') placeSet.add(r.start.trim());
+                    if (r.end && r.end.trim() !== '미상' && r.end.trim() !== '미입력') placeSet.add(r.end.trim());
                 });
                 const datalist = document.getElementById('place-list');
                 if (datalist) {
@@ -684,8 +685,9 @@
                     document.getElementById(`km_${vehicleName}`).value = existing.km || 0;
                     
                     // 🔥 기존 예약정보 불러올 때 출발지/도착지 값도 칸에 넣기
-                    document.getElementById(`start_${vehicleName}`).value = existing.start || '';
-                    document.getElementById(`end_${vehicleName}`).value = existing.end || '';
+                    // 🔥 DB에 '미상'이라고 적혀있으면 화면엔 아예 빈칸으로 비워버리기!
+                    document.getElementById(`start_${vehicleName}`).value = (existing.start === '미상' || existing.start === '미입력') ? '' : (existing.start || '');
+                    document.getElementById(`end_${vehicleName}`).value = (existing.end === '미상' || existing.end === '미입력') ? '' : (existing.end || '');
 
                     if(isBus) document.getElementById(`single_${vehicleName}`).checked = (existing.reqCount === 1);
                     
