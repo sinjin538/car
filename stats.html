@@ -31,8 +31,8 @@
         .time-nav { display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 20px; font-size: 1.6rem; font-weight: 900; color: #2c3e50; }
         .time-nav button { padding: 5px 15px; font-size: 1.2rem; cursor: pointer; border: 1px solid #ccc; background: #fff; border-radius: 6px; }
 
-        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; margin-bottom: 40px; }
-        .stat-card { background: #fff; padding: 15px 5px; border-radius: 8px; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.05); border-top: 4px solid #007bff; }
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; margin-bottom: 5px; }
+        .stat-card { background: #fff; padding: 4px 2px; border-radius: 8px; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.05); border-top: 4px solid #007bff; }
         .stat-card.total { border-top-color: #28a745; background: #f0fdf4; }
         .stat-card.cancel { border-top-color: #dc3545; background: #fff5f5; }
         .stat-card h4 { font-size: 0.85rem; color: #555; margin-bottom: 8px; font-weight: 700; letter-spacing: -0.5px; }
@@ -44,12 +44,11 @@
         .table-section { padding: 0; margin-bottom: 40px !important; box-shadow: none; break-inside: avoid; }
         .table-section h3 { margin-bottom: 35px; font-size: 1.6rem; color: #000; border-left: 6px solid #000; }
             
-         table { min-width: 100%; border: 2px solid #000; }
-            /* 🔥 인쇄 시에도 표 글씨를 큼직하고 시원하게! */
-         th, td { border: 1px solid #444; padding: 6px 6px !important; font-size: 1.1rem !important; color: #000; }
-         th { background-color: #e9ecef !important; font-weight: 900; }
-         td.highlight { background-color: #f8f9fa !important; color: #000 !important; font-weight: 900; }
-         td.cancel-cell { color: #d9534f !important; font-weight: bold; }
+         /* 🎨 2026년형 세련된 대시보드 표 디자인 (90년대 안녕!) */
+table { width: 100%; border-collapse: collapse; border-top: 3px solid #007bff; border-bottom: 2px solid #ced4da; font-size: 0.85rem; text-align: center; background-color: #fff; }
+th, td { border: 1px solid #e2e8f0; padding: 7px 6px; white-space: nowrap; color: #333; }
+th { background-color: #f1f5f9; font-weight: bold; color: #1e293b; border-bottom: 1px solid #cbd5e1; }
+tr:nth-child(even) { background-color: #f8fafc; } /* 얼룩말 패턴으로 읽기 편하게 */
 
         #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); z-index: 9999; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; font-weight: 700; color: #007bff; }
 
@@ -70,15 +69,15 @@
             .table-section { padding: 0; margin-bottom: 40px !important; box-shadow: none; break-inside: avoid; }
             .table-section h3 { margin-bottom: 35px; font-size: 1.6rem; color: #000; border-left: 6px solid #000; }
             
-            table { min-width: 100%; border: 2px solid #000; }
-            /* 🔥 인쇄 시에도 표 글씨를 큼직하고 시원하게! */
-            th, td { border: 1px solid #444; padding: 12px 6px !important; font-size: 1.1rem !important; color: #000; }
-            th { background-color: #e9ecef !important; font-weight: 900; }
-            td.highlight { background-color: #f8f9fa !important; color: #000 !important; font-weight: 900; }
-            td.cancel-cell { color: #d9534f !important; font-weight: bold; }
+           /* 🔥 1. 모던하고 세련된 표 디자인으로 환골탈태! */
+            /* 🎨 모니터 화면용 세련된 표 디자인 */
+table { width: 100%; border-collapse: collapse; border-top: 2px solid #333; border-bottom: 2px solid #333; font-size: 0.85rem; text-align: center; }
+th, td { border: 1px solid #e2e8f0; padding: 6px 8px; white-space: nowrap; color: #222; }
+th { background-color: #f1f5f9; font-weight: bold; color: #1e293b; border-bottom: 1px solid #cbd5e1; }
+tr:nth-child(even) { background-color: #f8fafc; } /* 얼룩말 패턴으로 읽기 편하게 */
 
-            /* 🔥 운전원별 세트는 여전히 2페이지 첫 줄에서 시작! */
-            .driver-section-start { page-break-before: always; padding-top: 20px; margin-top: 0; }
+            /* 🔥 2. 무조건 2페이지로 넘기던 기능 해제! (한 장에 이어지게 유지) */
+            
         }
     </style>
 </head>
@@ -124,7 +123,7 @@
         <!-- 1. 🧑‍✈️ [운전원별 집계표] (위로 올라옴!) -->
         <!-- ============================== -->
         <div class="table-section">
-            <h3>🧑 운전원별 집계</h3>
+            <h3 style="margin-top: 0px; margin-bottom: 5px;">🧑 운전원별 집계</h3>
             <table>
                 <thead>
                     <tr>
