@@ -25,7 +25,10 @@
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .calc-result { background: #e8f0fe; padding: 12px; border-radius: 6px; text-align: center; margin-top: 10px; border: 1px dashed #007bff; font-weight: bold;}
         .signature-area { border: 2px solid #ccc; border-radius: 8px; background: #fafbfc; position: relative; margin-top: 10px; }
-        canvas { width: 100%; height: 250px; display: block; touch-action: none; background: transparent; }
+        
+        /* 🔥 수술 1: 사인 도화지 높이를 220px로 시원하게 키우고, 배경을 하얗게 고정! */
+        canvas { width: 100%; height: 220px; display: block; touch-action: none; background: #fff; }
+        
         .clear-btn { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.5); color: #fff; border: none; padding: 4px 10px; border-radius: 4px; font-size: 0.8rem; cursor: pointer; z-index: 5; }
         
         .radio-group { display: flex; flex-wrap: wrap; gap: 12px; padding: 10px 0; }
@@ -112,7 +115,6 @@
     </style>
 </head>
 <body>
-
     <div id="mobile-view">
         <header class="header">
             <button class="back-btn" onclick="window.location.href='driver.html'">❮</button>
@@ -243,7 +245,6 @@
                 <p style="font-size:0.8rem; color:#007bff; margin-top:5px; text-align:center;">※ 한 번만 서명하시면 인쇄 시 지정된 2곳에 자동으로 찍힙니다!</p>
             </div>
 
-            <!-- 🔥 버튼들에 ID 추가 -->
             <div class="btn-group">
                 <button id="btn-save" class="save-btn" onclick="saveDraft()">☁️ 클라우드 중간 저장</button>
                 <button id="btn-print" class="print-btn" onclick="doPrint()">🖨️ 인쇄 (최종 완료)</button>
@@ -300,7 +301,6 @@
         <img class="print-sign" id="pt-cust-sign" style="display:none;">
         <img class="print-sign" id="pt-cust-sign2" style="display:none;">
     </div>
-
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyD3KPnvBMz14fqe3znaSNxQurJ_mSHG9mY",
@@ -320,9 +320,14 @@
             const cvs = document.getElementById(canvasId);
             const ctx = cvs.getContext('2d');
             let drawing = false;
-            cvs.width = cvs.parentElement.clientWidth || 300; 
             
-            cvs.height = 120; ctx.lineWidth = 6; ctx.lineCap = 'round'; ctx.strokeStyle = '#000'; 
+            // 🔥 [수술 완료] 캔버스 내부 해상도를 껍데기(CSS 220px)와 완벽하게 일치시켜 좌표 틀어짐 방지!
+            cvs.width = cvs.parentElement.clientWidth || 300; 
+            cvs.height = 220; 
+            
+            ctx.lineWidth = 6; 
+            ctx.lineCap = 'round'; 
+            ctx.strokeStyle = '#000'; 
             
             function getPos(e) {
                 const rect = cvs.getBoundingClientRect();
@@ -368,15 +373,12 @@
                 document.getElementById('m-car').value = carMap[carName].num;
             }
             
-            // 🚀 [마법의 서랍장 로직 1] 내 차 전용 서랍장부터 열어보기!
             if(carName && !document.getElementById('m-km-start').value) {
                 const savedMileage = localStorage.getItem('lastMileage_' + carName);
-                
                 if (savedMileage) {
                     document.getElementById('m-km-start').value = savedMileage;
                     calcKm();
                 } else {
-                    // (만약 서랍이 비어있으면 기존처럼 서버에서 긁어오기)
                     try {
                         const snap = await db.collection('reports').where('carName', '==', carName).get();
                         let lastKm = 0;
@@ -426,12 +428,10 @@
             const urlParams = new URLSearchParams(window.location.search);
             const resId = urlParams.get('resId'); 
             const pDate = urlParams.get('date');
-            
             let isManual = urlParams.get('isManual') === 'true';
 
             if(isManual) {
                 globalDocId = "MANUAL_" + Date.now(); 
-                
                 document.getElementById('m-date').readOnly = false;
                 document.getElementById('m-car-name').disabled = false;
                 document.getElementById('m-car').readOnly = false;
@@ -446,10 +446,8 @@
                 
                 document.getElementById('m-date').value = pDate || new Date().toISOString().substring(0, 10);
                 document.getElementById('m-driver1').value = urlParams.get('driver') || '';
-                
                 document.getElementById('btn-save').style.display = 'none';
                 document.getElementById('btn-delete').style.display = 'none';
-                
             } else {
                 if(!resId || !pDate) return;
                 globalDocId = resId + "_" + pDate; 
@@ -457,7 +455,6 @@
 
             let tIn = parseTimeParam(urlParams.get('in'));
             let tOut = parseTimeParam(urlParams.get('out'));
-            
             let passedCar = (urlParams.get('car') || '').trim();
             let finalCarType = carMap[passedCar] ? carMap[passedCar].type : '유니버스';
             let finalCarName = passedCar; 
@@ -477,11 +474,9 @@
 
             try {
                 const docSnap = await db.collection('reports').doc(globalDocId).get();
-                
                 if(docSnap.exists) {
                     const data = docSnap.data();
                     document.getElementById('m-date').value = data.date || pDate;
-                    
                     document.getElementById('m-car-type').value = data.carType || finalCarType;
                     
                     if(document.getElementById('m-car-name').tagName === 'SELECT') {
@@ -491,12 +486,10 @@
                     document.getElementById('m-car').value = data.car || finalCarNum;
                     document.getElementById('m-driver1').value = data.driver1 || d1;
                     document.getElementById('m-driver2').value = data.driver2 || d2;
-                    
                     document.getElementById('m-time-start').value = data.t_start || tIn;
                     document.getElementById('m-time-end').value = data.t_end || tOut;
                     document.getElementById('m-km-start').value = data.k_start || '';
                     document.getElementById('m-km-end').value = data.k_end || '';
-                    
                     document.getElementById('m-time-board').value = data.t_board || '';
                     document.getElementById('m-time-alight').value = data.t_alight || '';
                     document.getElementById('m-km-board').value = data.k_board || '';
@@ -504,17 +497,14 @@
 
                     setRadioValue('m-reason', data.reason || finalReason);
                     setRadioValue('m-trip', data.trip || initialTrip); 
-                    
                     document.getElementById('m-trip-day').value = data.tripDay || '';
                     document.getElementById('m-loc-start').value = data.l_start || '';
                     document.getElementById('m-loc-end').value = data.l_end || urlParams.get('dest') || '';
                     document.getElementById('m-pax-w').value = data.p_w || '';
                     document.getElementById('m-pax-n').value = data.p_n || '';
-                    
                     document.getElementById('m-pax-disabled').value = data.p_disabled || '';
                     document.getElementById('m-pax-non-disabled').value = data.p_non_disabled || '';
                     document.getElementById('m-note').value = data.note || '';
-
                     document.getElementById('m-cust-name').value = data.c_name || '';
                     
                     await autoFillCarInfo();
@@ -524,7 +514,7 @@
                         if (data.driver1Sign && data.driver1Sign.length > 1300) { const img = new Image(); img.onload = () => pads['driver1-sign-pad'].ctx.drawImage(img, 0, 0); img.src = data.driver1Sign; }
                         if (data.driver2Sign && data.driver2Sign.length > 1300) { const img = new Image(); img.onload = () => pads['driver2-sign-pad'].ctx.drawImage(img, 0, 0); img.src = data.driver2Sign; }
                         if (data.custSign && data.custSign.length > 1300) { const img = new Image(); img.onload = () => pads['cust-sign-pad'].ctx.drawImage(img, 0, 0); img.src = data.custSign; }
-                    }, 100);
+                    }, 150);
                 } else if(!isManual) {
                     document.getElementById('m-date').value = pDate;
                     document.getElementById('m-car-type').value = finalCarType;
@@ -585,7 +575,6 @@
                 
                 await db.collection('reports').doc(globalDocId).set(reportData);
                 
-                // 🚀 [마법의 서랍장 로직 2] 방금 적은 도착 누계 키로수를 내 차 전용 서랍에 쏙 덮어쓰기!
                 const currentCarName = document.getElementById('m-car-name').value;
                 const finalKm = document.getElementById('m-km-end').value;
                 if(currentCarName && finalKm) {
@@ -628,9 +617,10 @@
             return String(h).padStart(2,'0') + ":" + String(m).padStart(2,'0');
         }
 
-        function doPrint() {
+        // 🔥 [수술 완료] 인쇄 버튼 누를 때 딜레이 타이밍을 줘서 에러 없이 무조건 인쇄창이 뜨게 수정!
+        async function doPrint() {
             if(!globalDocId.startsWith("MANUAL")) {
-                saveDraft(true); 
+                await saveDraft(true); // 저장 끝날 때까지 확실히 기다림!
             }
 
             document.getElementById('print-view').className = 'type-general';
@@ -686,7 +676,6 @@
             document.getElementById('pt-car-type').innerText = document.getElementById('m-car-type').value || '';
             document.getElementById('pt-car-name').innerText = document.getElementById('m-car-name').value || ''; 
             document.getElementById('pt-car').innerText = document.getElementById('m-car').value || '';
-            
             document.getElementById('pt-driver1').innerText = document.getElementById('m-driver1').value || '';
             document.getElementById('pt-driver2').innerText = document.getElementById('m-driver2').value || '';
             
@@ -711,7 +700,6 @@
             document.getElementById('pt-km-start').innerText = ks ? Number(ks).toLocaleString() : '';
             document.getElementById('pt-km-end').innerText = ke ? Number(ke).toLocaleString() : '';
             document.getElementById('pt-km-total').innerText = document.getElementById('m-km-total').innerText || '';
-            
             document.getElementById('pt-km-board').innerText = kbs ? Number(kbs).toLocaleString() : '';
             document.getElementById('pt-km-alight').innerText = kba ? Number(kba).toLocaleString() : '';
             document.getElementById('pt-km-board-total').innerText = document.getElementById('m-km-board-total').innerText || '';
@@ -720,11 +708,9 @@
             document.getElementById('pt-loc-end').innerText = document.getElementById('m-loc-end').value || '';
             document.getElementById('pt-pax-w').innerText = document.getElementById('m-pax-w').value || '';
             document.getElementById('pt-pax-n').innerText = document.getElementById('m-pax-n').value || '';
-            
             document.getElementById('pt-pax-disabled').innerText = document.getElementById('m-pax-disabled').value || '';
             document.getElementById('pt-pax-non-disabled').innerText = document.getElementById('m-pax-non-disabled').value || '';
             document.getElementById('pt-note').innerText = document.getElementById('m-note').value || '';
-
             document.getElementById('pt-cust-name').innerText = document.getElementById('m-cust-name').value || '';
 
             const d1Sign = pads['driver1-sign-pad'].cvs.toDataURL('image/png');
@@ -746,15 +732,11 @@
                 ptCust.style.display = 'none'; 
                 ptCust2.style.display = 'none'; 
             }
-            // 🔥 인쇄 직전에, 지금 도화지에 그린 사인을 인쇄용 도장 위치에 강제로 복사!
-            if (!signaturePad.isEmpty()) {
-                document.getElementById('sign-image-cust').src = signaturePad.toDataURL();
-                document.getElementById('sign-image-cust').style.display = 'block';
-            }
 
-            // 이 아래에 원래 있던 인쇄 명령이 실행됩니다.
-
-            window.print();
+            // 0.3초 여유를 두고 인쇄 창을 띄워 도장이 밀리지 않고 완벽하게 찍히게 보장!
+            setTimeout(() => {
+                window.print();
+            }, 300);
         }
     </script>
 </body>
