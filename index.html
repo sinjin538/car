@@ -117,7 +117,8 @@
     </style>
 </head>
 <body>
-    <datalist id="place-list"></datalist>
+    <datalist id="start-place-list"></datalist>
+    <datalist id="end-place-list"></datalist>
 
     <div id="login-container">
         <div class="login-card">
@@ -187,7 +188,6 @@
                 <button onclick="logout()" style="background: #dc3545; color: white; border: none; padding: 4px 10px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 0.75rem;">로그아웃</button>
             </div>
         </div>
-
         <div class="dispatch-container">
             <div class="main-section">
                 <div class="card">
@@ -250,18 +250,17 @@
                                     </select>
                                 </div>
                                 
-                                <!-- 🔥 출발지/도착지 추가 구역 -->
+                                <!-- 🔥 1. 자동완성 분리 수술 완료 (주머니 쪼개기 + 첫 글자 칠 때만 팝업 뜨게 꼼수 적용!) -->
                                 <div style="display: flex; gap: 10px; margin-bottom: 12px;">
                                     <div class="form-group" style="flex: 1; margin-bottom: 0;">
                                         <label>출발지</label>
-                                        <input type="text" id="start_${v}" list="place-list" autocomplete="off">
+                                        <input type="text" id="start_${v}" autocomplete="off" oninput="this.setAttribute('list', this.value ? 'start-place-list' : '')">
                                     </div>
                                     <div class="form-group" style="flex: 1; margin-bottom: 0;">
                                         <label>도착지</label>
-                                        <input type="text" id="end_${v}" list="place-list" autocomplete="off">
+                                        <input type="text" id="end_${v}" autocomplete="off" oninput="this.setAttribute('list', this.value ? 'end-place-list' : '')">
                                     </div>
                                 </div>
-                                <!-- 🔥 출발지/도착지 추가 구역 끝 -->
 
                                 <div style="display: flex; gap: 10px; margin-bottom: 12px;">
                                     <div class="form-group" style="flex: 1.5; margin-bottom: 0;">
@@ -338,6 +337,7 @@
         const systemUsers = {
             'admin1': { role: 'admin', pw: '123456' },
             'admin2': { role: 'admin', pw: '123456' },
+            'admin3': { role: 'admin', pw: '123456' },
             '박기준': { role: 'driver', pw: '123456' },
             '변석현': { role: 'driver', pw: '123456' },
             '이명순': { role: 'driver', pw: '123456' },
@@ -489,7 +489,6 @@
                 loadFromFirebase();
             }
         }
-
         const koreaHolidays = {
             "01-01": "신정", "03-01": "삼일절", "05-05": "어린이날", "06-06": "현충일", 
             "08-15": "광복절", "10-03": "개천절", "10-09": "한글날", "12-25": "기독탄신일",
@@ -566,10 +565,18 @@
             });
         }
 
+        // 🔥 3. 창고(Storage) 찌꺼기 파일 완전 소각 수술 완료!
         async function cleanUpOldFiles(reservations) {
             const todayStr = `${_now.getFullYear()}-${String(_now.getMonth() + 1).padStart(2, '0')}-${String(_now.getDate()).padStart(2, '0')}`;
             for (let r of reservations) {
                 if (r.startDate < todayStr && r.photoUrl) {
+                    try {
+                        // 텍스트 방(Firestore)에서만 지우는 게 아니라, 창고 방(Storage)에서도 파일을 찾아내서 찢어버림!
+                        const fileRef = storage.refFromURL(r.photoUrl);
+                        await fileRef.delete();
+                    } catch (err) {
+                        console.log("이미 지워졌거나 파일이 없습니다.");
+                    }
                     r.photoUrl = null; 
                     db.collection('reservations').doc(r.id).set(r, { merge: true }).catch(e => {});
                 }
@@ -584,17 +591,19 @@
                 resSnapshot.forEach(doc => allReservations.push(doc.data()));
 
                 await cleanUpOldFiles(allReservations);
-                // 🔥 자동완성 주머니에 출발지/도착지 데이터 꽉꽉 채워넣기
-                const placeSet = new Set();
+                
+                // 🔥 1. 자동완성 분리 수술 완료 (데이터 쪼개서 담기)
+                const startSet = new Set();
+                const endSet = new Set();
                 allReservations.forEach(r => {
-                    // 🔥 자동완성 주머니에 넣을 때 '미상'이나 '미입력'은 버리고 넣기!
-                    if (r.start && r.start.trim() !== '미상' && r.start.trim() !== '미입력') placeSet.add(r.start.trim());
-                    if (r.end && r.end.trim() !== '미상' && r.end.trim() !== '미입력') placeSet.add(r.end.trim());
+                    if (r.start && r.start.trim() !== '미상' && r.start.trim() !== '미입력') startSet.add(r.start.trim());
+                    if (r.end && r.end.trim() !== '미상' && r.end.trim() !== '미입력') endSet.add(r.end.trim());
                 });
-                const datalist = document.getElementById('place-list');
-                if (datalist) {
-                    datalist.innerHTML = [...placeSet].map(val => `<option value="${val}">`).join('');
-                }
+                
+                const startList = document.getElementById('start-place-list');
+                const endList = document.getElementById('end-place-list');
+                if (startList) startList.innerHTML = [...startSet].map(val => `<option value="${val}">`).join('');
+                if (endList) endList.innerHTML = [...endSet].map(val => `<option value="${val}">`).join('');
 
                 const statusSnapshot = await db.collection('daily_status').get();
                 statusSnapshot.forEach(doc => { dailyDriverStatus[doc.id] = doc.data(); });
@@ -684,8 +693,6 @@
                     document.getElementById(`type_${vehicleName}`).value = existing.type || '공공예약';
                     document.getElementById(`km_${vehicleName}`).value = existing.km || 0;
                     
-                    // 🔥 기존 예약정보 불러올 때 출발지/도착지 값도 칸에 넣기
-                    // 🔥 DB에 '미상'이라고 적혀있으면 화면엔 아예 빈칸으로 비워버리기!
                     document.getElementById(`start_${vehicleName}`).value = (existing.start === '미상' || existing.start === '미입력') ? '' : (existing.start || '');
                     document.getElementById(`end_${vehicleName}`).value = (existing.end === '미상' || existing.end === '미입력') ? '' : (existing.end || '');
 
@@ -716,7 +723,6 @@
                     document.getElementById(`type_${vehicleName}`).value = '공공예약';
                     document.getElementById(`km_${vehicleName}`).value = '0';
                     
-                    // 🔥 새 예약일 때는 칸 비우기
                     document.getElementById(`start_${vehicleName}`).value = '';
                     document.getElementById(`end_${vehicleName}`).value = '';
 
@@ -959,7 +965,6 @@
 
             allReservations.push({
                 id: docId, startDate: currentDate, dates: dates, vehicle: vehicleName,
-                // 🔥 저장할 때 출발지, 도착지 값도 같이 저장!
                 start: document.getElementById(`start_${vehicleName}`).value || '', 
                 end: document.getElementById(`end_${vehicleName}`).value || '', 
                 dest: document.getElementById(`dest_${vehicleName}`).value || '내용 없음',
@@ -1122,7 +1127,6 @@
             document.getElementById('detail-modal-title').innerText = `[${d.vehicle}] ${d.type} (${clickedDate})`;
             document.getElementById('detail-modal-drivers').innerText = assigned;
             
-            // 🔥 모달 창에도 출발지-도착지 띄우기
             let routeText = `[${d.start || '미입력'} ➔ ${d.end || '미입력'}]<br>${d.dest || '내용 없음'}`;
             document.getElementById('detail-modal-dest').innerHTML = routeText; 
 
@@ -1196,7 +1200,6 @@
 
                     let attachIcon = d.photoUrl ? ' <span style="font-size:0.9rem;">📎</span>' : '';
 
-                    // 🔥 최종 배차 결과 화면에 [출발지 ➔ 도착지] 예쁘게 띄우기
                     html += `
                         <li style="${canceledLiStyle}">
                             <b>[${d.vehicle}]</b>${attachIcon} 
@@ -1258,7 +1261,18 @@
             updateDropdownOptions(dateStr); 
         }
 
+        // 🔥 2. 뒤로 가기 앱 종료 방어막 수술 완료!
+        window.addEventListener('popstate', function(event) {
+            if (confirm("배차 시스템 앱을 종료하시겠습니까?")) {
+                window.history.back(); // 진짜 종료
+            } else {
+                window.history.pushState(null, null, window.location.href); // 덫 다시 깔기
+            }
+        });
+
         window.onload = () => {
+            // 처음에 덫을 한 번 깔아둡니다.
+            window.history.pushState(null, null, window.location.href);
             checkAuth(); 
         };
     </script>
