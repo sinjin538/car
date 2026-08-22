@@ -1019,6 +1019,7 @@
             renderMonthlySummary(); 
         }
 
+        // 🔥 요기서부터 파일 끝까지 정확히 이 모양이어야 합니다! (팝업 코드 완전 삭제됨)
         window.onload = () => {
             if(checkAuth()) {
                 const _now = new Date();
@@ -1027,18 +1028,6 @@
                 currentDate = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(_now.getDate()).padStart(2, '0')}`; 
                 
                 loadFromFirebase();
-
-                // 🔥 [수술 2] 기사님 전용 앱 종료 방어막! (뒤로가기 시 묻고 바로 홈화면 튕겨냄)
-                window.history.pushState(null, null, window.location.href);
-                window.addEventListener('popstate', function(event) {
-                    if (confirm("배차 시스템 앱을 종료하시겠습니까?")) {
-                        window.location.replace('about:blank'); 
-                        setTimeout(() => { window.close(); }, 100);
-                        setTimeout(() => { window.history.go(-2); }, 200); 
-                    } else {
-                        window.history.pushState(null, null, window.location.href); 
-                    }
-                });
             }
         };
     </script>
