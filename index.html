@@ -250,7 +250,6 @@
                                     </select>
                                 </div>
                                 
-                                <!-- 🔥 1. 자동완성 분리 수술 완료 (주머니 쪼개기 + 첫 글자 칠 때만 팝업 뜨게 꼼수 적용!) -->
                                 <div style="display: flex; gap: 10px; margin-bottom: 12px;">
                                     <div class="form-group" style="flex: 1; margin-bottom: 0;">
                                         <label>출발지</label>
@@ -407,10 +406,15 @@
                 return;
             }
 
+            // 로그인 성공 시 쿠키와 비슷하게 로컬에 정보를 저장합니다.
             localStorage.setItem('loggedInUser', id);
             localStorage.setItem('userRole', systemUsers[id].role);
             localStorage.setItem('loggedInPw', realPw); 
             
+            // 로그인 딱 한 번만! 바로 내배차로 강제 이동시키는 '1회용 입장권'을 발급해서 리로드합니다.
+            if(systemUsers[id].role === 'driver') {
+                sessionStorage.setItem('justLoggedIn', 'true');
+            }
             window.location.reload(); 
         }
 
@@ -457,6 +461,7 @@
             window.location.href = 'driver.html'; 
         }
 
+        // 🔥 여기가 핵심입니다! 로그인 권한 확인 및 화면 강제 이동 로직
         function checkAuth() {
             currentUser = localStorage.getItem('loggedInUser');
             const userRole = localStorage.getItem('userRole');
@@ -465,16 +470,17 @@
                 document.getElementById('login-container').style.display = 'flex';
                 document.getElementById('app-container').style.display = 'none';
             } else {
-                // 🔥 [수술 1] 기사님 로그인 시 묻지도 따지지도 않고 내배차로 납치! (main=1 입장권 없으면)
-                const urlParams = new URLSearchParams(window.location.search);
-                if (userRole === 'driver' && !urlParams.has('main')) {
+                
+                // 🔥 [수술 1] 기사님이 방금 막 로그인 버튼을 눌렀다면? 묻지도 따지지도 않고 내배차로 슛!
+                const justLoggedIn = sessionStorage.getItem('justLoggedIn');
+                if (userRole === 'driver' && justLoggedIn === 'true') {
+                    sessionStorage.removeItem('justLoggedIn'); // 1회용 입장권 찢어버림 (다음에 버튼 누르면 통과되게)
                     window.location.replace('driver.html');
                     return; 
                 }
 
                 document.getElementById('login-container').style.display = 'none';
                 document.getElementById('app-container').style.display = 'block';
-                // ... (이 아래는 원래 있던 코드 그대로 둡니다)
                 
                 document.getElementById('welcome-msg').innerText = `${getDispName(currentUser)}님 메인창`;
 
@@ -573,13 +579,11 @@
             });
         }
 
-        // 🔥 3. 창고(Storage) 찌꺼기 파일 완전 소각 수술 완료!
         async function cleanUpOldFiles(reservations) {
             const todayStr = `${_now.getFullYear()}-${String(_now.getMonth() + 1).padStart(2, '0')}-${String(_now.getDate()).padStart(2, '0')}`;
             for (let r of reservations) {
                 if (r.startDate < todayStr && r.photoUrl) {
                     try {
-                        // 텍스트 방(Firestore)에서만 지우는 게 아니라, 창고 방(Storage)에서도 파일을 찾아내서 찢어버림!
                         const fileRef = storage.refFromURL(r.photoUrl);
                         await fileRef.delete();
                     } catch (err) {
@@ -600,7 +604,6 @@
 
                 await cleanUpOldFiles(allReservations);
                 
-                // 🔥 1. 자동완성 분리 수술 완료 (데이터 쪼개서 담기)
                 const startSet = new Set();
                 const endSet = new Set();
                 allReservations.forEach(r => {
@@ -1269,8 +1272,7 @@
             updateDropdownOptions(dateStr); 
         }
 
-        // 🔥 2. 뒤로 가기 앱 종료 방어막 수술 완료!
-        // 🔥 [수술 2] 앱 종료 방어막 업그레이드! (확인 누르면 즉시 꺼지게)
+        // 🔥 [수술 2] 앱 종료 방어막 업그레이드! (확인 누르면 즉시 앱이 꺼지거나 빈 페이지로 이동)
         window.addEventListener('popstate', function(event) {
             if (confirm("배차 시스템 앱을 종료하시겠습니까?")) {
                 window.location.replace('about:blank'); 
@@ -1281,7 +1283,6 @@
         });
 
         window.onload = () => {
-            // 처음에 덫을 한 번 깔아둡니다.
             window.history.pushState(null, null, window.location.href);
             checkAuth(); 
         };
