@@ -168,9 +168,7 @@
                     <p style="margin:0;"><span style="color:#888; display:inline-block; width:65px;">운전원</span> <b id="detail-modal-drivers" style="color:#333;"></b></p>
                     <p style="margin:0;"><span style="color:#888; display:inline-block; width:65px;">내 용</span> <b id="detail-modal-dest" style="color:#d9534f;"></b></p>
                 </div>
-                
                 <div id="detail-modal-img-container" style="text-align: center; margin-bottom: 15px; display: none;"></div>
-                
                 <div style="text-align: right;">
                     <button style="padding: 8px 20px; background: #6c757d; color: #fff; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;" onclick="closeDetailModal()">닫기</button>
                 </div>
@@ -188,6 +186,7 @@
                 <button onclick="logout()" style="background: #dc3545; color: white; border: none; padding: 4px 10px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 0.75rem;">로그아웃</button>
             </div>
         </div>
+
         <div class="dispatch-container">
             <div class="main-section">
                 <div class="card">
@@ -350,38 +349,58 @@
             '조병준': { role: 'driver', pw: '123456' }
         };
 
-        let currentUser = ''; 
-
-        function getShortType(type) {
-            if (type.includes('공공')) return '공공';
-            if (type.includes('1박')) return '1박';
-            if (type.includes('2박')) return '2박';
-            if (type.includes('서울')) return '서울';
-            if (type.includes('시티')) return '시티';
-            if (type.includes('성묘')) return '성묘';
-            return '기타';
+        const koreaHolidays = {
+            "01-01": "신정", "03-01": "삼일절", "05-05": "어린이날", "06-06": "현충일", 
+            "08-15": "광복절", "10-03": "개천절", "10-09": "한글날", "12-25": "기독탄신일",
+            "2026-02-16": "설날연휴", "2026-02-17": "설날", "2026-02-18": "설날연휴",
+            "2026-03-02": "대체공휴일", "2026-05-24": "부처님오신날", "2026-05-25": "대체공휴일",
+            "2026-06-03": "지방선거", "2026-08-17": "대체공휴일", "2026-09-24": "추석연휴", 
+            "2026-09-25": "추석", "2026-09-26": "추석연휴", "2026-10-05": "대체공휴일",
+            "2027-02-06": "설날연휴", "2027-02-07": "설날", "2027-02-08": "설날연휴", "2027-02-09": "대체공휴일",
+            "2027-05-01": "노동절", "2027-05-03": "대체공휴일","2027-05-13":"부처님오신날",
+            "2027-07-17": "제헌절", "2027-07-19": "대체공휴일","2027-08-15":"광복절",
+            "2027-08-16": "대체공휴일", "2027-09-14": "추석연휴","2027-09-15": "추석","2027-09-16": "추석연휴",
+            "2027-10-04": "대체공휴일", "2027-10-11": "대체공휴일","2027-12-27": "대체공휴일"
+        };
+        
+        function getHolidayName(year, month, day) {
+            const mmdd = `${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            return koreaHolidays[`${year}-${mmdd}`] || koreaHolidays[mmdd] || null;
         }
 
-        function getDispName(name) {
-            if (!name) return '';
-            if (name.includes('admin')) return name;
-            if (name.length >= 2) return name.substring(1);
-            return name;
+        const defaultDrivers = ['박기준', '변석현', '이명순', '김탁', '한상훈', '문인식', '황덕일', '강철규', '이상헌', '함동한', '조병준'];
+        let driverListModifiers = {}; 
+        
+        const _now = new Date();
+        let currentYear = _now.getFullYear(); 
+        let currentMonth = _now.getMonth(); 
+        let currentDate = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(_now.getDate()).padStart(2, '0')}`; 
+        
+        const dailyDriverStatus = {}; 
+        let allReservations = []; 
+        let currentUser = '';
+
+        // UI 로딩 함수
+        function showLoading(msg = '서버 처리 중...') {
+            document.getElementById('loading-text').innerText = msg;
+            document.getElementById('loading-overlay').style.display = 'flex';
+        }
+        function hideLoading() {
+            document.getElementById('loading-overlay').style.display = 'none';
         }
 
+        // 로그인 로직
         async function handleLogin() {
             const id = document.getElementById('login-id').value.trim();
             const pw = document.getElementById('login-pw').value;
             const btn = document.getElementById('btn-login');
 
             if (!id) return alert('이름(또는 아이디)을 입력해주세요.');
-            
             if (!systemUsers[id]) {
                 alert('등록되지 않은 사용자입니다. 이름을 정확히 확인해 주세요.');
                 document.getElementById('login-id').value = ''; 
                 return;
             }
-
             if (!pw) return alert('비밀번호를 입력해주세요.');
 
             btn.innerText = '인증 확인 중...';
@@ -390,12 +409,8 @@
             let realPw = systemUsers[id].pw; 
             try {
                 const doc = await db.collection('user_auth').doc(id).get();
-                if (doc.exists && doc.data().pw) {
-                    realPw = doc.data().pw;
-                }
-            } catch (error) {
-                console.error("인증 통신 오류", error);
-            }
+                if (doc.exists && doc.data().pw) { realPw = doc.data().pw; }
+            } catch (error) { console.error("인증 통신 오류", error); }
 
             btn.innerText = '접속하기';
             btn.disabled = false;
@@ -406,16 +421,16 @@
                 return;
             }
 
-            // 로그인 성공 시 쿠키와 비슷하게 로컬에 정보를 저장합니다.
             localStorage.setItem('loggedInUser', id);
             localStorage.setItem('userRole', systemUsers[id].role);
             localStorage.setItem('loggedInPw', realPw); 
-            
-            // 로그인 딱 한 번만! 바로 내배차로 강제 이동시키는 '1회용 입장권'을 발급해서 리로드합니다.
-            if(systemUsers[id].role === 'driver') {
-                sessionStorage.setItem('justLoggedIn', 'true');
-            }
             window.location.reload(); 
+        }
+
+        function logout() {
+            localStorage.clear();
+            sessionStorage.clear();
+            window.location.reload();
         }
 
         function openPwModal() {
@@ -451,92 +466,25 @@
             hideLoading();
         }
 
-        function logout() {
-            localStorage.clear();
-            sessionStorage.clear();
-            window.location.reload();
-        }
-
         function goToModule2() {
             window.location.href = 'driver.html'; 
         }
 
-        // 🔥 여기가 핵심입니다! 로그인 권한 확인 및 화면 강제 이동 로직
-        function checkAuth() {
-            currentUser = localStorage.getItem('loggedInUser');
-            const userRole = localStorage.getItem('userRole');
-
-            if (!currentUser) {
-                document.getElementById('login-container').style.display = 'flex';
-                document.getElementById('app-container').style.display = 'none';
-            } else {
-                
-                // 🔥 [수술 1] 기사님이 방금 막 로그인 버튼을 눌렀다면? 묻지도 따지지도 않고 내배차로 슛!
-                const justLoggedIn = sessionStorage.getItem('justLoggedIn');
-                if (userRole === 'driver' && justLoggedIn === 'true') {
-                    sessionStorage.removeItem('justLoggedIn'); // 1회용 입장권 찢어버림 (다음에 버튼 누르면 통과되게)
-                    window.location.replace('driver.html');
-                    return; 
-                }
-
-                document.getElementById('login-container').style.display = 'none';
-                document.getElementById('app-container').style.display = 'block';
-                
-                document.getElementById('welcome-msg').innerText = `${getDispName(currentUser)}님 메인창`;
-
-                if (userRole === 'admin') {
-                    document.querySelector('.sidebar-section').style.display = 'block'; 
-                    document.querySelector('.btn-edit-drivers').style.display = 'block'; 
-                    document.querySelector('.status-header').style.display = 'flex'; 
-                    document.getElementById('status-container').style.display = 'grid'; 
-                    document.getElementById('btn-go-driver').style.display = 'none';
-                } else {
-                    document.querySelector('.sidebar-section').style.display = 'none'; 
-                    document.querySelector('.btn-edit-drivers').style.display = 'none'; 
-                    document.querySelector('.status-header').style.display = 'none'; 
-                    document.getElementById('status-container').style.display = 'none'; 
-                    document.getElementById('btn-go-driver').style.display = 'inline-block';
-                }
-                
-                renderCalendar();
-                selectDate(currentDate);
-                loadFromFirebase();
-            }
-        }
-        const koreaHolidays = {
-            "01-01": "신정", "03-01": "삼일절", "05-05": "어린이날", "06-06": "현충일", 
-            "08-15": "광복절", "10-03": "개천절", "10-09": "한글날", "12-25": "기독탄신일",
-            "2026-02-16": "설날연휴", "2026-02-17": "설날", "2026-02-18": "설날연휴",
-            "2026-03-02": "대체공휴일", "2026-05-24": "부처님오신날", "2026-05-25": "대체공휴일",
-            "2026-06-03": "지방선거", "2026-08-17": "대체공휴일", "2026-09-24": "추석연휴", 
-            "2026-09-25": "추석", "2026-09-26": "추석연휴", "2026-10-05": "대체공휴일",
-            "2027-02-06": "설날연휴", "2027-02-07": "설날", "2027-02-08": "설날연휴", "2027-02-09": "대체공휴일",
-            "2027-05-01": "노동절", "2027-05-03": "대체공휴일","2027-05-13":"부처님오신날",
-            "2027-07-17": "제헌절", "2027-07-19": "대체공휴일","2027-08-15":"광복절",
-            "2027-08-16": "대체공휴일", "2027-09-14": "추석연휴","2027-09-15": "추석","2027-09-16": "추석연휴",
-            "2027-10-04": "대체공휴일", "2027-10-11": "대체공휴일","2027-12-27": "대체공휴일"
-        };
-        function getHolidayName(year, month, day) {
-            const mmdd = `${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-            return koreaHolidays[`${year}-${mmdd}`] || koreaHolidays[mmdd] || null;
+        function getShortType(type) {
+            if (type.includes('공공')) return '공공';
+            if (type.includes('1박')) return '1박';
+            if (type.includes('2박')) return '2박';
+            if (type.includes('서울')) return '서울';
+            if (type.includes('시티')) return '시티';
+            if (type.includes('성묘')) return '성묘';
+            return '기타';
         }
 
-        const defaultDrivers = ['박기준', '변석현', '이명순', '김탁', '한상훈', '문인식', '황덕일', '강철규', '이상헌', '함동한', '조병준'];
-        let driverListModifiers = {}; 
-        
-        const _now = new Date();
-        let currentYear = _now.getFullYear(); 
-        let currentMonth = _now.getMonth(); 
-        let currentDate = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(_now.getDate()).padStart(2, '0')}`; 
-        
-        const dailyDriverStatus = {}; let allReservations = []; 
-
-        function showLoading(msg = '서버 처리 중...') {
-            document.getElementById('loading-text').innerText = msg;
-            document.getElementById('loading-overlay').style.display = 'flex';
-        }
-        function hideLoading() {
-            document.getElementById('loading-overlay').style.display = 'none';
+        function getDispName(name) {
+            if (!name) return '';
+            if (name.includes('admin')) return name;
+            if (name.length >= 2) return name.substring(1);
+            return name;
         }
 
         function getEffectiveDriverList(date) {
@@ -586,9 +534,7 @@
                     try {
                         const fileRef = storage.refFromURL(r.photoUrl);
                         await fileRef.delete();
-                    } catch (err) {
-                        console.log("이미 지워졌거나 파일이 없습니다.");
-                    }
+                    } catch (err) {}
                     r.photoUrl = null; 
                     db.collection('reservations').doc(r.id).set(r, { merge: true }).catch(e => {});
                 }
@@ -626,7 +572,7 @@
             } finally {
                 recalculateAll(false); 
                 updateDropdownOptions(currentDate); 
-                hideLoading();
+                hideLoading(); 
             }
         }
 
@@ -733,7 +679,6 @@
                     document.getElementById(`dest_${vehicleName}`).value = '';
                     document.getElementById(`type_${vehicleName}`).value = '공공예약';
                     document.getElementById(`km_${vehicleName}`).value = '0';
-                    
                     document.getElementById(`start_${vehicleName}`).value = '';
                     document.getElementById(`end_${vehicleName}`).value = '';
 
@@ -741,7 +686,6 @@
                     
                     document.getElementById(`manual_${vehicleName}`).checked = false;
                     document.getElementById(`next_pointer_${vehicleName}`).value = '';
-                    
                     if (photoStatus) photoStatus.innerText = '';
 
                     d1.value = ''; d1.disabled = true;
@@ -1132,7 +1076,7 @@
             const d = allReservations.find(r => r.id === id);
             if (!d) return;
 
-            const currentUserRole = localStorage.getItem('userRole'); 
+            const userRole = localStorage.getItem('userRole'); 
 
             let assigned = (d.assigned && d.assigned.length > 0) ? d.assigned.join(', ') : '미정';
             document.getElementById('detail-modal-title').innerText = `[${d.vehicle}] ${d.type} (${clickedDate})`;
@@ -1144,7 +1088,9 @@
             const imgContainer = document.getElementById('detail-modal-img-container');
             
             const todayStr = `${_now.getFullYear()}-${String(_now.getMonth() + 1).padStart(2, '0')}-${String(_now.getDate()).padStart(2, '0')}`;
-            if (currentUserRole === 'driver') {
+            
+            // 기사님은 메인창에 구경 왔을 때 영수증/사진 첨부 버튼을 볼 수 없게 숨김 처리
+            if (userRole === 'driver') {
                 imgContainer.style.display = 'none';
             } else {
                 if (d.startDate < todayStr && !d.photoUrl) {
@@ -1272,23 +1218,65 @@
             updateDropdownOptions(dateStr); 
         }
 
-        // 🔥 [수술 2] 앱 종료 방어막 업그레이드! (확인 누르면 즉시 앱이 꺼지거나 빈 페이지로 이동)
-        // 🔥 [수술 2 수정본] 앱 종료 방어막 업그레이드! (하얀 창 안 뜨고 진짜 앱 탈출)
-        window.addEventListener('popstate', function(event) {
-            if (confirm("배차 시스템 앱을 종료하시겠습니까?")) {
-                // 확인을 누르면 백지(about:blank)로 가지 않고, 아예 진짜 뒤로가기를 한 번 더 실행해 앱을 탈출합니다.
-                window.history.back(); 
-                
-                // 혹시 홈화면 추가 앱(PWA) 상태일 경우를 대비해 닫기 명령도 던져둡니다.
-                setTimeout(() => { window.close(); }, 100);
-            } else {
-                // 취소 누르면 다시 못 나가게 덫 깔아두기
-                window.history.pushState(null, null, window.location.href); 
-            }
-        });
+        function checkAuth() {
+            currentUser = localStorage.getItem('loggedInUser');
+            const userRole = localStorage.getItem('userRole');
 
+            if (!currentUser) {
+                document.getElementById('login-container').style.display = 'flex';
+                document.getElementById('app-container').style.display = 'none';
+            } else {
+                
+                // 🔥 기사님은 묻지도 따지지도 않고 무조건 내배차(driver.html)로 강제 이동!
+                // 단, 내배차 화면에서 '메인창' 버튼(?main=1)을 누르고 온 경우에만 통과!
+                const urlParams = new URLSearchParams(window.location.search);
+                if (userRole === 'driver' && !urlParams.has('main')) {
+                    window.location.replace('driver.html');
+                    return; 
+                }
+
+                document.getElementById('login-container').style.display = 'none';
+                document.getElementById('app-container').style.display = 'block';
+                
+                document.getElementById('welcome-msg').innerText = `${getDispName(currentUser)}님 메인창`;
+
+                if (userRole === 'admin') {
+                    document.querySelector('.sidebar-section').style.display = 'block'; 
+                    document.querySelector('.btn-edit-drivers').style.display = 'block'; 
+                    document.querySelector('.status-header').style.display = 'flex'; 
+                    document.getElementById('status-container').style.display = 'grid'; 
+                    document.getElementById('btn-go-driver').style.display = 'none';
+                } else {
+                    document.querySelector('.sidebar-section').style.display = 'none'; 
+                    document.querySelector('.btn-edit-drivers').style.display = 'none'; 
+                    document.querySelector('.status-header').style.display = 'none'; 
+                    document.getElementById('status-container').style.display = 'none'; 
+                    document.getElementById('btn-go-driver').style.display = 'inline-block';
+                }
+                
+                renderCalendar();
+                selectDate(currentDate);
+                loadFromFirebase();
+            }
+        }
+
+        // 🔥 앱 종료 방어막 추가!
         window.onload = () => {
-            window.history.pushState(null, null, window.location.href);
+            const userRole = localStorage.getItem('userRole');
+            currentUser = localStorage.getItem('loggedInUser');
+            
+            // 관리자이거나 로그인이 안 된 상태일 때만 뒤로가기 종료 팝업 작동! (기사님이 구경왔을 땐 뒤로가기 누르면 얌전히 내배차로 돌아감)
+            if (userRole === 'admin' || !currentUser) {
+                window.history.pushState(null, null, window.location.href);
+                window.addEventListener('popstate', function(event) {
+                    if (confirm("배차 시스템 앱을 종료하시겠습니까?")) {
+                        window.history.back(); // 1단계 탈출
+                        setTimeout(() => { window.close(); }, 100); // 2단계 탈출
+                    } else {
+                        window.history.pushState(null, null, window.location.href); 
+                    }
+                });
+            }
             checkAuth(); 
         };
     </script>
