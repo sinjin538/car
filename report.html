@@ -26,7 +26,7 @@
         .calc-result { background: #e8f0fe; padding: 12px; border-radius: 6px; text-align: center; margin-top: 10px; border: 1px dashed #007bff; font-weight: bold;}
         .signature-area { border: 2px solid #ccc; border-radius: 8px; background: #fafbfc; position: relative; margin-top: 10px; }
         
-        /* 🔥 수술 1: 사인 도화지 높이를 220px로 시원하게 키우고, 배경을 하얗게 고정! */
+        /* 🔥 사인 도화지 높이 220px 고정! */
         canvas { width: 100%; height: 220px; display: block; touch-action: none; background: #fff; }
         
         .clear-btn { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.5); color: #fff; border: none; padding: 4px 10px; border-radius: 4px; font-size: 0.8rem; cursor: pointer; z-index: 5; }
@@ -52,9 +52,7 @@
             .print-sign { position: absolute; z-index: 10; width: 100px; height: 50px; }
             .chk-mark { font-size: 16px; color: #d9534f; font-weight: bold; }
 
-            /* ========================================================
-               🎯 영점 조절 구역 (대표님 설정 완벽 복원)
-               ======================================================== */
+            /* 영점 조절 구역 */
             .type-general #pt-year { top: 8.9%; left: 22.8%; font-size:18px;}
             .type-general #pt-month { top: 8.9%; left: 36%; font-size:18px; }
             .type-general #pt-day { top: 8.9%; left: 46%; font-size:18px; }
@@ -93,11 +91,27 @@
 
             .type-general #pt-km-start { top: 28%; left: 78%; font-size: 18px; }
             .type-general #pt-km-end { top: 30.8%; left: 78%; font-size: 18px;}
-            .type-general #pt-km-total { top: 33.6%; left: 79%; font-size: 18px;} 
+            
+            /* 🔥 인쇄 화면 '총 운행 거리' 네모 박스 & 우측 정렬 */
+            .type-general #pt-km-total { 
+                top: 33.3%; left: 77%; 
+                width: 65px; height: 22px; 
+                border: 1px solid #333; 
+                text-align: right; padding-right: 5px; 
+                font-size: 16px; line-height: 22px; box-sizing: border-box;
+            } 
 
             .type-general #pt-km-board { top: 42.2%; left: 78%; font-size: 18px;}  
             .type-general #pt-km-alight { top: 47.8%; left: 78%; font-size: 18px;} 
-            .type-general #pt-km-board-total { top: 50.7%; left: 79%; font-size: 18px;} 
+            
+            /* 🔥 인쇄 화면 '탑승 총 거리' 네모 박스 & 우측 정렬 */
+            .type-general #pt-km-board-total { 
+                top: 50.4%; left: 77%; 
+                width: 65px; height: 22px; 
+                border: 1px solid #333; 
+                text-align: right; padding-right: 5px; 
+                font-size: 16px; line-height: 22px; box-sizing: border-box;
+            } 
 
             .type-general #pt-loc-start { top: 40%; left: 25%; font-size: 18px; }
             .type-general #pt-loc-end { top: 45.3%; left: 25%; font-size: 18px;}
@@ -115,6 +129,7 @@
     </style>
 </head>
 <body>
+
     <div id="mobile-view">
         <header class="header">
             <button class="back-btn" onclick="window.location.href='driver.html'">❮</button>
@@ -321,7 +336,7 @@
             const ctx = cvs.getContext('2d');
             let drawing = false;
             
-            // 🔥 [수술 완료] 캔버스 내부 해상도를 껍데기(CSS 220px)와 완벽하게 일치시켜 좌표 틀어짐 방지!
+            // 🔥 [수술 1] 캔버스 내부 해상도를 껍데기(CSS 220px)와 완벽하게 일치! (위치 어긋남 해결)
             cvs.width = cvs.parentElement.clientWidth || 300; 
             cvs.height = 220; 
             
@@ -510,6 +525,7 @@
                     await autoFillCarInfo();
                     calcKm();
 
+                    // 서명 이미지 로딩
                     setTimeout(() => {
                         if (data.driver1Sign && data.driver1Sign.length > 1300) { const img = new Image(); img.onload = () => pads['driver1-sign-pad'].ctx.drawImage(img, 0, 0); img.src = data.driver1Sign; }
                         if (data.driver2Sign && data.driver2Sign.length > 1300) { const img = new Image(); img.onload = () => pads['driver2-sign-pad'].ctx.drawImage(img, 0, 0); img.src = data.driver2Sign; }
@@ -538,6 +554,12 @@
                 setTimeout(() => { saveDraft(true); }, 500);
             }
         };
+
+        // 🔥 [수술 2] 운행일보에서 폰 물리 뒤로가기 누르면 묻지도 따지지도 않고 내배차(driver.html)로 강제 복귀!
+        window.history.pushState(null, null, window.location.href);
+        window.addEventListener('popstate', function(event) {
+            window.location.replace('driver.html');
+        });
 
         async function saveDraft(isSilent = false) {
             if(!globalDocId) return;
@@ -617,10 +639,10 @@
             return String(h).padStart(2,'0') + ":" + String(m).padStart(2,'0');
         }
 
-        // 🔥 [수술 완료] 인쇄 버튼 누를 때 딜레이 타이밍을 줘서 에러 없이 무조건 인쇄창이 뜨게 수정!
+        // 🔥 [수술 3] 인쇄 버튼 누를 때 딜레이(0.3초)를 줘서 도장이 완벽히 찍힌 후 인쇄창 호출!
         async function doPrint() {
             if(!globalDocId.startsWith("MANUAL")) {
-                await saveDraft(true); // 저장 끝날 때까지 확실히 기다림!
+                await saveDraft(true);
             }
 
             document.getElementById('print-view').className = 'type-general';
@@ -733,7 +755,7 @@
                 ptCust2.style.display = 'none'; 
             }
 
-            // 0.3초 여유를 두고 인쇄 창을 띄워 도장이 밀리지 않고 완벽하게 찍히게 보장!
+            // 0.3초 대기 후 인쇄 팝업 띄움 (도장 밀림 방지)
             setTimeout(() => {
                 window.print();
             }, 300);
