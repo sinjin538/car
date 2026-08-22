@@ -1273,11 +1273,16 @@
         }
 
         // 🔥 [수술 2] 앱 종료 방어막 업그레이드! (확인 누르면 즉시 앱이 꺼지거나 빈 페이지로 이동)
+        // 🔥 [수술 2 수정본] 앱 종료 방어막 업그레이드! (하얀 창 안 뜨고 진짜 앱 탈출)
         window.addEventListener('popstate', function(event) {
             if (confirm("배차 시스템 앱을 종료하시겠습니까?")) {
-                window.location.replace('about:blank'); 
+                // 확인을 누르면 백지(about:blank)로 가지 않고, 아예 진짜 뒤로가기를 한 번 더 실행해 앱을 탈출합니다.
+                window.history.back(); 
+                
+                // 혹시 홈화면 추가 앱(PWA) 상태일 경우를 대비해 닫기 명령도 던져둡니다.
                 setTimeout(() => { window.close(); }, 100);
             } else {
+                // 취소 누르면 다시 못 나가게 덫 깔아두기
                 window.history.pushState(null, null, window.location.href); 
             }
         });
