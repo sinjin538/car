@@ -465,8 +465,16 @@
                 document.getElementById('login-container').style.display = 'flex';
                 document.getElementById('app-container').style.display = 'none';
             } else {
+                // 🔥 [수술 1] 기사님 로그인 시 묻지도 따지지도 않고 내배차로 납치! (main=1 입장권 없으면)
+                const urlParams = new URLSearchParams(window.location.search);
+                if (userRole === 'driver' && !urlParams.has('main')) {
+                    window.location.replace('driver.html');
+                    return; 
+                }
+
                 document.getElementById('login-container').style.display = 'none';
                 document.getElementById('app-container').style.display = 'block';
+                // ... (이 아래는 원래 있던 코드 그대로 둡니다)
                 
                 document.getElementById('welcome-msg').innerText = `${getDispName(currentUser)}님 메인창`;
 
@@ -1262,11 +1270,13 @@
         }
 
         // 🔥 2. 뒤로 가기 앱 종료 방어막 수술 완료!
+        // 🔥 [수술 2] 앱 종료 방어막 업그레이드! (확인 누르면 즉시 꺼지게)
         window.addEventListener('popstate', function(event) {
             if (confirm("배차 시스템 앱을 종료하시겠습니까?")) {
-                window.history.back(); // 진짜 종료
+                window.location.replace('about:blank'); 
+                setTimeout(() => { window.close(); }, 100);
             } else {
-                window.history.pushState(null, null, window.location.href); // 덫 다시 깔기
+                window.history.pushState(null, null, window.location.href); 
             }
         });
 
