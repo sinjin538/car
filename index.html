@@ -1261,23 +1261,16 @@
         }
 
         // 🔥 앱 종료 방어막 추가!
+        // 🔥 뒤로가기 팝업 싹 지우고 초깔끔해진 driver.html
         window.onload = () => {
-            const userRole = localStorage.getItem('userRole');
-            currentUser = localStorage.getItem('loggedInUser');
-            
-            // 관리자이거나 로그인이 안 된 상태일 때만 뒤로가기 종료 팝업 작동! (기사님이 구경왔을 땐 뒤로가기 누르면 얌전히 내배차로 돌아감)
-            if (userRole === 'admin' || !currentUser) {
-                window.history.pushState(null, null, window.location.href);
-                window.addEventListener('popstate', function(event) {
-                    if (confirm("배차 시스템 앱을 종료하시겠습니까?")) {
-                        window.history.back(); // 1단계 탈출
-                        setTimeout(() => { window.close(); }, 100); // 2단계 탈출
-                    } else {
-                        window.history.pushState(null, null, window.location.href); 
-                    }
-                });
+            if(checkAuth()) {
+                const _now = new Date();
+                currentYear = _now.getFullYear(); 
+                currentMonth = _now.getMonth(); 
+                currentDate = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(_now.getDate()).padStart(2, '0')}`; 
+                
+                loadFromFirebase();
             }
-            checkAuth(); 
         };
     </script>
 </body>
