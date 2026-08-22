@@ -166,16 +166,13 @@
             </div>
         </div>
 
-        <!-- 🔥 모바일 상단바 (이름표 + 우측 버튼 3개) -->
         <div style="max-width: 1600px; margin: 10px auto 0; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; gap: 6px;">
             
-            <!-- 👇 1. 왼쪽 이름표 (여기를 누르면 비번변경 팝업이 뜹니다!) -->
             <div onclick="openPwModal()" style="cursor: pointer; display: flex; align-items: center; gap: 5px;" title="비밀번호 변경">
                 <span id="welcome-msg" style="font-weight: bold; color: #333; font-size: 1.15rem;"></span>
                 <span style="font-size: 1.2rem; opacity: 0.8;">⚙️</span>
             </div>
 
-            <!-- 👇 2. 오른쪽 버튼들 (비번변경 버튼은 사라지고 딱 3개만 남음!) -->
             <div style="display: flex; gap: 6px; align-items: center;">
                 <button onclick="window.open('stats.html', '_blank')" style="background: #6f42c1; color: white; border: none; padding: 4px 10px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 0.75rem;">집계</button>
                 <button onclick="goToAdmin()" style="background: #007bff; color: white; border: none; padding: 4px 10px; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 0.75rem;">메인창</button>
@@ -217,7 +214,6 @@
             </div>
         </div>
     </div>
-
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyCipeqfmU03bZQozFt8MdToxxuDyFIUd-g",
@@ -505,7 +501,8 @@
             window.location.href = 'report.html?' + params.toString();
         }
 
-        function goToAdmin() { window.location.href = 'index.html'; }
+        // 🔥 [핵심 1] 기사님이 내배차에서 [메인창] 버튼을 누르면 입장권(?main=1)을 발급해서 보냅니다!
+        function goToAdmin() { window.location.href = 'index.html?main=1'; }
 
         const koreaHolidays = {
             "01-01": "신정", "03-01": "삼일절", "05-05": "어린이날", "06-06": "현충일", 
@@ -793,7 +790,6 @@
             });
         }
 
-        // 🔥 클라우드(DB) 영구 삭제 폭탄 장착 완료!
         function deleteSettlement() {
             const resId = document.getElementById('settle-res-id').value;
             const clickedDate = document.getElementById('settle-date').value;
@@ -810,14 +806,13 @@
 
             showLoading('삭제 중...');
             
-            // 파이어베이스 전용 '이 데이터만 쏙 빼서 영구 삭제해라!' 명령어
             const fieldPath = `settlement.${currentUser}.${clickedDate}`;
             
             db.collection('reservations').doc(resId).update({
                 [fieldPath]: firebase.firestore.FieldValue.delete()
             })
             .then(() => {
-                delete d.settlement[currentUser][clickedDate]; // 폰 화면에서도 즉시 지움
+                delete d.settlement[currentUser][clickedDate]; 
                 alert('깔끔하게 삭제되었습니다!');
                 renderDispatchResult(currentDate); 
                 updateCalendarCellUI(currentDate); 
@@ -826,7 +821,6 @@
                 hideLoading();
             })
             .catch(error => {
-                // 혹시 모를 대비책 (문서가 없을 경우 등)
                 delete d.settlement[currentUser][clickedDate];
                 db.collection('reservations').doc(resId).set({ settlement: d.settlement }, { merge: true })
                 .then(() => {
@@ -989,23 +983,16 @@
                 let sType = item.type.replace('예약','').replace('지원','').replace('운행','').replace('투어','').replace('동행','');
                 
                 listHtml += `<li style="padding: 10px; border-bottom: 1px solid #eee;">
-                <!-- 1. 날짜 방 (30px) -->
                 <span style="color:#333; font-weight:bold; font-size:0.85rem; display:inline-block; width:39px;">${currentMonth + 1}/${item.day}</span>
-                
                 <span style="color:#555; font-size:0.80rem;">보상: 
-                    <!-- 2. 보상 숫자 방 (30px 우측정렬) -->
                     <b style="color:#007bff; display:inline-block; width:39px; text-align:right;">${Number(item.overtime || 0).toFixed(2)}</b> 
-                    
-                    <!-- ❌ 점(:)에는 투명 상자를 씌우면 안 됩니다! 원상복구! -->
                     <span style="color:#ccc; margin:0 4px;">:</span> 
-                    
                     일비: 
-                    <!-- 👇 3. 진짜 일비 숫자 방 (50px 우측정렬) 씌우기! -->
                     <b style="color:#007bff; display:inline-block; width:50px; text-align:right;">${Number(item.allowance || 0).toLocaleString()}</b>원
                 </span>
              </li>`;
-totalOvertime += (item.overtime || 0);
-totalAllowance += (item.allowance || 0);
+            totalOvertime += (item.overtime || 0);
+            totalAllowance += (item.allowance || 0);
             });
 
             if (!hasData) { listHtml += `<li style="color:#666; padding:10px; font-size: 0.8rem; text-align:center;">이번 달 정산 내역이 없습니다.</li>`; }
@@ -1040,6 +1027,18 @@ totalAllowance += (item.allowance || 0);
                 currentDate = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(_now.getDate()).padStart(2, '0')}`; 
                 
                 loadFromFirebase();
+
+                // 🔥 [수술 2] 기사님 전용 앱 종료 방어막! (뒤로가기 시 묻고 바로 홈화면 튕겨냄)
+                window.history.pushState(null, null, window.location.href);
+                window.addEventListener('popstate', function(event) {
+                    if (confirm("배차 시스템 앱을 종료하시겠습니까?")) {
+                        window.location.replace('about:blank'); 
+                        setTimeout(() => { window.close(); }, 100);
+                        setTimeout(() => { window.history.go(-2); }, 200); 
+                    } else {
+                        window.history.pushState(null, null, window.location.href); 
+                    }
+                });
             }
         };
     </script>
