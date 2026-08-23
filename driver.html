@@ -995,15 +995,32 @@
             totalAllowance += (item.allowance || 0);
             });
 
-            if (!hasData) { listHtml += `<li style="color:#666; padding:10px; font-size: 0.8rem; text-align:center;">이번 달 정산 내역이 없습니다.</li>`; }
-
             let html = `<h3 style="margin-top: 25px; border-bottom: 2px solid #007bff; padding-bottom: 8px; font-size: 1.1rem;">${currentMonth + 1}월 내 배차 정산 요약</h3>`;
             
-            html += `<div style="background:#e8f0fe; padding:12px; border-radius:6px; margin:10px 0; border:1px solid #c6dafc; text-align:center;">`;
-            html += `<div style="margin-bottom: 5px; font-size:0.95rem;"><b style="color:#333;">총합계 보상: <span style="color:#007bff; font-size:1.1rem;">${Number(totalOvertime || 0).toFixed(2)}</span> 시간</b></div>`;
-            html += `<div style="font-size:0.95rem;"><b style="color:#333;">총합계 일비: <span style="color:#007bff; font-size:1.1rem;">${Number(totalAllowance || 0).toLocaleString()}</span> 원</b></div>`;
+            // 🔥 바깥쪽 파란 박스 (표를 한가운데로 모아주는 역할)
+            html += `<div style="background:#e8f0fe; padding:12px; border-radius:6px; margin:10px 0; border:1px solid #c6dafc; display:flex; justify-content:center;">`;
+            
+            // 🔥 투명한 표(table) 시작: 3칸으로 쪼개서 줄 맞추기!
+            html += `<table style="font-size:0.95rem; font-weight:bold; color:#333; border-spacing:0;">`;
+            
+            // 1열: 보상 시간
+            html += `<tr>`;
+            html += `<td style="text-align:right; padding-right:15px; padding-bottom:5px;">총합계 보상 :</td>`;
+            html += `<td style="text-align:right; color:#007bff; font-size:1.15rem; padding-right:5px; padding-bottom:5px;">${Number(totalOvertime || 0).toFixed(2)}</td>`;
+            html += `<td style="text-align:left; padding-bottom:5px;">T</td>`;
+            html += `</tr>`;
+            
+            // 2열: 일비
+            html += `<tr>`;
+            html += `<td style="text-align:right; padding-right:15px;">총합계 일비 :</td>`;
+            html += `<td style="text-align:right; color:#007bff; font-size:1.15rem; padding-right:5px;">${Number(totalAllowance || 0).toLocaleString()}</td>`;
+            html += `<td style="text-align:left;">원</td>`;
+            html += `</tr>`;
+            
+            html += `</table>`;
             html += `</div>`;
             
+            // 🔥 일일 정산 내역 리스트 붙이기
             html += `<ul class="result-list" style="padding:0; margin-top:0; max-height: none; overflow-y: visible;">`; 
             html += listHtml;
             html += `</ul>`;
