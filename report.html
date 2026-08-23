@@ -49,6 +49,17 @@
             #print-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; object-fit: fill; }
             .print-data { position: absolute; font-size: 15px; font-weight: 500; color: #000; z-index: 10; font-family: 'Malgun Gothic', sans-serif; white-space: nowrap; }
             
+            /* 🔥 [핵심 1] 모든 글자 박스와 서명 배경을 '투명하게' 만들어서 양식지 기본 줄(선) 일그러짐 완벽 방지! */
+            #print-view div, 
+            #print-view span, 
+            #print-view input {
+                background: transparent !important;
+            }
+            #print-view img {
+                background: transparent !important;
+                mix-blend-mode: multiply !important; 
+            }
+
             .print-sign { position: absolute; z-index: 10; width: 100px; height: 50px; }
             .chk-mark { font-size: 16px; color: #d9534f; font-weight: bold; }
 
@@ -70,7 +81,8 @@
                 top: 20.7%; left: 8.65%; 
                 width: 65px; height: 22px; 
                 border: none; 
-                text-align: right; text-align: center; 
+                background: transparent !important;
+                text-align: center; 
                 font-size: 18px; line-height: 22px; box-sizing: border-box;
             }
             .type-general #pt-car-name { top: 20.6%; left: 24%; font-size: 18px;} 
@@ -98,11 +110,12 @@
             .type-general #pt-km-start { top: 28%; left: 78%; font-size: 18px; }
             .type-general #pt-km-end { top: 30.7%; left: 78%; font-size: 18px;}
             
-            /* 🔥 인쇄 화면 '총 운행 거리' 네모 박스 & 우측 정렬 */
+            /* 🔥 [핵심 2] 인쇄 화면 '총 운행 거리' 네모 박스 (투명 & 가운데 정렬) */
             .type-general #pt-km-total { 
                 top: 33.5%; left: 77%; 
                 width: 65px; height: 22px; 
                 border: none; 
+                background: transparent !important;
                 text-align: right; padding-right: 5px; 
                 font-size: 18px; line-height: 22px; box-sizing: border-box;
             } 
@@ -110,36 +123,41 @@
             .type-general #pt-km-board { top: 42.3%; left: 78%; font-size: 18px;}  
             .type-general #pt-km-alight { top: 47.8%; left: 78%; font-size: 18px;} 
             
-            /* 🔥 인쇄 화면 '탑승 총 거리' 네모 박스 & 우측 정렬 */
+            /* 🔥 [핵심 3] 인쇄 화면 '탑승 총 거리' 네모 박스 (투명 & 가운데 정렬) */
             .type-general #pt-km-board-total { 
                 top: 50.7%; left: 77%; 
                 width: 65px; height: 22px; 
                 border: none; 
-                text-align: right; padding-right: 5px; 
+                background: transparent !important;
+                text-align: right; padding-right: 5px;  
                 font-size: 18px; line-height: 22px; box-sizing: border-box;
             } 
 
             .type-general #pt-loc-start { top: 39.8%; left: 24%; font-size: 18px; }
             .type-general #pt-loc-end { top: 45.2%; left: 24%; font-size: 18px;}
+            
+            /* 🔥 [보너스] 탑승 인원 박스들도 삐뚤어지지 않게 전부 투명 + 가운데 정렬! */
             .type-general #pt-pax-w {
                 top: 53.45%; left: 19.9%; 
                 width: 65px; height: 22px; 
                 border: none; 
-                text-align: right; padding-right: 5px; 
+                background: transparent !important;
+                text-align: right; padding-right: 5px;  
                 font-size: 16px; line-height: 22px; box-sizing: border-box;
             }
             .type-general #pt-pax-n {
                 top: 53.45%; left: 30.2%; 
                 width: 65px; height: 22px; 
                 border: none; 
+                background: transparent !important;
                 text-align: right; padding-right: 5px; 
                 font-size: 16px; line-height: 22px; box-sizing: border-box;
             }
-            
             .type-general #pt-pax-disabled {
                 top: 53.45%; left: 40.6%; 
                 width: 65px; height: 22px; 
                 border: none; 
+                background: transparent !important;
                 text-align: right; padding-right: 5px; 
                 font-size: 16px; line-height: 22px; box-sizing: border-box;
             } 
@@ -147,9 +165,11 @@
                 top: 53.45%; left: 52.7%; 
                 width: 65px; height: 22px; 
                 border: none; 
-                text-align: right; padding-right: 5px; 
+                background: transparent !important;
+                text-align: right; padding-right: 5px;  
                 font-size: 16px; line-height: 22px; box-sizing: border-box;
             } 
+            
             .type-general #pt-note { top: 79%; left: 8%; font-size: 18px; width: 640px; white-space: normal !important; word-break: break-all; line-height: 1.5; }
             
             .type-general #pt-cust-name { top: 53.3%; left: 77%; font-size: 18px; }
