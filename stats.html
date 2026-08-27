@@ -53,8 +53,11 @@
         @media print {
             @page { size: A4 landscape; margin: 10mm; }
             body { background-color: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-            .header, .view-tabs, .time-nav button { display: none !important; }
+            .header, .view-tabs, .time-nav button, .tab-buttons { display: none !important; }
             
+            /* 🔥 인쇄할 때는 숨겨진 탭 상관없이 무조건 3개 구역 전부 다 출력! */
+            #section-driver, #section-vehicle, #section-loc { display: block !important; margin-bottom: 20px; }
+
             .container { margin: 0 auto; padding-top: 10px; max-width: 100%; box-shadow: none; }
             .time-nav { margin: 0 0 20px 0; font-size: 2.2rem; color: #000; border-bottom: 2px solid #000; padding-bottom: 10px; }
             
@@ -110,73 +113,92 @@
             <div class="stat-card cancel"><h4>4일전 취소</h4><div class="num" id="s-cancel">0</div></div>
         </div>
 
-        <div class="table-section">
-            <h3>🧑 운전원별 집계</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>운전원 성함</th>
-                        <th style="background:#e8f0fe;">유효 합계</th>
-                        <th>공공</th>
-                        <th>1박</th>
-                        <th>2박</th>
-                        <th>시티</th>
-                        <th>성묘</th>
-                        <th>서울</th>
-                        <th>나들이</th>
-                        <th>기타</th>
-                        <th style="background:#fff5f5; color:#dc3545;">취소건</th>
-                    </tr>
-                </thead>
-                <tbody id="driver-tbody"></tbody>
-            </table>
+        <!-- 🔥 탭 스위치 버튼 구역 추가 -->
+        <div class="tab-buttons" style="display: flex; gap: 8px; justify-content: center; margin: 30px 0 20px 0;">
+            <button id="btn-tab-driver" onclick="switchTab('driver')" style="flex:1; padding: 12px; background: #007bff; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size:1rem;">🧑 운전원 정산</button>
+            <button id="btn-tab-vehicle" onclick="switchTab('vehicle')" style="flex:1; padding: 12px; background: #6c757d; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size:1rem;">🚗 차량별 집계</button>
+            <button id="btn-tab-loc" onclick="switchTab('loc')" style="flex:1; padding: 12px; background: #6c757d; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size:1rem;">📍 장소별 집계</button>
         </div>
 
-        <div class="table-section driver-section-start">
-            <h3>🚗 차량별 집계</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>차량번호</th>
-                        <th style="background:#e8f0fe;">유효 합계</th>
-                        <th>공공</th>
-                        <th>1박</th>
-                        <th>2박</th>
-                        <th>시티</th>
-                        <th>성묘</th>
-                        <th>서울</th>
-                        <th>나들이</th>
-                        <th>기타</th>
-                        <th style="background:#fff5f5; color:#dc3545;">취소건</th>
-                    </tr>
-                </thead>
-                <tbody id="vehicle-tbody"></tbody>
-            </table>
+        <!-- 🔥 1. 운전원 구역 (기본 표시) -->
+        <div id="section-driver" style="display: block;">
+            <div class="table-section">
+                <h3>🧑 운전원별 집계 및 정산 대장</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>운전원 성함</th>
+                            <th style="background:#e8f0fe;">유효 합계</th>
+                            <th>공공</th>
+                            <th>1박</th>
+                            <th>2박</th>
+                            <th>시티</th>
+                            <th>성묘</th>
+                            <th>서울</th>
+                            <th>나들이</th>
+                            <th>기타</th>
+                            <th style="background:#fff5f5; color:#dc3545;">취소건</th>
+                            <!-- 🔥 보상과 일비 제목을 맨 뒤로 이동! -->
+                            <th style="background:#fff3cd; color:#856404;">보상(시간)</th>
+                            <th style="background:#d4edda; color:#155724;">일비(원)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="driver-tbody"></tbody>
+                </table>
+            </div>
         </div>
 
-        <div class="table-section" style="margin-top: 15px; page-break-inside: avoid;">
-            <h3 style="margin-bottom: 10px;">📍 주요 출발지 & 🚩 도착지 통계 <span style="font-size:0.85rem; color:#666; font-weight:normal;">(가장 많이 간 곳 TOP 5)</span></h3>
-            <div style="display: flex; gap: 15px;">
-                <table style="flex: 1; border-top: 3px solid #17a2b8;">
+        <!-- 🔥 2. 차량 구역 (기본 숨김) -->
+        <div id="section-vehicle" style="display: none;">
+            <div class="table-section">
+                <h3>🚗 차량별 집계</h3>
+                <table>
                     <thead>
                         <tr>
-                            <th style="width:50px;">순위</th>
-                            <th style="background:#e0f7fa;">📍 출발지</th>
-                            <th style="width:60px;">건수</th>
+                            <th>차량번호</th>
+                            <th style="background:#e8f0fe;">유효 합계</th>
+                            <th>공공</th>
+                            <th>1박</th>
+                            <th>2박</th>
+                            <th>시티</th>
+                            <th>성묘</th>
+                            <th>서울</th>
+                            <th>나들이</th>
+                            <th>기타</th>
+                            <th style="background:#fff5f5; color:#dc3545;">취소건</th>
                         </tr>
                     </thead>
-                    <tbody id="start-loc-tbody"></tbody>
+                    <tbody id="vehicle-tbody"></tbody>
                 </table>
-                <table style="flex: 1; border-top: 3px solid #fd7e14;">
-                    <thead>
-                        <tr>
-                            <th style="width:50px;">순위</th>
-                            <th style="background:#fff3cd;">🚩 도착지</th>
-                            <th style="width:60px;">건수</th>
-                        </tr>
-                    </thead>
-                    <tbody id="end-loc-tbody"></tbody>
-                </table>
+            </div>
+        </div>
+
+        <!-- 🔥 3. 장소 구역 (기본 숨김) -->
+        <div id="section-loc" style="display: none;">
+            <div class="table-section" style="margin-top: 15px; page-break-inside: avoid;">
+                <h3 style="margin-bottom: 10px;">📍 주요 출발지 & 🚩 도착지 통계 <span style="font-size:0.85rem; color:#666; font-weight:normal;">(가장 많이 간 곳 TOP 20)</span></h3>
+                <div style="display: flex; gap: 15px;">
+                    <table style="flex: 1; border-top: 3px solid #17a2b8;">
+                        <thead>
+                            <tr>
+                                <th style="width:50px;">순위</th>
+                                <th style="background:#e0f7fa;">📍 출발지</th>
+                                <th style="width:60px;">건수</th>
+                            </tr>
+                        </thead>
+                        <tbody id="start-loc-tbody"></tbody>
+                    </table>
+                    <table style="flex: 1; border-top: 3px solid #fd7e14;">
+                        <thead>
+                            <tr>
+                                <th style="width:50px;">순위</th>
+                                <th style="background:#fff3cd;">🚩 도착지</th>
+                                <th style="width:60px;">건수</th>
+                            </tr>
+                        </thead>
+                        <tbody id="end-loc-tbody"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
@@ -201,6 +223,20 @@
 
         const allVehicles = ['1호차', '2호차', '3호차', '11호차', '12호차', '13호차', '14호차'];
         const baseDrivers = ['박기준', '변석현', '이명순', '김탁', '한상훈', '문인식', '황덕일', '강철규', '이상헌', '함동한', '조병준'];
+
+        // 🔥 탭 스위치 작동 함수
+        function switchTab(tabName) {
+            document.getElementById('section-driver').style.display = 'none';
+            document.getElementById('section-vehicle').style.display = 'none';
+            document.getElementById('section-loc').style.display = 'none';
+            
+            document.getElementById('btn-tab-driver').style.background = '#6c757d';
+            document.getElementById('btn-tab-vehicle').style.background = '#6c757d';
+            document.getElementById('btn-tab-loc').style.background = '#6c757d';
+
+            document.getElementById('section-' + tabName).style.display = 'block';
+            document.getElementById('btn-tab-' + tabName).style.background = '#007bff';
+        }
 
         function getShortType(type) {
             if (!type) return '기타';
@@ -259,7 +295,10 @@
 
             let t_tot=0, t_pub=0, t_stay1=0, t_stay2=0, t_city=0, t_grave=0, t_seoul=0, t_outing=0, t_etc=0, t_cancel=0;
             let vStats = {}; allVehicles.forEach(v => vStats[v] = {tot:0, pub:0, stay1:0, stay2:0, city:0, grave:0, seoul:0, outing:0, etc:0, cancel:0});
-            let dStats = {}; baseDrivers.forEach(d => dStats[d] = {tot:0, pub:0, stay1:0, stay2:0, city:0, grave:0, seoul:0, outing:0, etc:0, cancel:0});
+            
+            // 🔥 운전원별 통계 주머니에 overtime(시간)과 allowance(일비) 추가!
+            let dStats = {}; 
+            baseDrivers.forEach(d => dStats[d] = {tot:0, pub:0, stay1:0, stay2:0, city:0, grave:0, seoul:0, outing:0, etc:0, cancel:0, overtime:0, allowance:0});
             
             let startCounts = {};
             let endCounts = {};
@@ -270,7 +309,7 @@
                 const v = r.vehicle;
                 let drivers = r.assigned || [];
 
-                drivers.forEach(d => { if(d !== '미지정' && !dStats[d]) dStats[d] = {tot:0, pub:0, stay1:0, stay2:0, city:0, grave:0, seoul:0, outing:0, etc:0, cancel:0}; });
+                drivers.forEach(d => { if(d !== '미지정' && !dStats[d]) dStats[d] = {tot:0, pub:0, stay1:0, stay2:0, city:0, grave:0, seoul:0, outing:0, etc:0, cancel:0, overtime:0, allowance:0}; });
 
                 if (isCanceled) {
                     t_cancel++;
@@ -310,6 +349,16 @@
                             else if(typeStr==='성묘') dStats[d].grave++; 
                             else if(typeStr==='서울') dStats[d].seoul++; else if(typeStr==='나들이') dStats[d].outing++; 
                             else dStats[d].etc++;
+
+                            // 🔥 정산 내역 합산 (보상시간, 일비)
+                            if (r.settlement && r.settlement[d]) {
+                                (r.dates || []).forEach(date => {
+                                    if (date.startsWith(timePrefix) && r.settlement[d][date]) {
+                                        dStats[d].overtime += Number(r.settlement[d][date].overtime || 0);
+                                        dStats[d].allowance += Number(r.settlement[d][date].allowance || 0);
+                                    }
+                                });
+                            }
                         }
                     });
                 }
@@ -331,10 +380,10 @@
                 const s = vStats[v];
                 vHtml += `<tr>
                     <td style="font-weight:bold; background:#f8f9fa;">${v}</td>
-                    <td class="highlight">${s.tot}</td>
+                    <td class="highlight" style="color:#007bff; font-weight:bold;">${s.tot}</td>
                     <td>${s.pub}</td><td>${s.stay1}</td><td>${s.stay2}</td>
                     <td>${s.city}</td><td>${s.grave}</td><td>${s.seoul}</td><td>${s.outing}</td>
-                    <td>${s.etc}</td><td class="cancel-cell">${s.cancel}</td>
+                    <td>${s.etc}</td><td class="cancel-cell" style="color:#dc3545; font-weight:bold;">${s.cancel}</td>
                 </tr>`;
             });
             document.getElementById('vehicle-tbody').innerHTML = vHtml;
@@ -344,16 +393,20 @@
                 const s = dStats[d];
                 dHtml += `<tr>
                     <td style="font-weight:bold; background:#f8f9fa;">${d}</td>
-                    <td class="highlight">${s.tot}</td>
+                    <td class="highlight" style="color:#007bff; font-weight:bold;">${s.tot}</td>
                     <td>${s.pub}</td><td>${s.stay1}</td><td>${s.stay2}</td>
                     <td>${s.city}</td><td>${s.grave}</td><td>${s.seoul}</td><td>${s.outing}</td>
-                    <td>${s.etc}</td><td class="cancel-cell">${s.cancel}</td>
+                    <td>${s.etc}</td><td class="cancel-cell" style="color:#dc3545; font-weight:bold;">${s.cancel}</td>
+                    <!-- 🔥 실제 계산된 보상시간과 일비 데이터를 맨 뒤로 이동! -->
+                    <td style="color:#856404; font-weight:bold; text-align:right;">${s.overtime.toFixed(2)}</td>
+                    <td style="color:#155724; font-weight:bold; text-align:right;">${s.allowance.toLocaleString()}</td>
                 </tr>`;
             });
             document.getElementById('driver-tbody').innerHTML = dHtml;
 
-            const sortedStarts = Object.entries(startCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
-            const sortedEnds = Object.entries(endCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
+            // 이미 위에서 TOP 20으로 처리하게 해두었습니다!
+            const sortedStarts = Object.entries(startCounts).sort((a, b) => b[1] - a[1]).slice(0, 20);
+            const sortedEnds = Object.entries(endCounts).sort((a, b) => b[1] - a[1]).slice(0, 20);
 
             const renderRankRow = (arr) => {
                 if (arr.length === 0) return `<tr><td colspan="3" style="color:#888;">입력된 데이터가 없습니다.</td></tr>`;
