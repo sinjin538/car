@@ -43,8 +43,9 @@
         .table-section { padding: 0; margin-bottom: 10px !important; box-shadow: none; break-inside: avoid; }
         .table-section h3 { margin-bottom: 5px; font-size: 1.1rem; color: #000; border-left: 6px solid #000; padding-left: 8px; }
             
-        table { width: 100%; border-collapse: collapse; border-top: 3px solid #007bff; border-bottom: 2px solid #ced4da; font-size: 0.85rem; text-align: center; background-color: #fff; }
-        th, td { border: 1px solid #e2e8f0; padding: 7px 6px; white-space: nowrap; color: #333; }
+        /* 🔥 글씨는 키우고 칸 여백은 쫙 줄인 맞춤형 표 스타일 */
+        table { width: 100%; border-collapse: collapse; border-top: 3px solid #007bff; border-bottom: 2px solid #ced4da; font-size: 1.0rem; text-align: center; background-color: #fff; }
+        th, td { border: 1px solid #e2e8f0; padding: 3px 4px; white-space: nowrap; color: #333; }
         th { background-color: #f1f5f9; font-weight: bold; color: #1e293b; border-bottom: 1px solid #cbd5e1; }
         tr:nth-child(even) { background-color: #f8fafc; } 
 
@@ -69,8 +70,9 @@
             .table-section { padding: 0; margin-bottom: 20px !important; box-shadow: none; break-inside: avoid; }
             .table-section h3 { margin-bottom: 10px; font-size: 1.2rem; color: #000; border-left: 6px solid #000; }
             
-            table { width: 100%; border-collapse: collapse; border-top: 2px solid #333; border-bottom: 2px solid #333; font-size: 0.85rem; text-align: center; }
-            th, td { border: 1px solid #e2e8f0; padding: 5px 6px; white-space: nowrap; color: #222; }
+            /* 🔥 인쇄용 표도 글씨 키우고 여백 쫀쫀하게! */
+            table { width: 100%; border-collapse: collapse; border-top: 2px solid #333; border-bottom: 2px solid #333; font-size: 1.0rem; text-align: center; }
+            th, td { border: 1px solid #e2e8f0; padding: 3px 4px; white-space: nowrap; color: #222; }
             th { background-color: #f1f5f9; font-weight: bold; color: #1e293b; border-bottom: 1px solid #cbd5e1; }
             tr:nth-child(even) { background-color: #f8fafc; }
         }
@@ -113,17 +115,17 @@
             <div class="stat-card cancel"><h4>4일전 취소</h4><div class="num" id="s-cancel">0</div></div>
         </div>
 
-        <!-- 🔥 탭 스위치 버튼 구역 추가 -->
+        <!-- 🔥 탭 스위치 버튼 구역 (그림 제거) -->
         <div class="tab-buttons" style="display: flex; gap: 8px; justify-content: center; margin: 30px 0 20px 0;">
-            <button id="btn-tab-driver" onclick="switchTab('driver')" style="flex:1; padding: 12px; background: #007bff; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size:1rem;">🧑 운전원 정산</button>
-            <button id="btn-tab-vehicle" onclick="switchTab('vehicle')" style="flex:1; padding: 12px; background: #6c757d; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size:1rem;">🚗 차량별 집계</button>
-            <button id="btn-tab-loc" onclick="switchTab('loc')" style="flex:1; padding: 12px; background: #6c757d; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size:1rem;">📍 장소별 집계</button>
+            <button id="btn-tab-driver" onclick="switchTab('driver')" style="flex:1; padding: 12px; background: #007bff; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size:1rem;">운전원 정산</button>
+            <button id="btn-tab-vehicle" onclick="switchTab('vehicle')" style="flex:1; padding: 12px; background: #6c757d; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size:1rem;">차량별 집계</button>
+            <button id="btn-tab-loc" onclick="switchTab('loc')" style="flex:1; padding: 12px; background: #6c757d; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size:1rem;">장소별 집계</button>
         </div>
 
-        <!-- 🔥 1. 운전원 구역 (기본 표시) -->
+        <!-- 🔥 1. 운전원 구역 (그림 제거, 보상/일비 텍스트 수정) -->
         <div id="section-driver" style="display: block;">
             <div class="table-section">
-                <h3>🧑 운전원별 집계 및 정산 대장</h3>
+                <h3>운전원별 집계 및 정산 대장</h3>
                 <table>
                     <thead>
                         <tr>
@@ -138,9 +140,8 @@
                             <th>나들이</th>
                             <th>기타</th>
                             <th style="background:#fff5f5; color:#dc3545;">취소건</th>
-                            <!-- 🔥 보상과 일비 제목을 맨 뒤로 이동! -->
-                            <th style="background:#fff3cd; color:#856404;">보상(시간)</th>
-                            <th style="background:#d4edda; color:#155724;">일비(원)</th>
+                            <th style="background:#fff3cd; color:#856404;">보상</th>
+                            <th style="background:#d4edda; color:#155724;">일비</th>
                         </tr>
                     </thead>
                     <tbody id="driver-tbody"></tbody>
@@ -148,10 +149,10 @@
             </div>
         </div>
 
-        <!-- 🔥 2. 차량 구역 (기본 숨김) -->
+        <!-- 🔥 2. 차량 구역 (그림 제거) -->
         <div id="section-vehicle" style="display: none;">
             <div class="table-section">
-                <h3>🚗 차량별 집계</h3>
+                <h3>차량별 집계</h3>
                 <table>
                     <thead>
                         <tr>
@@ -173,16 +174,16 @@
             </div>
         </div>
 
-        <!-- 🔥 3. 장소 구역 (기본 숨김) -->
+        <!-- 🔥 3. 장소 구역 (그림 제거) -->
         <div id="section-loc" style="display: none;">
             <div class="table-section" style="margin-top: 15px; page-break-inside: avoid;">
-                <h3 style="margin-bottom: 10px;">📍 주요 출발지 & 🚩 도착지 통계 <span style="font-size:0.85rem; color:#666; font-weight:normal;">(가장 많이 간 곳 TOP 20)</span></h3>
+                <h3 style="margin-bottom: 10px;">주요 출발지 & 도착지 통계 <span style="font-size:0.85rem; color:#666; font-weight:normal;">(가장 많이 간 곳 TOP 20)</span></h3>
                 <div style="display: flex; gap: 15px;">
                     <table style="flex: 1; border-top: 3px solid #17a2b8;">
                         <thead>
                             <tr>
                                 <th style="width:50px;">순위</th>
-                                <th style="background:#e0f7fa;">📍 출발지</th>
+                                <th style="background:#e0f7fa;">출발지</th>
                                 <th style="width:60px;">건수</th>
                             </tr>
                         </thead>
@@ -192,7 +193,7 @@
                         <thead>
                             <tr>
                                 <th style="width:50px;">순위</th>
-                                <th style="background:#fff3cd;">🚩 도착지</th>
+                                <th style="background:#fff3cd;">도착지</th>
                                 <th style="width:60px;">건수</th>
                             </tr>
                         </thead>
